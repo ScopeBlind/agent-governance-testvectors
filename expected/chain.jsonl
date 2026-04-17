@@ -1,0 +1,4 @@
+{"sequence": 1, "tool_name": "Read", "decision": "allow", "policy_id": "autoresearch-safe"}
+{"sequence": 2, "tool_name": "Bash", "decision": "allow", "policy_id": "autoresearch-safe"}
+{"sequence": 3, "tool_name": "Bash", "decision": "deny",  "policy_id": "autoresearch-safe"}
+{"sequence": 4, "tool_name": "Write", "decision": "allow", "policy_id": "autoresearch-safe"}

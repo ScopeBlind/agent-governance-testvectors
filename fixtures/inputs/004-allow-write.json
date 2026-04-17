@@ -1,0 +1,13 @@
+{
+  "sequence": 4,
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "./notes.md",
+    "content": "example test content"
+  },
+  "session_id": "testvectors-session-001",
+  "context": {
+    "path_starts_with": "./"
+  },
+  "expected_decision": "allow"
+}

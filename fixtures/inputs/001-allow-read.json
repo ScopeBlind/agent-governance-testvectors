@@ -1,0 +1,12 @@
+{
+  "sequence": 1,
+  "tool_name": "Read",
+  "tool_input": {
+    "file_path": "./README.md"
+  },
+  "session_id": "testvectors-session-001",
+  "context": {
+    "path_starts_with": "./"
+  },
+  "expected_decision": "allow"
+}

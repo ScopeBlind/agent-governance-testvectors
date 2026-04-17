@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ScopeBlind/agent-governance-testvectors/blob/main/expected/receipt-schema.json",
+  "title": "Acta Decision Receipt v1 (conformance test schema)",
+  "description": "Minimum required fields for a conformant decision receipt. Implementations MAY include additional fields.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "receipt_version",
+    "tool_name",
+    "decision",
+    "policy_id",
+    "timestamp",
+    "public_key",
+    "signature"
+  ],
+  "properties": {
+    "receipt_id":        { "type": "string", "pattern": "^rcpt-" },
+    "receipt_version":   { "type": "string", "const": "1.0" },
+    "issuer_id":         { "type": "string" },
+    "tool_name":         { "type": "string" },
+    "tool_input":        { "type": "object" },
+    "input_hash":        { "type": "string", "pattern": "^sha256:" },
+    "decision":          { "type": "string", "enum": ["allow", "deny"] },
+    "policy_id":         { "type": "string" },
+    "policy_digest":     { "type": "string", "pattern": "^sha256:" },
+    "timestamp":         { "type": "string", "format": "date-time" },
+    "sequence":          { "type": "integer", "minimum": 1 },
+    "parent_receipt_hash": { "type": ["string", "null"] },
+    "trust_tier":        { "type": "string" },
+    "public_key":        { "type": "string", "minLength": 32 },
+    "signature":         { "type": "string", "minLength": 32 }
+  },
+  "additionalProperties": true
+}

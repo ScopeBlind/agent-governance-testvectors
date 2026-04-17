@@ -1,0 +1,12 @@
+{
+  "sequence": 3,
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rm -rf /"
+  },
+  "session_id": "testvectors-session-001",
+  "context": {
+    "command_pattern": "rm -rf"
+  },
+  "expected_decision": "deny"
+}

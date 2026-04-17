@@ -1,0 +1,12 @@
+{
+  "sequence": 2,
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status"
+  },
+  "session_id": "testvectors-session-001",
+  "context": {
+    "command_pattern": "git"
+  },
+  "expected_decision": "allow"
+}
