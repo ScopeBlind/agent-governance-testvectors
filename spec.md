@@ -38,12 +38,63 @@ Every conformant implementation must pass these three checks:
 
 | # | Check | Where |
 |---|-------|-------|
-| 1 | Each produced receipt matches the JSON Schema | `expected/receipt-schema.json` |
+| 1 | Each produced receipt matches one of the two schema shapes (v1 flat or v2 envelope) | `expected/receipt-schema.json` |
 | 2 | Each receipt's Ed25519 signature verifies against the public key | Signature validation with `fixtures/keys/public.hex` |
-| 3 | The chain of `parent_receipt_hash` values forms a valid ordered chain from genesis (null parent) to the final receipt | Walk the chain |
+| 3 | The chain of `parent_receipt_hash` (v1) or `prev_hash` (v2) values forms a valid ordered chain from genesis to the final receipt | Walk the chain |
 
-`@veritasacta/verify` performs checks 2 and 3 automatically. Check 1 is a
-separate `jsonschema` validation run by `conformance/verify.sh`.
+`@veritasacta/verify` performs checks 2 and 3 automatically and accepts
+both receipt shapes. Check 1 is a shape-level test run by
+`conformance/verify.sh`.
+
+## Two conformant receipt shapes
+
+The format has accumulated two interoperable shapes. A conformant receipt
+is one OR the other; `@veritasacta/verify` accepts both, and the
+test-vector schema uses `oneOf` to allow either.
+
+### v1 flat (used by protect-mcp, protect-mcp-adk)
+
+```json
+{
+  "receipt_id": "rcpt-a8f3c9d2",
+  "receipt_version": "1.0",
+  "tool_name": "Bash",
+  "decision": "allow",
+  "policy_id": "autoresearch-safe",
+  "timestamp": "2026-04-17T12:34:56Z",
+  "parent_receipt_hash": "sha256:...",
+  "public_key": "4437ca56...",
+  "signature": "4cde814b..."
+}
+```
+
+### v2 structured envelope (used by sb-runtime, APS)
+
+```json
+{
+  "payload": {
+    "type": "scopeblind.receipt.v1",
+    "decision": "allow",
+    "action": { "kind": "exec", "target": "/usr/bin/git" },
+    "policy_id": "autoresearch-safe",
+    "sequence": 1,
+    "prev_hash": "sha256:...",
+    "timestamp": "2026-04-17T12:34:56Z"
+  },
+  "signature": "...",
+  "pubkey": "..."
+}
+```
+
+The two shapes express the same facts with different field layouts. The
+JCS-canonical bytes signed over differ between shapes; the signature still
+verifies because the signer and verifier agree on which bytes to sign
+within each shape. A v1 verifier does not verify v2 receipts and vice
+versa without the polyglot logic that `@veritasacta/verify` implements.
+
+A future v0.3 spec revision of this repo may converge the two shapes.
+Until then, conformance means producing at least one shape correctly and
+having the reference verifier accept the output.
 
 ## Cedar evaluation semantics
 
