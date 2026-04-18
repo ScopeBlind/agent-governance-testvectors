@@ -1,0 +1,69 @@
+{
+  "fixture": "happy-path",
+  "description": "Full two-step delegation chain with monotonic scope narrowing, signed by APS issuer. trust_level=trusted, delegation_chain_root in canonical sha256:<hex> form. Reference case for the x-agent-trust header baseline.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "spec_refs": [
+    "a2aproject/A2A#1742",
+    "a2aproject/A2A#1628"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "scope": [
+          "tool:read",
+          "tool:write"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "16884563550fa4c95257f662415a5f360055941521cef7cba793afafa47aa1f01c37a1ef289aaa99f0f8a74ae6c96e2f0c9642f3ba78257a39a92c728b818202"
+        }
+      },
+      {
+        "delegated_by": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1",
+          "pubkey": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+          "sig": "164c68c579afe299e263921237fadbd9fd7d6a765b3dc16818a081fefcaf2f3b42ddcc84baec137c13fb13084f1350c9d0c3181358144886dcd1316c514e6908"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:e1caf9662de1564c347e1351a486cfbe5459a8475310004d751d899dc43fc529",
+    "attestations": [
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "trusted",
+          "delegation_chain_root": "sha256:e1caf9662de1564c347e1351a486cfbe5459a8475310004d751d899dc43fc529",
+          "issued_at": "2026-04-18T12:00:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "evidence_tier": "infrastructure",
+          "monotonic_narrowing": true
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "cbfa70d4e42b379bdd59b4d573d86a5cc4d3c06f577ef3867586881bca90be0cb88dd454722c4ecd7d62f653d522e9cb52162ba97686be1350e05a6b7455590e"
+        }
+      }
+    ]
+  }
+}

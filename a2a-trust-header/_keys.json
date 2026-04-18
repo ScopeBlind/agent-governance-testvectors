@@ -1,0 +1,29 @@
+{
+  "description": "Deterministic Ed25519 public keys used across the six fixtures. Seeds follow the fixtures/keys/ convention (32-byte tail). Seeds themselves are NOT reproduced here; verifier only needs the public halves.",
+  "keys": {
+    "aps_issuer": {
+      "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+      "did": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c"
+    },
+    "org_a": {
+      "pubkey": "7422b9887598068e32c4448a949adb290d0f4e35b9e01b0ee5f1a1e600fe2674",
+      "did": "did:aps:7422b9887598068e32c4448a949adb29"
+    },
+    "org_b": {
+      "pubkey": "f381626e41e7027ea431bfe3009e94bdd25a746beec468948d6c3c7c5dc9a54b",
+      "did": "did:aps:f381626e41e7027ea431bfe3009e94bd"
+    },
+    "subject_agent": {
+      "pubkey": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+      "did": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d"
+    },
+    "delegate_1": {
+      "pubkey": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+      "did": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1"
+    },
+    "delegate_2": {
+      "pubkey": "b4c92afb3ba57f3ab959ffe6d319c98484a2155a0f4c65b2c37011ffd197b075",
+      "did": "did:aps:b4c92afb3ba57f3ab959ffe6d319c984"
+    }
+  }
+}

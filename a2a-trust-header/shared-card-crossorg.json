@@ -1,0 +1,81 @@
+{
+  "fixture": "shared-card-crossorg",
+  "description": "A2A Agent Card (per #1628) carrying trust.signals[] from two independent orgs (orgA + orgB) about the same subject agent. Each signal is independently Ed25519-signed by its org key. Neither signal is self-attested: the issuer of each signal is distinct from the subject agent. Verifier should accept both signatures and surface that the subject has two cross-org trust signals concurring at trust_level=trusted.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "spec_refs": [
+    "a2aproject/A2A#1742",
+    "a2aproject/A2A#1628"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read",
+          "commerce:preflight"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "73d739921a2e77bb238df89997a247fea9313ab0ac794378107c60f7565fd5b9d5b11e37e483b1397c731afe33c04b38a03ee045636be487a60bd02dd82b9307"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:d68ae3c95a76c23f5a7d28c8fe3912f871db08d0a434dcbb08278752e15d7c1a",
+    "agent_card": {
+      "name": "subject-agent",
+      "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+      "pubkey": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+      "trust": {
+        "signals": [
+          {
+            "payload": {
+              "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+              "trust_level": "trusted",
+              "delegation_chain_root": "sha256:d68ae3c95a76c23f5a7d28c8fe3912f871db08d0a434dcbb08278752e15d7c1a",
+              "issued_at": "2026-04-18T12:00:00Z",
+              "issuer": "did:aps:7422b9887598068e32c4448a949adb29",
+              "issuer_org": "orgA",
+              "evidence_tier": "infrastructure",
+              "issuer_domain": "orga.example"
+            },
+            "signature": {
+              "alg": "EdDSA",
+              "kid": "did:aps:7422b9887598068e32c4448a949adb29",
+              "pubkey": "7422b9887598068e32c4448a949adb290d0f4e35b9e01b0ee5f1a1e600fe2674",
+              "canonicalization": "RFC8785-JCS",
+              "sig": "ddcb205370abf5a4bd1739ec0050fe07ead0e2a262d0431588dbdfd01e8e814bc1ad4d1e1355899ad7c426a32f4f98433af488454f6adf391c9721300c233707"
+            }
+          },
+          {
+            "payload": {
+              "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+              "trust_level": "trusted",
+              "delegation_chain_root": "sha256:d68ae3c95a76c23f5a7d28c8fe3912f871db08d0a434dcbb08278752e15d7c1a",
+              "issued_at": "2026-04-18T12:05:00Z",
+              "issuer": "did:aps:f381626e41e7027ea431bfe3009e94bd",
+              "issuer_org": "orgB",
+              "evidence_tier": "behavioral",
+              "issuer_domain": "orgb.example"
+            },
+            "signature": {
+              "alg": "EdDSA",
+              "kid": "did:aps:f381626e41e7027ea431bfe3009e94bd",
+              "pubkey": "f381626e41e7027ea431bfe3009e94bdd25a746beec468948d6c3c7c5dc9a54b",
+              "canonicalization": "RFC8785-JCS",
+              "sig": "5aa85f41e2a9d7d8795ca240f6b9947d568f5dd0b51ea90e43868cdfa154a3c313f146f0759e4206251b54ebb56fe37dd0bf7afc77fafd3380a2cea26f89f20b"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

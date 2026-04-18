@@ -1,0 +1,93 @@
+{
+  "fixture": "trust-level-descending",
+  "description": "Reputation-decay trajectory: trusted → developing → flagged across three attestations. All signatures verify; the final attestation carries reason=policy_violation_confirmed. Verifier should accept signatures (output=valid) and surface the descending trajectory so downstream policy can decide whether to honor the most recent trust_level.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "trust_level_trajectory": [
+    "trusted",
+    "developing",
+    "flagged"
+  ],
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read",
+          "tool:write"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "cf9ede70b534e1842e332d003c1c092112caed64c365c4228d1f25eb393e1aee83584cf1ede95c598d66c7c009c92b4993aca642097253a48e7f4e4a1656e107"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:5bf1b99e65970d025b5dfbeda762b0b6c8f03274b42a3eabf59237d634490a70",
+    "attestations": [
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "trusted",
+          "delegation_chain_root": "sha256:5bf1b99e65970d025b5dfbeda762b0b6c8f03274b42a3eabf59237d634490a70",
+          "issued_at": "2026-04-18T12:00:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 0
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "8ff916915f81a6f8542d395b141cddb668100f591c9f8b8da7b62c0e4b64002bf2236815d6aaaefc3305b09ad2ae9d625d346188e5c32f33b6009ce8fc49c100"
+        }
+      },
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "developing",
+          "delegation_chain_root": "sha256:5bf1b99e65970d025b5dfbeda762b0b6c8f03274b42a3eabf59237d634490a70",
+          "issued_at": "2026-04-18T12:05:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 1,
+          "reason": "behavioral_drift_observed"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "abed8a58331cf82bbaa3f1f0dec9bedd2d0dcb5111ebfa2c5735f087db1be0f080861e372f9a161b46c6eec3ec71df9ba03e7761d3a61c104ff21a8299085c00"
+        }
+      },
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "flagged",
+          "delegation_chain_root": "sha256:5bf1b99e65970d025b5dfbeda762b0b6c8f03274b42a3eabf59237d634490a70",
+          "issued_at": "2026-04-18T12:10:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 2,
+          "reason": "policy_violation_confirmed"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "89e4cda5ba20fefe7e846235df6fec594a22217e23b676c3695776ce95faf366077448f58f4ccbdf38e7fff9e400f47cca85113bc666a434db90cf4f1e59d207"
+        }
+      }
+    ]
+  }
+}

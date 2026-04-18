@@ -1,0 +1,68 @@
+{
+  "fixture": "drift-explicit-flag",
+  "description": "Drift case: two attestations over the same delegation chain, but the second advertises the chain root under a non-standard hash algorithm (keccak256 instead of sha256). Per MoltyCel agreement, this non-canonical shape MUST carry format_variant=true at the fixture level. The signatures both verify; the verifier should flag the root-format drift and refuse to treat att2 as interoperable with the sha256 baseline.",
+  "expected_verifier_output": "invalid",
+  "format_variant": true,
+  "format_variant_reason": "delegation_chain_root hash algorithm changes sha256 → keccak256 between attestations",
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "d8d74d739c3239d8e9a970fdce64a149a6390597b624676c152b7f868a8324adb875360bb6183453f6d8171959b121c122651700ddf30c340607a3f1ce2ce40b"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+    "attestations": [
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "trusted",
+          "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+          "issued_at": "2026-04-18T12:00:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "9fb5865357b848dcc131f2b9042e920d1192cac926420e68eb5d7e3682cb1ce22f437cf18d735a3416751a034e4cf712ad4595827162a9d024fcfe2071b24009"
+        }
+      },
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "trusted",
+          "delegation_chain_root": "keccak256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+          "issued_at": "2026-04-18T12:05:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "format_variant_note": "delegation_chain_root hash algorithm diverges from sha256 baseline"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "f36f612b2e2e4a7c7669fedda79b9750a38229b37de7a17d98337f7493c7102e3698bfa8fb779933d7e13d96c93b810cc790aa573a9282d386f374e0747fd807"
+        }
+      }
+    ]
+  }
+}
