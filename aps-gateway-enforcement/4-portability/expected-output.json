@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "decision": "allow",
+  "verifiers": {
+    "aps-sdk": "VALID",
+    "veritasacta-verify": "VALID",
+    "in-toto-dsse": "VALID"
+  },
+  "same_signing_key_for_all": true,
+  "same_logical_decision": true
+}

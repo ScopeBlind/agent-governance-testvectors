@@ -1,0 +1,15 @@
+{
+  "request_id": "req-vec3-003",
+  "agent_id": "aps:agent:research-bot",
+  "tool": "http.post",
+  "params": {
+    "url": "https://example.com/submit",
+    "body": {
+      "topic": "analysis"
+    }
+  },
+  "delegation_id": "dlg-vec3-research-bot-003",
+  "policy_id": "autoresearch-safe",
+  "timestamp_signed_at": "2026-04-18T12:02:00Z",
+  "timestamp_executed_at": "2026-04-18T12:02:03Z"
+}

@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "decision": "allow",
+  "receipt_signature_valid": true,
+  "receipt_canonical_sha256": "b7d84a8a164c8aea6d09d27c41ecbf4119dbada80cab4d9b83bfcb51fae119bc",
+  "verifier": "openssl + plain Ed25519 (RFC 8032). No APS-specific code required.",
+  "jwks_kid_matches_receipt": true
+}

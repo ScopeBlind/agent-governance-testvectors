@@ -1,0 +1,22 @@
+{
+  "v": 2,
+  "type": "decision_receipt",
+  "algorithm": "ed25519",
+  "kid": "3iR-H6Xx_3rpt7eNMUVNazSZkUclb_cekBJZZL4mlUs",
+  "issuer": "aps:gateway:test",
+  "issued_at": "2026-04-18T12:02:00Z",
+  "payload": {
+    "decision": "allow",
+    "request_id": "req-vec3-003",
+    "agent_id": "aps:agent:research-bot",
+    "delegation_id": "dlg-vec3-research-bot-003",
+    "tool": "http.post",
+    "params_hash": "sha256:3c4b2e407671f3a002226d0b872477b446416b8ba9bb57b235ab3948494c71c4",
+    "policy_id": "autoresearch-safe",
+    "policy_digest": "sha256:cb6f676694ae1d2b12c25e7d82b830825c4590f091829689ee13a964224c82eb",
+    "reason_code": "policy_match",
+    "tier": "signed-known",
+    "state_hash_at_signing": "sha256:987f148f4aa67b48f2aff75a5ae6108f9c98753f6e333b9bb260efa5150ed34b"
+  },
+  "signature": "b06db9ae1c7949a55f4a366568c13cf5d776a0aa2dc23bc651765e9b8479fee97217b5f94a37abbcbe38cbe7127d1b6c1488d395adaa821e7343f0f2becaf20d"
+}

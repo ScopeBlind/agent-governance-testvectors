@@ -1,0 +1,33 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "req-vec4-004",
+      "digest": {
+        "sha256": "3a4234a25a25fbce61154f5f8d6f17e1adfd0d584eb2a1ef27d33315a6250f9b"
+      }
+    }
+  ],
+  "predicateType": "https://aeoess.com/aps/decision-receipt/v2",
+  "predicate": {
+    "v": 2,
+    "type": "decision_receipt",
+    "algorithm": "ed25519",
+    "kid": "3iR-H6Xx_3rpt7eNMUVNazSZkUclb_cekBJZZL4mlUs",
+    "issuer": "aps:gateway:test",
+    "issued_at": "2026-04-18T12:03:00Z",
+    "payload": {
+      "decision": "allow",
+      "request_id": "req-vec4-004",
+      "agent_id": "aps:agent:research-bot",
+      "delegation_id": "dlg-vec4-research-bot-004",
+      "tool": "http.get",
+      "params_hash": "sha256:3a4234a25a25fbce61154f5f8d6f17e1adfd0d584eb2a1ef27d33315a6250f9b",
+      "policy_id": "autoresearch-safe",
+      "policy_digest": "sha256:cb6f676694ae1d2b12c25e7d82b830825c4590f091829689ee13a964224c82eb",
+      "reason_code": "policy_match",
+      "tier": "signed-known"
+    },
+    "signature": "8a76e23c3a4b66e8195e318cfe91ea9d04859bf8aaf30eee0736e1bdcc30e1aea2a7f411d93e36948ccc369890624878a4022e2c38ec46bcee20120f8f3e460c"
+  }
+}

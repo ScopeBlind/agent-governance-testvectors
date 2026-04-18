@@ -1,0 +1,17 @@
+{
+  "delegation_id": "dlg-vec3-research-bot-003",
+  "delegator": "aps:agent:operator-prime",
+  "delegated_to": "aps:agent:research-bot",
+  "scope": [
+    "http.get",
+    "http.post"
+  ],
+  "spend_limit": {
+    "amount": 100,
+    "currency": "USD"
+  },
+  "not_before": "2026-04-18T12:00:00Z",
+  "not_after": "2026-04-18T18:00:00Z",
+  "status": "active",
+  "status_at": "2026-04-18T12:02:00Z"
+}
