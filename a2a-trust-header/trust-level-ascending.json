@@ -1,0 +1,93 @@
+{
+  "fixture": "trust-level-ascending",
+  "description": "Trajectory of three attestations on the same subject agent, rising trust_level (unknown → developing → trusted) as evidence tier strengthens. Each attestation is independently signed and JCS-canonical. All over the same delegation_chain_root (sha256 form). Verifier should accept all three signatures and surface the monotone upward trajectory.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "trust_level_trajectory": [
+    "unknown",
+    "developing",
+    "trusted"
+  ],
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "d8d74d739c3239d8e9a970fdce64a149a6390597b624676c152b7f868a8324adb875360bb6183453f6d8171959b121c122651700ddf30c340607a3f1ce2ce40b"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+    "attestations": [
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "unknown",
+          "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+          "issued_at": "2026-04-18T12:00:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 0,
+          "evidence_tier": "self-declared"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "f8768ca4a034347b308fa71e93d6198955857875031b49f131266a2f033ed3e377f2d6ce3be6c099c7ba34ebea7b6df005f81f57adb0e6a2349725e343a72f02"
+        }
+      },
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "developing",
+          "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+          "issued_at": "2026-04-18T12:05:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 1,
+          "evidence_tier": "behavioral"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "b148bc3b72552d7631910c37206138d02a04523e401b3cb3c3f73e6d11bf1a82052ada77023405db2d1324a184f2f5e5ecc28e05f02a4fda6dc6c62cef33bd0a"
+        }
+      },
+      {
+        "payload": {
+          "agent_id": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+          "trust_level": "trusted",
+          "delegation_chain_root": "sha256:b48cfebe140183bae7e4414bff233b3c99f1f748fec3e5321fa0c49e155f3488",
+          "issued_at": "2026-04-18T12:10:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "sequence": 2,
+          "evidence_tier": "infrastructure"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "b433a1c9490599db75b040be632ba4e81ce4b85f4036c617efbcdef1dc865b32a86e4c19009e6bf508a1ea83fc06a3c4cbe156ec02505f67df6b5c33e6366c07"
+        }
+      }
+    ]
+  }
+}

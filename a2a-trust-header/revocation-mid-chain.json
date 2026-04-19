@@ -1,0 +1,93 @@
+{
+  "fixture": "revocation-mid-chain",
+  "description": "Revocation case: chain is valid at step 1 (T0), revoked at step 2 (T1), use attempted at step 3 (T2) produces a signed deny receipt. The chain carries both the active and the revoked delegation records so a verifier can reconstruct the state transition. Per MoltyCel agreement, revocation cases carry format_variant=true because the chain contains a status=revoked link that deviates from the pure happy-path shape.",
+  "expected_verifier_output": "deny",
+  "format_variant": true,
+  "format_variant_reason": "delegation chain includes a status=revoked link alongside the original active link",
+  "revocation_timestamp": "2026-04-18T12:05:00Z",
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "header_value": {
+    "trust_header_version": "0.1",
+    "subject_agent": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1",
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "status": "active",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "9c165e4270a80b1d51a4b9f677b023ce02bd12f3bdd7488c3e6603aac2e66da6bd18eedde587413c66a1992c77b01f9a34964cd386ce313196de67b2bb658603"
+        }
+      },
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "status": "revoked",
+        "revoked_at": "2026-04-18T12:05:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "b71f0d29be56a3c87870c57a4619fc8716388c6e2c04ab9b9d56022b0e6c3baec4109cede719d7f5ee82530d3b62f23644266d543364783fc27eecb499d8cf0d"
+        }
+      }
+    ],
+    "delegation_chain_root": "sha256:dc95fa72367f07037931ba3e2a7daa153774a377215c5381e36e79d65c555064",
+    "attestations": [
+      {
+        "payload": {
+          "agent_id": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1",
+          "trust_level": "revoked",
+          "delegation_chain_root": "sha256:dc95fa72367f07037931ba3e2a7daa153774a377215c5381e36e79d65c555064",
+          "issued_at": "2026-04-18T12:10:00Z",
+          "issuer": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "revoked_at": "2026-04-18T12:05:00Z",
+          "deny_receipt_ref": "sha256:632668c71fc0ecb8bc84821cbcd12b816aef7faa95958d6d0544ef3b0bcdfdd5"
+        },
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "1d9eed96b5171840b20ca989ff803981fcf186e0f92b7d1c14cb14a47818a60e7fda40df1f77c88d717f02b4bf307efee6bb7c0b01522e94ebf448c19f78c404"
+        }
+      }
+    ],
+    "deny_receipt": {
+      "payload": {
+        "type": "deny_receipt",
+        "subject_agent": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1",
+        "attempted_at": "2026-04-18T12:10:00Z",
+        "attempted_scope": "tool:read",
+        "reason": "delegation_revoked",
+        "revoked_delegation": {
+          "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "delegated_to": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+          "revoked_at": "2026-04-18T12:05:00Z"
+        }
+      },
+      "signature": {
+        "alg": "EdDSA",
+        "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+        "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "canonicalization": "RFC8785-JCS",
+        "sig": "e48d62442988ceae9da7e2f396d504394f154a88461fd7db523395f366817955d1c9c77ee6ba51347cf58a860f8e7ab73e498e5187070027e15c1c819c2b2001"
+      }
+    }
+  }
+}
