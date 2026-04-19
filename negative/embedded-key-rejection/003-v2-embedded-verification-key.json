@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "description": "v2 structured artifact with verification_key field embedded in payload (a common variant on public_key). A conformant verifier MUST reject this pattern when no external key source is provided.",
+    "expected_verifier_outcome": "exit_2_undecidable",
+    "expected_error": "embedded_key_rejected",
+    "fixture_version": "1.0.0",
+    "spec_reference": "draft-farley-acta-signed-receipts-02 Security Considerations"
+  },
+  "v": 2,
+  "type": "scopeblind:decision",
+  "algorithm": "ed25519",
+  "kid": "embedded-key-test:v2",
+  "issuer": "attacker-controlled-issuer",
+  "issued_at": "2026-04-19T00:00:00.000Z",
+  "payload": {
+    "tool_name": "exec_command",
+    "decision": "allow",
+    "verification_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "policy_id": "attacker-crafted"
+  },
+  "signature": "cccccccc33333333cccccccc33333333cccccccc33333333cccccccc33333333cccccccc33333333cccccccc33333333cccccccc33333333cccccccc33333333"
+}

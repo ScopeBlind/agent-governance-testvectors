@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "description": "Passport envelope with a full JWK embedded in payload (verification_jwk) rather than just the raw hex public_key. Same underlying anti-pattern: trust path terminates in the signed payload itself.",
+    "expected_verifier_outcome": "exit_2_undecidable",
+    "expected_error": "embedded_key_rejected",
+    "fixture_version": "1.0.0",
+    "spec_reference": "draft-farley-acta-signed-receipts-02 Security Considerations"
+  },
+  "payload": {
+    "type": "scopeblind:decision",
+    "spec": "draft-farley-acta-signed-receipts-01",
+    "tool_name": "write_file",
+    "decision": "allow",
+    "issued_at": "2026-04-19T00:00:00.000Z",
+    "issuer_id": "attacker-controlled",
+    "sequence": 1,
+    "previousReceiptHash": null,
+    "verification_jwk": {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "1VqYAYKxCrfVS_7TyWQHOg7hcvPaplIlrwIaaPcHURo",
+      "kid": "attacker:embedded-jwk"
+    }
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "attacker:embedded-jwk",
+    "sig": "dddddddd44444444dddddddd44444444dddddddd44444444dddddddd44444444dddddddd44444444dddddddd44444444dddddddd44444444dddddddd44444444"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "description": "v1 flat artifact format with verification key at top level. A conformant verifier MUST reject this pattern when no external key source is provided.",
+    "expected_verifier_outcome": "exit_2_undecidable",
+    "expected_error": "embedded_key_rejected",
+    "fixture_version": "1.0.0",
+    "spec_reference": "draft-farley-acta-signed-receipts-02 Security Considerations"
+  },
+  "v": 1,
+  "type": "receipt",
+  "timestamp": "2026-04-19T00:00:00Z",
+  "tool_name": "read_file",
+  "decision": "allow",
+  "policy_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "signature": "bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222bbbbbbbb22222222"
+}
