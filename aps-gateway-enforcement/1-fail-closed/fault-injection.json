@@ -1,0 +1,9 @@
+{
+  "description": "Simulate a transient signing-key-unavailable fault. The HSM is reachable, the policy engine is healthy, but the receipt-signing key cannot be loaded for this request.",
+  "fault": {
+    "component": "receipt-signer",
+    "error": "signing_key_unavailable",
+    "error_detail": "kid=3iR-H6Xx_3rpt7eNMUVNazSZkUclb_cekBJZZL4mlUs not loaded in HSM session",
+    "transient": true
+  }
+}

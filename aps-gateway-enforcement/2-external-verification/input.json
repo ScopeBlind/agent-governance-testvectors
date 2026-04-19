@@ -1,0 +1,11 @@
+{
+  "request_id": "req-vec2-002",
+  "agent_id": "aps:agent:research-bot",
+  "tool": "http.get",
+  "params": {
+    "url": "https://example.com/data"
+  },
+  "delegation_id": "dlg-vec2-research-bot-002",
+  "policy_id": "autoresearch-safe",
+  "timestamp": "2026-04-18T12:01:00Z"
+}

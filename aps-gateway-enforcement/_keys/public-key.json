@@ -1,0 +1,6 @@
+{
+  "algorithm": "ed25519",
+  "publicKeyHex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+  "kid": "3iR-H6Xx_3rpt7eNMUVNazSZkUclb_cekBJZZL4mlUs",
+  "derivation": "Ed25519 seed = 32 bytes of 0x00 followed by 0x01 (see fixtures/keys/README.md)"
+}

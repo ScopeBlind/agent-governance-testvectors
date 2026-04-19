@@ -1,0 +1,18 @@
+{
+  "ok": false,
+  "decision": "fail_closed",
+  "error": {
+    "code": "PolicyEvaluationError",
+    "reason": "signing_unavailable",
+    "detail": "Policy evaluation succeeded but receipt signing failed; no execution permitted.",
+    "transient": true
+  },
+  "policy_decision": "allow",
+  "receipt": null,
+  "side_effects": {
+    "tool_invoked": false,
+    "state_mutated": false,
+    "audit_log_entry_written": true
+  },
+  "audit_log_entry_ref": "audit-log.json"
+}

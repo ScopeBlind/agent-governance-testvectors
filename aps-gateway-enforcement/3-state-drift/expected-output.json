@@ -1,0 +1,25 @@
+{
+  "ok": false,
+  "decision": "aborted",
+  "error": {
+    "code": "StateHashMismatch",
+    "reason": "state_hash_mismatch",
+    "detail": "Delegation state changed between receipt-signing and executeToolCall(); aborting fail-closed per the gateway invariant that the executor re-verifies state immediately before each side-effecting call.",
+    "component": "aps-gateway:executeToolCall"
+  },
+  "state_hash_at_signing": "sha256:987f148f4aa67b48f2aff75a5ae6108f9c98753f6e333b9bb260efa5150ed34b",
+  "state_hash_at_execution": "sha256:3ff1a7b4bef599cebdf4c57c7e5115b704cd8e6ff8d3dcacbb0804c3b004050e",
+  "state_diff": {
+    "delegation_status": {
+      "before": "active",
+      "after": "revoked"
+    },
+    "detected_drift_field": "status"
+  },
+  "receipt_signature_valid": true,
+  "side_effects": {
+    "tool_invoked": false,
+    "state_mutated": false,
+    "audit_log_entry_written": true
+  }
+}
