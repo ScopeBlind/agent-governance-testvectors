@@ -1,0 +1,23 @@
+{
+  "name": "a2a-trust-header-vectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Week 2 + Week 3 fixtures, generators, and dual-provider consumer verifier for the A2A x-agent-trust header (A2A#1742).",
+  "scripts": {
+    "verify": "tsx verify.ts",
+    "consumer-verify": "tsx consumer-verify.ts",
+    "generate": "tsx generate.ts",
+    "generate-placeholder": "tsx moltrust-placeholder/generate-placeholder.ts"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.0.0",
+    "agent-passport-system": "^2.0.0",
+    "ajv": "^8.0.0",
+    "ajv-formats": "^3.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
