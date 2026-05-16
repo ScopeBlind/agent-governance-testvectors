@@ -1,0 +1,28 @@
+{
+  "payload": {
+    "type": "tap:post_execution_outcome_receipt",
+    "spec": "draft-farley-acta-signed-receipts-01+tap-bilateral-outcome-v0",
+    "predicateType": "https://veritasacta.com/attestation/tap-bilateral-receipt/v0.1",
+    "receipt_id": "tap-outcome-0001",
+    "issued_at": "2026-05-16T00:00:02Z",
+    "sequence": 2,
+    "previousReceiptHash": "sha256:49897f56ca0de86991e9901a1f2403ed4080fe9f09775d89242a82fc37bdf163",
+    "tap_request_hash": "sha256:00b175262d7773161a1bfbf168994104e5a816dc093ec76ae2afd823c51d8c39",
+    "transaction_payload_hash": "sha256:927ba277ff0c2f2a037af3600d53d16d9bbc6938059e7b025376a1e7b4bd22cc",
+    "authorization_receipt_hash": "sha256:49897f56ca0de86991e9901a1f2403ed4080fe9f09775d89242a82fc37bdf163",
+    "agent_id": "did:key:z6MkTapAgentTest",
+    "merchant_id": "did:web:merchant.example",
+    "processor_id": "did:web:merchant.example#tap-proxy-1",
+    "outcome": "processed",
+    "merchant_reference": "merchant-settlement-98765",
+    "amount_processed": {
+      "currency": "USD",
+      "amount": "42.17"
+    }
+  },
+  "signature": {
+    "format": "detached-jws-jcs-ed25519",
+    "protected": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0IiwiamNzIl0sImN0eSI6ImFwcGxpY2F0aW9uL2pjcytqc29uIiwia2lkIjoidGFwLW1lcmNoYW50LWVkMjU1MTktdGVzdCJ9",
+    "sig": "XUW8SA0NsOoR7UyrVvtgGc5ZAPZjvyDWMyQOofjRzkOwlOcKBesCAB_yhUFIFncKLNNsFeAPwdaori9Ek7sGAA"
+  }
+}

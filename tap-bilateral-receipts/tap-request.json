@@ -1,0 +1,25 @@
+{
+  "tap_request_id": "tap-req-2026-05-16-0001",
+  "http_message_signature": {
+    "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"x-agent-id\");created=1778894400;keyid=\"tap-agent-ed25519-test\";alg=\"ed25519\"",
+    "signature": "sig1=:MEUCIQDf-test-vector-placeholder:",
+    "covered_components": [
+      "@method",
+      "@authority",
+      "@path",
+      "content-digest",
+      "x-agent-id"
+    ]
+  },
+  "method": "POST",
+  "authority": "merchant.example",
+  "path": "/tap/v1/transactions",
+  "agent_id": "did:key:z6MkTapAgentTest",
+  "merchant_id": "did:web:merchant.example",
+  "transaction": {
+    "currency": "USD",
+    "amount": "42.17",
+    "merchant_order_id": "order-12345",
+    "purpose": "agent-initiated checkout for approved office supplies"
+  }
+}
