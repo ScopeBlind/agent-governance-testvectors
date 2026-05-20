@@ -1,0 +1,115 @@
+{
+  "payload": {
+    "type": "scopeblind.receipt.v1",
+    "decision": "deny",
+    "action": {
+      "kind": "sensor.cold-chain.verify",
+      "target": "shipment:au-syd-sg-sin:pharma:0043"
+    },
+    "policy_id": "cold-chain-pharma-2to8C",
+    "policy_digest": "sha256:9a3b2e07c40d8af1a31e5d6c89aa42d51e0fdf6bc6a0e7d4b3b39b00f5e8c211",
+    "sequence": 1,
+    "prev_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": "2026-05-19T08:00:00Z",
+    "context": {
+      "shipment_id": "shp-au-syd-sg-sin-0043",
+      "product_class": "insulin-glargine",
+      "lot_number": "INS-2026-W20-AU-075",
+      "origin": {
+        "facility_id": "fac:au:syd:pharma-coldroom-3",
+        "geo": "AU-NSW Sydney",
+        "sealed_at": "2026-05-17T20:00:00Z"
+      },
+      "destination": {
+        "facility_id": "fac:sg:sin:importer-warehouse-7",
+        "geo": "SG-01 Singapore",
+        "verified_at": "2026-05-19T08:00:00Z"
+      },
+      "transit": {
+        "duration_minutes": 2160,
+        "epochs_total": 36,
+        "epoch_minutes": 60,
+        "readings_per_epoch": 60,
+        "readings_total": 1284,
+        "carrier": "qantas-freight-QF52"
+      },
+      "device": {
+        "kid": "dev:atecc608b:au-syd-pharma-0043",
+        "secure_element": "ATECC608B-TNGTLS",
+        "manufacturer": "Microchip",
+        "provisioned_at": "2026-05-15T03:14:00Z",
+        "sensor": "NTC-10k-0603"
+      },
+      "checkpoints": [
+        {
+          "label": "origin-seal",
+          "minute": 0,
+          "temperature_c": 4.1,
+          "epoch_index": 0
+        },
+        {
+          "label": "tarmac-load",
+          "minute": 240,
+          "temperature_c": 4.7,
+          "epoch_index": 4
+        },
+        {
+          "label": "in-flight-cruise",
+          "minute": 720,
+          "temperature_c": 4.4,
+          "epoch_index": 12
+        },
+        {
+          "label": "destination-unseal",
+          "minute": 2160,
+          "temperature_c": 4.9,
+          "epoch_index": 36
+        }
+      ],
+      "excursion_events": [
+        {
+          "minute": 1800,
+          "temperature_c": 8.4,
+          "epoch_index": 30,
+          "reading_index_in_epoch": 12,
+          "duration_minutes": 1,
+          "admittance_band_c": [2.0, 8.0],
+          "excess_c": 0.4,
+          "merkle_path_to_root": "sha256:c5d6e7f8091a2b3c4d5e6f70112233445566778899aabbccddeeff0011223344",
+          "epoch_root": "sha256:7a8b9c0d1e2f30415263748596a7b8c9dafbecfd0e1f2a3b4c5d6e7f80910213"
+        }
+      ],
+      "stats": {
+        "readings_total": 1284,
+        "temperature_min_c": 3.7,
+        "temperature_max_c": 8.4,
+        "temperature_mean_c": 4.7,
+        "temperature_stddev_c": 0.48,
+        "excursions": 1,
+        "admittance_band_c": [2.0, 8.0]
+      },
+      "epoch_chain": {
+        "first_epoch_root": "sha256:4f3a1b2c7d8e9f01a2b3c4d5e6f70112233445566778899aabbccddeeff00113",
+        "last_epoch_root": "sha256:d2c3b4a5968778695a4b3c2d1e0f1102030405060708090a0b0c0d0e0f001020",
+        "chain_intact": true,
+        "chain_algorithm": "sha256-merkle-roots-linked-prev_hash"
+      },
+      "decision_reason": {
+        "code": "TEMPERATURE_BAND_VIOLATION",
+        "message": "Single excursion at minute 1800 (8.4 C) exceeds upper bound (8.0 C). Policy admits no excursions of any magnitude.",
+        "blocking_event_index": 0
+      },
+      "verification": {
+        "performed_offline": true,
+        "verifier_device": "phone:nfc:ios:importer-app-1.4.0",
+        "issuer_pubkey_source": "embedded-at-provisioning",
+        "signature_check": "ok",
+        "merkle_path_check": "ok",
+        "chain_intact_check": "ok"
+      },
+      "note": "The signed receipt verifies. The world it describes failed the policy. This is the canonical 'signature valid, decision deny' shape."
+    }
+  },
+  "signature": "a8b9c0d1e2f30415263748596a7b8c9dafbecfd0e1f2a3b4c5d6e7f8091021344f3a1b2c7d8e9f01a2b3c4d5e6f70112233445566778899aabbccddeeff00103",
+  "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29"
+}

@@ -1,0 +1,96 @@
+{
+  "payload": {
+    "type": "scopeblind.receipt.v1",
+    "decision": "allow",
+    "action": {
+      "kind": "sensor.cold-chain.verify",
+      "target": "shipment:au-syd-sg-sin:pharma:0042"
+    },
+    "policy_id": "cold-chain-pharma-2to8C",
+    "policy_digest": "sha256:9a3b2e07c40d8af1a31e5d6c89aa42d51e0fdf6bc6a0e7d4b3b39b00f5e8c211",
+    "sequence": 1,
+    "prev_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": "2026-05-19T08:00:00Z",
+    "context": {
+      "shipment_id": "shp-au-syd-sg-sin-0042",
+      "product_class": "insulin-glargine",
+      "lot_number": "INS-2026-W20-AU-074",
+      "origin": {
+        "facility_id": "fac:au:syd:pharma-coldroom-3",
+        "geo": "AU-NSW Sydney",
+        "sealed_at": "2026-05-17T20:00:00Z"
+      },
+      "destination": {
+        "facility_id": "fac:sg:sin:importer-warehouse-7",
+        "geo": "SG-01 Singapore",
+        "verified_at": "2026-05-19T08:00:00Z"
+      },
+      "transit": {
+        "duration_minutes": 2160,
+        "epochs_total": 36,
+        "epoch_minutes": 60,
+        "readings_per_epoch": 60,
+        "readings_total": 1284,
+        "carrier": "qantas-freight-QF52"
+      },
+      "device": {
+        "kid": "dev:atecc608b:au-syd-pharma-0042",
+        "secure_element": "ATECC608B-TNGTLS",
+        "manufacturer": "Microchip",
+        "provisioned_at": "2026-05-15T03:14:00Z",
+        "sensor": "NTC-10k-0603"
+      },
+      "checkpoints": [
+        {
+          "label": "origin-seal",
+          "minute": 0,
+          "temperature_c": 4.2,
+          "epoch_index": 0
+        },
+        {
+          "label": "tarmac-load",
+          "minute": 240,
+          "temperature_c": 4.8,
+          "epoch_index": 4
+        },
+        {
+          "label": "in-flight-cruise",
+          "minute": 720,
+          "temperature_c": 4.5,
+          "epoch_index": 12
+        },
+        {
+          "label": "destination-unseal",
+          "minute": 2160,
+          "temperature_c": 4.7,
+          "epoch_index": 36
+        }
+      ],
+      "stats": {
+        "readings_total": 1284,
+        "temperature_min_c": 3.6,
+        "temperature_max_c": 5.9,
+        "temperature_mean_c": 4.6,
+        "temperature_stddev_c": 0.41,
+        "excursions": 0,
+        "admittance_band_c": [2.0, 8.0]
+      },
+      "epoch_chain": {
+        "first_epoch_root": "sha256:4f3a1b2c7d8e9f01a2b3c4d5e6f70112233445566778899aabbccddeeff00112",
+        "last_epoch_root": "sha256:b1c2d3e4f5061728394a5b6c7d8e9f00112233445566778899aabbccddeeff01",
+        "chain_intact": true,
+        "chain_algorithm": "sha256-merkle-roots-linked-prev_hash"
+      },
+      "verification": {
+        "performed_offline": true,
+        "verifier_device": "phone:nfc:ios:importer-app-1.4.0",
+        "issuer_pubkey_source": "embedded-at-provisioning",
+        "signature_check": "ok",
+        "merkle_path_check": "ok",
+        "chain_intact_check": "ok"
+      }
+    }
+  },
+  "signature": "f7c1a26b8d3e4f5061728394a5b6c7d8e9f00112233445566778899aabbccdde9f3a1b2c7d8e9f01a2b3c4d5e6f70112233445566778899aabbccddeeff00102",
+  "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29"
+}
