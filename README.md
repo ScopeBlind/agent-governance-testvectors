@@ -50,6 +50,10 @@ implementations/
 - **v0.2 target**: all four drivers plus a proper cross-verification
   matrix (every implementation's output verified by every verifier).
 
+## Composition conformance
+
+For APS, A2A, Hermes, and ACTA interop, this repo follows one rule: compose by content-hash reference, not by re-signing another system's receipt. See [docs/composition-conformance.md](docs/composition-conformance.md).
+
 ## Running locally
 
 ```bash
