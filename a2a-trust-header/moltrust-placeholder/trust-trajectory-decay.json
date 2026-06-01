@@ -1,0 +1,93 @@
+{
+  "fixture": "trust-trajectory-decay",
+  "description": "MolTrust-shaped placeholder: trust_level decay trajectory 4 → 3 → 2 across three progressive emissions over the same delegation_chain_root. The header_value mirrors the latest (decayed) emission; the trajectory[] field lets consumers inspect the series. evidence_bundle is an ipfs:// placeholder pointer. Every emission is Ed25519-signed with the placeholder test seed. MolTrust replaces this with their production emission shape.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "moltrust_signing_key": {
+    "kid": "moltrust-placeholder-v1",
+    "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+    "seed_tail": "0xAA",
+    "notes": "Deterministic test seed. Replace before production."
+  },
+  "_placeholder": true,
+  "_replace_with_real_moltrust_emission": true,
+  "_placeholder_notes": "Test-only MolTrust shape emitted by APS as a structural reference. Deterministic signing seed (tail 0xAA) is documented in moltrust-placeholder/generate-placeholder.ts. MolTrust replaces this with production emission + real signing key when Week 3 ships on their side.",
+  "header_value": {
+    "trust_level": 2,
+    "attestation_count": 6,
+    "last_verified": "2026-04-18T12:10:00Z",
+    "evidence_bundle": "ipfs://bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy",
+    "delegation_chain_root": "sha256:680fbc23d0f8283896c9b4fd8e7c31affe693b13b543d0abc0d83ed7ee6bf3ad",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "issuer": "moltrust",
+    "sequence": 2,
+    "decay_reason": "policy_violation_confirmed",
+    "signature": {
+      "alg": "EdDSA",
+      "kid": "moltrust-placeholder-v1",
+      "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+      "canonicalization": "RFC8785-JCS",
+      "sig": "aec87bdb476c1543ed46d2ad6e671bee8f32698d828deecbdb476400c74eff36c1fa2cc4feb8f6dc51716966ebc1437b10f8d8e14dc99015508446c941bcb705"
+    },
+    "trajectory": [
+      {
+        "trust_level": 4,
+        "attestation_count": 2,
+        "last_verified": "2026-04-18T12:00:00Z",
+        "evidence_bundle": "ipfs://bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy",
+        "delegation_chain_root": "sha256:680fbc23d0f8283896c9b4fd8e7c31affe693b13b543d0abc0d83ed7ee6bf3ad",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 0,
+        "decay_reason": null,
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "c9be066a24206d17a78770c5e3d32512b92938b8b70a4f867badb0644d16d0704ab3d97796f3e5ab429a8cacfd0d2a05c664ee281e7eded3dd516f5e6934750a"
+        }
+      },
+      {
+        "trust_level": 3,
+        "attestation_count": 4,
+        "last_verified": "2026-04-18T12:05:00Z",
+        "evidence_bundle": "ipfs://bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy",
+        "delegation_chain_root": "sha256:680fbc23d0f8283896c9b4fd8e7c31affe693b13b543d0abc0d83ed7ee6bf3ad",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 1,
+        "decay_reason": "behavioral_drift_observed",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "855a5512ef930add812db26fad76c72ea959e8a7c3da8ca62734ee3fe526fc8cb5bdb63e3f87190ca81923c330c82339032463e03dc1ac3334a9001fd37a610e"
+        }
+      },
+      {
+        "trust_level": 2,
+        "attestation_count": 6,
+        "last_verified": "2026-04-18T12:10:00Z",
+        "evidence_bundle": "ipfs://bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy",
+        "delegation_chain_root": "sha256:680fbc23d0f8283896c9b4fd8e7c31affe693b13b543d0abc0d83ed7ee6bf3ad",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 2,
+        "decay_reason": "policy_violation_confirmed",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "aec87bdb476c1543ed46d2ad6e671bee8f32698d828deecbdb476400c74eff36c1fa2cc4feb8f6dc51716966ebc1437b10f8d8e14dc99015508446c941bcb705"
+        }
+      }
+    ]
+  }
+}

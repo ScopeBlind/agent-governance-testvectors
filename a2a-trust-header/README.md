@@ -1,4 +1,18 @@
-# a2a-trust-header — APS Week 2 fixtures
+# a2a-trust-header: A2A#1742 fixtures and dual-provider verifier
+
+Signed, JCS-canonical fixtures for the `x-agent-trust` header being
+specified at [a2aproject/A2A#1742](https://github.com/a2aproject/A2A/issues/1742),
+plus a consumer verifier that validates both APS and MolTrust emission
+shapes against a single canonical schema.
+
+- **Week 1 (done):** schema lock on the 5-field composite header.
+- **Week 2 (done):** 6 APS fixtures + APS-only round-trip verifier. See [Week 2](#week-2--six-aps-fixtures) below.
+- **Week 3 (done):** canonical JSON Schema, dual-provider consumer
+  verifier, 3 MolTrust-shaped placeholder fixtures. See [Week 3](#week-3--canonical-schema--dual-provider-consumer-verifier) below.
+
+---
+
+## Week 2: six APS fixtures
 
 Six signed, JCS-canonical fixtures for the `x-agent-trust` header being
 specified at [a2aproject/A2A#1742](https://github.com/a2aproject/A2A/issues/1742).
@@ -152,3 +166,180 @@ advertised public key. The verdict for each fixture must match
 
 Questions, format clarifications, or counter-examples: open a PR or
 comment on [a2aproject/A2A#1742](https://github.com/a2aproject/A2A/issues/1742).
+
+---
+
+## Week 3: canonical schema + dual-provider consumer verifier
+
+Week 3 turns the Week 1 schema lock into runnable artifacts and adds
+MolTrust-shaped placeholder fixtures so the consumer verifier can
+exercise both provider shapes end-to-end before MolTrust ships their
+half.
+
+### Canonical composite header schema
+
+The canonical wire form is a **5-field composite**:
+
+| Field | Type | Notes |
+|---|---|---|
+| `trust_level` | integer 0–4 | 0 = unverified / newly issued; 4 = highest-confidence issuer-backed |
+| `attestation_count` | integer ≥ 0 | Number of attestations accumulated by the issuer at `last_verified` time |
+| `last_verified` | ISO 8601 date-time | Consumers MAY apply a half-life policy (MolTrust default: 45 days) |
+| `evidence_bundle` | string, `ipfs://…` or `https?://…` | Pointer to the full attestation bundle |
+| `delegation_chain_root` | `sha256:<hex>` or `uri:https?://…` | Self-describing authority root |
+
+Schema file: [`schema/a2a-trust-header.schema.json`](./schema/a2a-trust-header.schema.json).
+Draft 2020-12. All 5 fields are required. `additionalProperties: true`
+so providers can emit vendor-specific sibling fields without coupling
+the canonical contract.
+
+`delegation_chain_root` uses a `pattern` constraint to enforce the
+self-describing form from Week 1 (`sha256:<hex>` | `uri:https?://…`).
+
+### Composite view derivation
+
+APS and MolTrust fixtures agree on the 5-field contract but differ in
+how rich their native shape is. The consumer verifier reduces every
+fixture to the canonical composite before schema validation:
+
+- **MolTrust-shaped fixtures** (placeholder + real) carry the 5 fields
+  directly on `header_value`. Derivation is `direct`: read the fields
+  off `header_value` and validate.
+- **APS-shaped fixtures** carry the 5 fields across the richer native
+  structure: `trust_level` lives inside each attestation's payload,
+  `attestation_count` = `len(attestations)`, `last_verified` = most
+  recent attestation's `issued_at`, `evidence_bundle` = synthesized
+  pointer to the APS gateway's public trust endpoint for the subject
+  agent, `delegation_chain_root` = already on `header_value`.
+  Derivation is `aps-synthesized`.
+
+This split is the Week 1 agreement made operational: consumers see the
+same 5 fields regardless of producer; producers keep their richer
+native shape.
+
+### Consumer verifier
+
+[`consumer-verify.ts`](./consumer-verify.ts) discovers every `*.json`
+fixture at the top of `a2a-trust-header/` and under
+`moltrust-placeholder/`, classifies each by issuer, derives the
+composite view, schema-validates via ajv, and verifies every Ed25519
+signature it finds. Signature verification uses `@noble/ed25519`
+(not the APS SDK) so MolTrust does not need to pull APS-specific code
+to run this verifier.
+
+```bash
+# From repo root
+cd a2a-trust-header
+npm install
+npx tsx consumer-verify.ts
+```
+
+Per-fixture row shape:
+
+```
+[PASS] happy-path.json  issuer=aps  schema=ok  sigs=3/3  root=ok  verdict=pass
+         composite_derivation=aps-synthesized
+```
+
+Aggregate summary:
+
+```
+Consumer verify: aggregate
+  APS fixtures:       6 / 6 pass
+  MolTrust fixtures:  3 / 3 pass (placeholder)
+  Unknown issuer:     0
+  Schema failures:    0
+  Signature failures: 0
+  Chain-root drift:   0
+```
+
+Exit codes:
+
+| Code | Meaning |
+|---|---|
+| `0` | all fixtures pass |
+| `1` | any signature or chain-root failure |
+| `2` | any schema failure |
+
+### MolTrust placeholder fixtures
+
+Three MolTrust-shaped fixtures live under
+[`moltrust-placeholder/`](./moltrust-placeholder/). They are synthetic
+references MolTrust can replace with their real emission when they ship
+Week 3 on their side. Every placeholder fixture is marked with:
+
+```json
+{
+  "_placeholder": true,
+  "_replace_with_real_moltrust_emission": true
+}
+```
+
+| # | File | What it exercises |
+|---|---|---|
+| 1 | [`trust-trajectory-decay.json`](./moltrust-placeholder/trust-trajectory-decay.json) | `trust_level` steps down 4 → 3 → 2 across three progressive emissions; `evidence_bundle` is an `ipfs://…` pointer |
+| 2 | [`attestation-accumulation.json`](./moltrust-placeholder/attestation-accumulation.json) | `attestation_count` accumulates 2 → 7 → 15 with `trust_level` held at 3; `evidence_bundle` is an `https://…` URL |
+| 3 | [`shared-happy-path-moltrust.json`](./moltrust-placeholder/shared-happy-path-moltrust.json) | Same `delegation_chain` + root as APS [`happy-path.json`](./happy-path.json), re-signed under MolTrust placeholder key with `issuer="moltrust"`: overlap-region proof |
+
+#### Placeholder signing key
+
+Placeholder fixtures are signed with a **deterministic test seed**:
+32-byte right-aligned, tail `0xAA`. The public half is embedded in each
+fixture's `moltrust_signing_key` field and as `signature.pubkey` on
+every emission. This is test-only:
+
+> Replace before production. Do not reuse the placeholder key in any
+> issuer emission seen by a real consumer.
+
+The generator that produced these fixtures,
+[`moltrust-placeholder/generate-placeholder.ts`](./moltrust-placeholder/generate-placeholder.ts),
+is committed so MolTrust can see exactly how the shape was constructed.
+
+### MolTrust replacement workflow
+
+When MolTrust ships Week 3 on their side:
+
+1. Replace each placeholder file under `moltrust-placeholder/` with
+   their real emission. Keep the filenames (trajectory / accumulation
+   / shared-happy-path) so the consumer verifier picks them up
+   automatically.
+2. Drop the `_placeholder` / `_replace_with_real_moltrust_emission`
+   fields.
+3. Replace `moltrust_signing_key` with their production kid + pubkey,
+   and re-sign every emission under that key.
+4. Re-run `npx tsx consumer-verify.ts`. All 9 fixtures (6 APS + 3
+   MolTrust real) must still pass schema + signature + chain-root
+   checks.
+
+The consumer verifier does not encode MolTrust import weighting
+(0.3 weight, 45-day half-life, `POST /identity/resolve` before import).
+Those are downstream policy decisions. What the verifier guarantees is
+that every 5-field composite a MolTrust-aware consumer would read is
+**schema-conformant, cryptographically verifiable, and chain-root
+consistent**: the preconditions MolTrust weighting is built on top of.
+
+### Ed25519 / canonicalization conventions
+
+Both providers use the same cryptography:
+
+- Ed25519 (RFC 8032) for all signatures.
+- RFC 8785 JCS canonicalization over every signed payload.
+- SHA-256 for `delegation_chain_root` in `sha256:<hex>` form.
+
+The consumer verifier uses `canonicalizeJCS` from
+`agent-passport-system` and `@noble/ed25519` for verification. It does
+not require the APS SDK to verify MolTrust-shaped fixtures beyond the
+canonicalization helper, which is a primitive, not APS-specific.
+
+### Reproducing Week 3 artifacts
+
+```bash
+cd a2a-trust-header
+npm install
+# Regenerate placeholder fixtures (byte-reproducible under fixed seed)
+npx tsx moltrust-placeholder/generate-placeholder.ts
+# Round-trip APS fixtures through the APS-native verifier
+npx tsx verify.ts
+# Dual-provider schema + signature + chain-root verification
+npx tsx consumer-verify.ts
+```

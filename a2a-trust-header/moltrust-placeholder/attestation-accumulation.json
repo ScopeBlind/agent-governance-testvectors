@@ -1,0 +1,93 @@
+{
+  "fixture": "attestation-accumulation",
+  "description": "MolTrust-shaped placeholder: attestation_count accumulation 2 → 7 → 15 across three progressive emissions with trust_level held at 3. Demonstrates the accumulation dimension of the 5-field composite header: an agent with many concurring attestations is meaningfully distinct from one with few, even at the same trust_level. evidence_bundle is an https:// URL. MolTrust replaces this with their production emission shape.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "spec_refs": [
+    "a2aproject/A2A#1742"
+  ],
+  "header_name": "x-agent-trust",
+  "moltrust_signing_key": {
+    "kid": "moltrust-placeholder-v1",
+    "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+    "seed_tail": "0xAA",
+    "notes": "Deterministic test seed. Replace before production."
+  },
+  "_placeholder": true,
+  "_replace_with_real_moltrust_emission": true,
+  "_placeholder_notes": "Test-only MolTrust shape emitted by APS as a structural reference. Deterministic signing seed (tail 0xAA) is documented in moltrust-placeholder/generate-placeholder.ts. MolTrust replaces this with production emission + real signing key when Week 3 ships on their side.",
+  "header_value": {
+    "trust_level": 3,
+    "attestation_count": 15,
+    "last_verified": "2026-04-18T12:10:00Z",
+    "evidence_bundle": "https://moltrust.example/bundles/e0df1ff190f8dfabdde91755f7c2f3e09fbd8efdf8ffbdfa90d34d77d0fa9cfa",
+    "delegation_chain_root": "sha256:4a812da6a61c8d8219dacb33dfbc1cb17d169d46397a45f5e63bd5b581591a45",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "issuer": "moltrust",
+    "sequence": 2,
+    "delta_from_previous": 8,
+    "signature": {
+      "alg": "EdDSA",
+      "kid": "moltrust-placeholder-v1",
+      "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+      "canonicalization": "RFC8785-JCS",
+      "sig": "095543b0688ce7c4c8ab99dee92b9c14be030108499d302cde8eff1bcb88e5dd1d74175810c9262eab330b81a8797a224a9f6f3bf3e0984e292539a654248f0b"
+    },
+    "trajectory": [
+      {
+        "trust_level": 3,
+        "attestation_count": 2,
+        "last_verified": "2026-04-18T12:00:00Z",
+        "evidence_bundle": "https://moltrust.example/bundles/e0df1ff190f8dfabdde91755f7c2f3e09fbd8efdf8ffbdfa90d34d77d0fa9cfa",
+        "delegation_chain_root": "sha256:4a812da6a61c8d8219dacb33dfbc1cb17d169d46397a45f5e63bd5b581591a45",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 0,
+        "delta_from_previous": 2,
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "2db858d5354fd3769f97061abd32b38eae46700f47bdbb1cbf7d5936b92207d7a100dec1c4b6bbb3347a9aefac844743f4f9fb33c9cfd8d6f91ae8cdaa02a700"
+        }
+      },
+      {
+        "trust_level": 3,
+        "attestation_count": 7,
+        "last_verified": "2026-04-18T12:05:00Z",
+        "evidence_bundle": "https://moltrust.example/bundles/e0df1ff190f8dfabdde91755f7c2f3e09fbd8efdf8ffbdfa90d34d77d0fa9cfa",
+        "delegation_chain_root": "sha256:4a812da6a61c8d8219dacb33dfbc1cb17d169d46397a45f5e63bd5b581591a45",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 1,
+        "delta_from_previous": 5,
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "e30588e482b4343d245abd169714e4861aa99fe653879b8ebccdd44a5ea5d2b45597048cf96826947858adfec37dd227c749ce0ff6e9e0c1ddd2760a9dabce0d"
+        }
+      },
+      {
+        "trust_level": 3,
+        "attestation_count": 15,
+        "last_verified": "2026-04-18T12:10:00Z",
+        "evidence_bundle": "https://moltrust.example/bundles/e0df1ff190f8dfabdde91755f7c2f3e09fbd8efdf8ffbdfa90d34d77d0fa9cfa",
+        "delegation_chain_root": "sha256:4a812da6a61c8d8219dacb33dfbc1cb17d169d46397a45f5e63bd5b581591a45",
+        "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+        "issuer": "moltrust",
+        "sequence": 2,
+        "delta_from_previous": 8,
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "moltrust-placeholder-v1",
+          "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+          "canonicalization": "RFC8785-JCS",
+          "sig": "095543b0688ce7c4c8ab99dee92b9c14be030108499d302cde8eff1bcb88e5dd1d74175810c9262eab330b81a8797a224a9f6f3bf3e0984e292539a654248f0b"
+        }
+      }
+    ]
+  }
+}

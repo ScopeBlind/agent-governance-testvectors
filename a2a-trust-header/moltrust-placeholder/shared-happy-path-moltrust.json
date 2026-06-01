@@ -1,0 +1,79 @@
+{
+  "fixture": "shared-happy-path-moltrust",
+  "description": "MolTrust-shaped placeholder sharing the APS happy-path delegation chain + root byte-for-byte, re-signed under the MolTrust placeholder key with issuer=\"moltrust\". Demonstrates that both providers can emit identical content over the shared happy-path space with only issuer + signing key differentiation. MolTrust replaces this with their production emission shape.",
+  "expected_verifier_output": "valid",
+  "format_variant": false,
+  "spec_refs": [
+    "a2aproject/A2A#1742",
+    "a2aproject/A2A#1628"
+  ],
+  "header_name": "x-agent-trust",
+  "moltrust_signing_key": {
+    "kid": "moltrust-placeholder-v1",
+    "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+    "seed_tail": "0xAA",
+    "notes": "Deterministic test seed. Replace before production."
+  },
+  "_placeholder": true,
+  "_replace_with_real_moltrust_emission": true,
+  "_placeholder_notes": "Test-only MolTrust shape emitted by APS as a structural reference. Deterministic signing seed (tail 0xAA) is documented in moltrust-placeholder/generate-placeholder.ts. MolTrust replaces this with production emission + real signing key when Week 3 ships on their side.",
+  "header_value": {
+    "trust_level": 4,
+    "attestation_count": 1,
+    "last_verified": "2026-04-18T12:00:00Z",
+    "evidence_bundle": "https://moltrust.example/bundles/shared-happy-path-2f3ca114fc196b2d1417195bf1f407e496a3310f8faca699e190f377400e6c62",
+    "delegation_chain_root": "sha256:e1caf9662de1564c347e1351a486cfbe5459a8475310004d751d899dc43fc529",
+    "subject_agent": "did:aps:fd50b8e3b144ea244fbf7737f550bc8d",
+    "issuer": "moltrust",
+    "overlap_with": "happy-path.json",
+    "overlap_note": "Same delegation_chain and delegation_chain_root as the APS happy-path fixture. Only issuer, signing key, and the 4 accumulation fields differ.",
+    "signature": {
+      "alg": "EdDSA",
+      "kid": "moltrust-placeholder-v1",
+      "pubkey": "71de3b4e933aa718a6f5c45845ee83af8000a450f9572d4cf393e681c8144191",
+      "canonicalization": "RFC8785-JCS",
+      "sig": "cb8a384c7474a38e859f859c9b0e0e02ae9adb1f577428abc6ebe79304f3ea21385df65166f4a559764380828039794248fe139b164460c8756a54b525542204"
+    },
+    "delegation_chain": [
+      {
+        "delegated_by": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+        "delegated_to": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "scope": [
+          "tool:read",
+          "tool:write"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:4cb5abf6ad79fbf5abbccafcc269d85c",
+          "pubkey": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+          "sig": "16884563550fa4c95257f662415a5f360055941521cef7cba793afafa47aa1f01c37a1ef289aaa99f0f8a74ae6c96e2f0c9642f3ba78257a39a92c728b818202"
+        }
+      },
+      {
+        "delegated_by": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+        "delegated_to": "fd50b8e3b144ea244fbf7737f550bc8dd0c2650bbc1aada833ca17ff8dbf329b",
+        "scope": [
+          "tool:read"
+        ],
+        "issued_at": "2026-04-18T12:00:00Z",
+        "expires_at": "2026-04-18T12:15:00Z",
+        "signature": {
+          "alg": "EdDSA",
+          "kid": "did:aps:fde4fba030ad002f7c2f7d4c331f49d1",
+          "pubkey": "fde4fba030ad002f7c2f7d4c331f49d13fb0ec747eceebec634f1ff4cbca9def",
+          "sig": "164c68c579afe299e263921237fadbd9fd7d6a765b3dc16818a081fefcaf2f3b42ddcc84baec137c13fb13084f1350c9d0c3181358144886dcd1316c514e6908"
+        }
+      }
+    ],
+    "overlap_ref": {
+      "source": "happy-path.json",
+      "shared_fields": [
+        "delegation_chain",
+        "delegation_chain_root",
+        "subject_agent"
+      ]
+    }
+  }
+}
