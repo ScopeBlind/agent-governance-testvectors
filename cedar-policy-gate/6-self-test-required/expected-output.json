@@ -1,0 +1,7 @@
+{
+  "decision": "SELF_TEST_REQUIRED",
+  "self_test_passed": true,
+  "arms_enforcement_only_when_passed": true,
+  "refuses_to_arm_when_failed": true,
+  "rationale": "A conformant implementation exposes a boot self-test that runs the known deny/allow vectors live through its own evaluator and returns passed=true only when every vector matches its expected decision. The enforcing entrypoint must refuse to start when the self-test returns false. protect-mcp 0.7.0 maps this to runEvaluatorSelfTest(): `serve --enforce` runs it before arming and exits non-zero if it fails, and `doctor` reports the same cases. This is self-attestation of restraint: the gate proves it denies a known-forbidden vector (including the in-on-String discard) before it is trusted to enforce."
+}
