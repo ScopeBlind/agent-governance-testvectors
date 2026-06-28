@@ -1,0 +1,8 @@
+{
+  "tool": "Bash",
+  "policy": "forbid(principal, action, resource) when { context.command in [\"rm\"] };\npermit(principal, action, resource) when { context.command == \"rm\" };",
+  "input": {
+    "command": "rm"
+  },
+  "note": "One forbid rule errors at evaluation (the `in`-on-String type error) and is discarded by Cedar. A separate, validly typed permit matches `rm` and would otherwise stand alone. Under enforcement, a per-policy evaluation error must not let any residual permit be returned: the gate denies because the decision is unsound, not because a rule cleanly matched."
+}

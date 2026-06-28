@@ -1,0 +1,8 @@
+{
+  "tool": "Bash",
+  "policy": "forbid(principal, action, resource) when { [\"rm\", \"dd\", \"mkfs\"].contains(context.command) };\npermit(principal, action, resource);",
+  "input": {
+    "command": "ls"
+  },
+  "note": "Positive control. Same correctly written policy as case 4, but the input is a safe command (`ls`). The forbid does not match, the permit applies, and the action is ALLOWED. This proves the bar is not trivially satisfied by an implementation that denies everything: a safe action under a valid policy must be allowed."
+}

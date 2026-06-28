@@ -1,0 +1,8 @@
+{
+  "tool": "Bash",
+  "policy": "forbid(principal, action, resource) when { context.command in [\"rm\", \"dd\", \"mkfs\"] };\npermit(principal, action, resource);",
+  "input": {
+    "command": "rm"
+  },
+  "note": "The forbid rule uses the hazardous `context.<attr> in [stringList]` pattern. Cedar treats `in` as entity-hierarchy membership, not string-set membership, so applying it to a String operand is a type error. Cedar silently discards the erroring forbid, leaving the terminal permit as the only surviving rule. A non-conformant gate therefore returns ALLOW for `rm`, which is the advisory vector (wshobson/agents #598, cedar-policy/cedar#2428). A conformant gate either rejects the policy at load or denies at evaluation."
+}

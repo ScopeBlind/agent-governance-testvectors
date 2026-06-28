@@ -1,0 +1,8 @@
+{
+  "decision": "DENY",
+  "allowed": false,
+  "acceptable_decisions": ["DENY", "POLICY_LOAD_REJECTED"],
+  "exit_code": 2,
+  "reason": "cedar_policy_errored: a forbid rule errored at evaluation and was discarded; the surviving permit cannot be trusted, so the decision is unsound and denies under enforcement.",
+  "rationale": "Distinct from case 1 in that a syntactically and type-valid permit really does exist and really does match the input. The point is that a per-policy error anywhere in the set poisons the whole decision: a gate must not return that residual permit. protect-mcp 0.7.0 denies because extractPolicyErrors() is non-empty, independent of what the surviving rules say."
+}
