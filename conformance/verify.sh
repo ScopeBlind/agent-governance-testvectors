@@ -46,6 +46,22 @@ for f in "$RECEIPTS_DIR"/*.json; do
 import json, sys
 r = json.load(open("$f"))
 
+# ACTA v2 structured envelope (draft-farley-acta-signed-receipts /
+# @veritasacta/artifacts): top-level v:2 + type + kid + payload.decision.
+# No embedded key; the verifier resolves the key by kid from the JWKS.
+def is_acta_v2(r):
+    return (
+        isinstance(r, dict)
+        and r.get("v") == 2
+        and isinstance(r.get("type"), str)
+        and r.get("kid")
+        and isinstance(r.get("payload"), dict)
+        and r["payload"].get("decision") in ("allow", "deny")
+    )
+
+if is_acta_v2(r):
+    sys.exit(0)
+
 # v1 flat: required top-level fields
 v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
                "policy_id", "timestamp", "public_key", "signature"]
@@ -94,14 +110,40 @@ done
 # ----- Check 2: signature verification ----------------------------------------
 echo ""
 echo "=== Check 2: @veritasacta/verify signatures ==="
-npx --yes @veritasacta/verify "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
-RC=$?
-case "$RC" in
-    0) pass "all signatures verify (exit 0)" ;;
-    1) fail "one or more signatures failed (exit 1 = tampered)" ;;
-    2) fail "malformed receipt (exit 2)" ;;
-    *) fail "verifier exited with unexpected code $RC" ;;
-esac
+JWKS="$RECEIPTS_DIR/_keys/jwks.json"
+if [ -f "$JWKS" ]; then
+    # ACTA v2 receipts carry no embedded key. Resolve the verification key by
+    # `kid` from the JWKS (signing_keys) and verify each receipt explicitly,
+    # per the ACTA verifier path. (@veritasacta/verify rejects embedded keys.)
+    V2RC=0
+    for f in "$RECEIPTS_DIR"/*.json; do
+        [ -e "$f" ] || continue
+        KID="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('kid',''))" "$f")"
+        HEX="$(python3 - "$JWKS" "$KID" <<'PY'
+import base64, json, sys
+jwks = json.load(open(sys.argv[1])); kid = sys.argv[2]
+for k in jwks.get("keys", []):
+    if k.get("kid") == kid and k.get("x"):
+        x = k["x"] + "=" * (-len(k["x"]) % 4)
+        print(base64.urlsafe_b64decode(x).hex()); break
+PY
+)"
+        if [ -z "$HEX" ]; then fail "no JWKS key for kid in $(basename "$f")"; V2RC=1; continue; fi
+        if ! npx --yes @veritasacta/verify "$f" --key "$HEX" >/dev/null 2>&1; then
+            fail "signature failed: $(basename "$f")"; V2RC=1
+        fi
+    done
+    [ "$V2RC" -eq 0 ] && pass "all signatures verify (kid -> JWKS key, exit 0)"
+else
+    npx --yes @veritasacta/verify "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
+    RC=$?
+    case "$RC" in
+        0) pass "all signatures verify (exit 0)" ;;
+        1) fail "one or more signatures failed (exit 1 = tampered)" ;;
+        2) fail "malformed receipt (exit 2)" ;;
+        *) fail "verifier exited with unexpected code $RC" ;;
+    esac
+fi
 
 # ----- Check 3: chain integrity (ordered sequence + parent hash linkage) ------
 echo ""
