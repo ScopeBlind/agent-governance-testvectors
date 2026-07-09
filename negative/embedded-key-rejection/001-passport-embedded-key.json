@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "description": "Passport envelope with verification key embedded in payload. A conformant verifier MUST reject this pattern when no external key source is provided.",
+    "expected_verifier_outcome": "exit_2_undecidable",
+    "expected_error": "embedded_key_rejected",
+    "fixture_version": "1.0.0",
+    "spec_reference": "draft-farley-acta-signed-receipts-02 Security Considerations"
+  },
+  "payload": {
+    "type": "scopeblind:decision",
+    "spec": "draft-farley-acta-signed-receipts-01",
+    "tool_name": "web_search",
+    "decision": "allow",
+    "issued_at": "2026-04-19T00:00:00.000Z",
+    "issuer_id": "attacker-controlled",
+    "sequence": 1,
+    "previousReceiptHash": null,
+    "public_key": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "embedded-key-test:passport",
+    "sig": "aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111aaaaaaaa11111111"
+  }
+}
