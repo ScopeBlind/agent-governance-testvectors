@@ -1,0 +1,28 @@
+{
+  "payload": {
+    "type": "tap:pre_execution_authorization_receipt",
+    "spec": "draft-farley-acta-signed-receipts-01+tap-bilateral-authorization-v0",
+    "predicateType": "https://veritasacta.com/attestation/tap-bilateral-receipt/v0.1",
+    "receipt_id": "tap-authz-0001",
+    "issued_at": "2026-05-16T00:00:00Z",
+    "sequence": 1,
+    "previousReceiptHash": null,
+    "tap_request_hash": "sha256:00b175262d7773161a1bfbf168994104e5a816dc093ec76ae2afd823c51d8c39",
+    "transaction_payload_hash": "sha256:927ba277ff0c2f2a037af3600d53d16d9bbc6938059e7b025376a1e7b4bd22cc",
+    "agent_id": "did:key:z6MkTapAgentTest",
+    "merchant_id": "did:web:merchant.example",
+    "authorization_scope": {
+      "currency": "USD",
+      "max_amount": "50.00",
+      "merchant_id": "did:web:merchant.example",
+      "purpose_class": "office-supplies"
+    },
+    "decision": "authorize",
+    "rfc9421_signature_input_hash": "sha256:c4fd1dbc3d79521cc23846a66343f070107330b403f5b8ebfa96b93f588f9c23"
+  },
+  "signature": {
+    "format": "detached-jws-jcs-ed25519",
+    "protected": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0IiwiamNzIl0sImN0eSI6ImFwcGxpY2F0aW9uL2pjcytqc29uIiwia2lkIjoidGFwLWFnZW50LWVkMjU1MTktdGVzdCJ9",
+    "sig": "5NEiyNQa8MeGuiLdv9m7obnzKVuCJMjD8W1W8t3K7_MQif670paxkccr1E0WCIbsIT_Aaopdj6-cb-QB30dSCw"
+  }
+}

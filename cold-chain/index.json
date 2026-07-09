@@ -1,0 +1,47 @@
+{
+  "$schema": "../expected/receipt-schema.json",
+  "category": "cold-chain",
+  "description": "Sensor-evidence vectors. The same v2 envelope used by agent tool-call governance, applied to physical-world cold-chain shipments.",
+  "spec_refs": [
+    "draft-farley-acta-signed-receipts-01",
+    "scopeblind.com/cold-chain"
+  ],
+  "receipt_shape": "v2-envelope",
+  "policy_id": "cold-chain-pharma-2to8C",
+  "policy_digest": "sha256:9a3b2e07c40d8af1a31e5d6c89aa42d51e0fdf6bc6a0e7d4b3b39b00f5e8c211",
+  "issuer": "coldchain:gateway:test",
+  "test_keypair": {
+    "seed_hex": "0000000000000000000000000000000000000000000000000000000000000001",
+    "public_key_hex": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+    "note": "Matches fixtures/keys/README.md. Cross-repo deterministic seed."
+  },
+  "vectors": [
+    {
+      "id": "cold-chain-pass-0042",
+      "file": "pharma-shipment-pass.json",
+      "expected_decision": "allow",
+      "expected_verifier_output": "valid",
+      "description": "Sydney to Singapore insulin shipment, 36 epochs, 1284 readings, mean 4.6 C, zero excursions. Passes the 2.0-8.0 C admittance policy."
+    },
+    {
+      "id": "cold-chain-excursion-0043",
+      "file": "pharma-shipment-excursion.json",
+      "expected_decision": "deny",
+      "expected_verifier_output": "valid",
+      "description": "Same journey shape. One reading at minute 1800 exceeds 8.0 C (8.4 C, 0.4 C excess). Signature still verifies; policy fails. Canonical 'signature ok, decision deny' shape."
+    },
+    {
+      "id": "cold-chain-merkle-root-epoch-12",
+      "file": "merkle-batch-root.json",
+      "expected_decision": "allow",
+      "expected_verifier_output": "valid",
+      "description": "One epoch root signing 60 readings. Per-reading Merkle paths included for one reading (minute 0). Demonstrates the batching scheme: one signature per epoch, per-reading provenance preserved via Merkle path."
+    }
+  ],
+  "verification_command": "./conformance/verify.sh cold-chain/",
+  "expected_outputs": {
+    "schema_check": "all three vectors match v2 envelope",
+    "signature_check": "all three signatures verify against the test pubkey",
+    "decision_field": "pharma-shipment-pass.json = allow; pharma-shipment-excursion.json = deny; merkle-batch-root.json = allow"
+  }
+}
