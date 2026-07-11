@@ -1,0 +1,28 @@
+{
+  "type": "scopeblind.receipt.v1",
+  "algorithm": "ed25519",
+  "kid": "test:manager:meridian:ed25519",
+  "issuer": "manager:meridian",
+  "issued_at": "2026-07-11T12:00:00Z",
+  "payload": {
+    "decision": "deny",
+    "action": {
+      "kind": "trade.submit",
+      "target": "restricted-security"
+    },
+    "receipt_id": "evidence-02",
+    "evidence": [
+      {
+        "dimension": "provenance",
+        "state": "verified",
+        "source": {
+          "authority": "custodian:demo",
+          "ref": "sha256:6e0a9aa1f9d5c8ce3d545fb7b1d452f84514e93f493f94f24fa7c8180cb49ac4",
+          "kid": "test:custodian:demo:ed25519",
+          "sig": "ba178689e57d6f44316a8d8d7f34050339aa7f30a6d4fc7a3d28347752ebefa4f04330b3413da7499945188b878143aa473af6c7b6f03d96b7da4ef39ba7920e"
+        }
+      }
+    ]
+  },
+  "signature": "c9cb29aed477c013df667c6cea8ebc5e57fa329f37fcade4bd1dcf585e0a5730c5769f1aaa9a7f3636de7a0fa831a6298925c2de3dcd9bc534bc979e989c1606"
+}

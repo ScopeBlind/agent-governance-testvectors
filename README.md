@@ -54,6 +54,13 @@ implementations/
 
 For APS, A2A, Hermes, and ACTA interop, this repo follows one rule: compose by content-hash reference, not by re-signing another system's receipt. See [docs/composition-conformance.md](docs/composition-conformance.md).
 
+## Evidence predicate conformance
+
+[`evidence-predicate/`](evidence-predicate/) is a separate semantic suite for
+the proposed `evidence` predicate. It verifies that a receipt cannot turn a
+named source or a copied key identifier into independent corroboration. The
+suite is dependency-free and runs in CI with the receipt conformance checks.
+
 ## Running locally
 
 ```bash

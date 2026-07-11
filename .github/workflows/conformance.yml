@@ -20,7 +20,10 @@ jobs:
           python-version: '3.12'
 
       - name: Make scripts executable
-        run: chmod +x conformance/*.sh implementations/*/run.sh
+        run: chmod +x conformance/*.sh implementations/*/run.sh evidence-predicate/run.sh
+
+      - name: Verify evidence predicate vectors
+        run: ./evidence-predicate/run.sh
 
       - name: Run all implementation drivers
         run: ./conformance/run.sh

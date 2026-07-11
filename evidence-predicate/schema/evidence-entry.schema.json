@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scopeblind.com/schemas/evidence-entry.v1.schema.json",
+  "title": "ScopeBlind Evidence Predicate Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dimension", "state", "source"],
+  "properties": {
+    "dimension": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "enum": ["verified", "failed", "unknown", "not_applicable"]
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "ref"],
+      "properties": {
+        "authority": { "type": "string", "minLength": 1 },
+        "ref": { "type": "string", "minLength": 1 },
+        "kid": { "type": "string", "minLength": 1 },
+        "sig": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{128}$"
+        }
+      }
+    }
+  }
+}
