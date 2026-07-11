@@ -1,0 +1,11 @@
+{
+  "dimension": "provenance",
+  "state": "verified",
+  "as_of": null,
+  "source": {
+    "authority": "custodian:demo",
+    "ref": "sha256:6e0a9aa1f9d5c8ce3d545fb7b1d452f84514e93f493f94f24fa7c8180cb49ac4",
+    "kid": "test:custodian:demo:ed25519",
+    "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

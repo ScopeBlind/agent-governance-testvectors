@@ -1,0 +1,11 @@
+{
+  "receipt_signature_valid": true,
+  "source_signature_valid": true,
+  "source_key_out_of_band": true,
+  "source_key_distinct": true,
+  "source_control_domain_distinct": true,
+  "independent_corroboration": true,
+  "reason": "independent_source_signature_verified",
+  "signed_claim_omits_as_of": true,
+  "receipt_digest": "sha256:564125a8d56384e37342c653fb0568713a51c2cd1a5a4ac2f572a161eda5993e"
+}
