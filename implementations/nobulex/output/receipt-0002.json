@@ -1,0 +1,17 @@
+{
+  "receipt_id": "rcpt-nobulex-0002",
+  "receipt_version": "1.0",
+  "issuer_id": "nobulex",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status"
+  },
+  "input_hash": "sha256:e0d3e391760d0a9b6c24bf66cecfc5a66557784782cbc704052385bf6e9bb287",
+  "decision": "allow",
+  "policy_id": "autoresearch-safe",
+  "timestamp": "2026-07-12T04:37:42Z",
+  "sequence": 2,
+  "parent_receipt_hash": "sha256:3e63d8c61f30218b9b07374f5cbc62717f7a3f9186b1846c43da656eccc03b74",
+  "public_key": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+  "signature": "07de43433342e6a4c571e9fea39e3f32ea64db7531cf03f50b16bb36b4808a3db06049d300a89ad3afd52d10a395aa1538bfe99aa4cab3c54e7a75423f01850f"
+}

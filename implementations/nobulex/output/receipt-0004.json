@@ -1,0 +1,18 @@
+{
+  "receipt_id": "rcpt-nobulex-0004",
+  "receipt_version": "1.0",
+  "issuer_id": "nobulex",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "./notes.md",
+    "content": "example test content"
+  },
+  "input_hash": "sha256:4a3fddcef3cd846a1b86621218cd017160de89b992c14d0869c36e33a29c8814",
+  "decision": "allow",
+  "policy_id": "autoresearch-safe",
+  "timestamp": "2026-07-12T04:37:42Z",
+  "sequence": 4,
+  "parent_receipt_hash": "sha256:e1365c924df8154e80547dd3a7c870471aa2890b0c74152200144eef06c76da3",
+  "public_key": "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29",
+  "signature": "42ce9c7498d492c028422c686a72647754f1291f25f7ce9525461f74451e28bbb255202ef83d59bb1c3ea7d220f3686c6130fe7b761224981ffeee52257f1c0f"
+}
