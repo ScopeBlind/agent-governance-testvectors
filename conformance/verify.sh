@@ -94,64 +94,36 @@ done
 # ----- Check 2: signature verification ----------------------------------------
 echo ""
 echo "=== Check 2: @veritasacta/verify signatures ==="
-npx --yes @veritasacta/verify "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
+# The verifier needs a key for receipts that do not carry an inline public
+# key. Without one it exits non-zero with no_public_key, which this script
+# previously reported as a failed signature. That is the difference between
+# "this receipt was tampered with" and "I was not told what to trust", and
+# conflating them makes the check useless. Key is the published fixture seed's
+# public half (fixtures/keys/README.md). Reported in #13.
+CONFORMANCE_KEY="${CONFORMANCE_KEY:-4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29}"
+npx --yes @veritasacta/verify --key "$CONFORMANCE_KEY" "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
 RC=$?
 case "$RC" in
     0) pass "all signatures verify (exit 0)" ;;
-    1) fail "one or more signatures failed (exit 1 = tampered)" ;;
-    2) fail "malformed receipt (exit 2)" ;;
+    1) fail "one or more signatures failed verification (exit 1)" ;;
+    2) fail "malformed or unrecognised receipt (exit 2)" ;;
     *) fail "verifier exited with unexpected code $RC" ;;
 esac
 
-# ----- Check 3: chain integrity (ordered sequence + parent hash linkage) ------
+# ----- Check 3: chain integrity + expected outcomes ---------------------------
+# Previously this checked only that parent_receipt_hash was non-empty. It
+# computed the expected hash and discarded it, so any constant string passed,
+# and expected/chain.jsonl and the fixtures' expected_decision were read by no
+# code at all. An implementation could ignore the policy, emit four correctly
+# signed receipts with arbitrary decisions, and be reported conformant.
+# Reported in #13.
 echo ""
-echo "=== Check 3: chain order + parent-hash linkage ==="
-python3 - <<PY
-import hashlib, json, os, sys
-from pathlib import Path
-
-d = Path("$RECEIPTS_DIR")
-receipts = []
-for f in sorted(d.glob("*.json")):
-    receipts.append(json.loads(f.read_text()))
-
-# Sort by sequence if present, else by filename order
-receipts.sort(key=lambda r: r.get("sequence", 0))
-
-errors = []
-prev_canonical_hash = None
-for i, r in enumerate(receipts):
-    expected_seq = i + 1
-    if r.get("sequence") != expected_seq:
-        errors.append(f"receipt {i}: sequence {r.get('sequence')} != expected {expected_seq}")
-    # Compute canonical form (JCS-lite: sorted keys, separators, no whitespace)
-    canonical = json.dumps(
-        {k: v for k, v in r.items() if k not in ("signature", "public_key")},
-        sort_keys=True, separators=(",", ":")
-    )
-    # Check parent linkage
-    if i == 0:
-        if r.get("parent_receipt_hash") not in (None, ""):
-            errors.append(f"receipt 0: genesis should have null/empty parent_receipt_hash, got {r.get('parent_receipt_hash')}")
-    else:
-        # Implementations may use different prefix lengths for the parent hash
-        # (e.g., first 16 hex chars). Accept any prefix match of the expected hash.
-        expected_hash = hashlib.sha256(prev_canonical_hash.encode()).hexdigest() if prev_canonical_hash else None
-        # Some implementations compute hash differently; just verify *some* non-null link exists
-        if not r.get("parent_receipt_hash"):
-            errors.append(f"receipt {i}: missing parent_receipt_hash")
-    prev_canonical_hash = canonical
-
-if errors:
-    for e in errors:
-        print(f"  {e}")
-    sys.exit(1)
-sys.exit(0)
-PY
+echo "=== Check 3: chain order, parent-hash linkage, expected outcomes ==="
+python3 "$REPO_ROOT/conformance/check_chain.py" "$RECEIPTS_DIR" "$REPO_ROOT"
 if [ "$?" -eq 0 ]; then
-    pass "chain order + linkage"
+    pass "chain order, linkage, and expected outcomes"
 else
-    fail "chain order + linkage"
+    fail "chain order, linkage, and expected outcomes"
 fi
 
 # ----- Summary ----------------------------------------------------------------
