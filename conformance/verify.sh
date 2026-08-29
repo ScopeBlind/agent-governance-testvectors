@@ -103,51 +103,10 @@ case "$RC" in
     *) fail "verifier exited with unexpected code $RC" ;;
 esac
 
-# ----- Check 3: chain integrity (ordered sequence + parent hash linkage) ------
+# ----- Check 3: chain integrity (sequence + previousReceiptHash linkage) ------
 echo ""
-echo "=== Check 3: chain order + parent-hash linkage ==="
-python3 - <<PY
-import hashlib, json, os, sys
-from pathlib import Path
-
-d = Path("$RECEIPTS_DIR")
-receipts = []
-for f in sorted(d.glob("*.json")):
-    receipts.append(json.loads(f.read_text()))
-
-# Sort by sequence if present, else by filename order
-receipts.sort(key=lambda r: r.get("sequence", 0))
-
-errors = []
-prev_canonical_hash = None
-for i, r in enumerate(receipts):
-    expected_seq = i + 1
-    if r.get("sequence") != expected_seq:
-        errors.append(f"receipt {i}: sequence {r.get('sequence')} != expected {expected_seq}")
-    # Compute canonical form (JCS-lite: sorted keys, separators, no whitespace)
-    canonical = json.dumps(
-        {k: v for k, v in r.items() if k not in ("signature", "public_key")},
-        sort_keys=True, separators=(",", ":")
-    )
-    # Check parent linkage
-    if i == 0:
-        if r.get("parent_receipt_hash") not in (None, ""):
-            errors.append(f"receipt 0: genesis should have null/empty parent_receipt_hash, got {r.get('parent_receipt_hash')}")
-    else:
-        # Implementations may use different prefix lengths for the parent hash
-        # (e.g., first 16 hex chars). Accept any prefix match of the expected hash.
-        expected_hash = hashlib.sha256(prev_canonical_hash.encode()).hexdigest() if prev_canonical_hash else None
-        # Some implementations compute hash differently; just verify *some* non-null link exists
-        if not r.get("parent_receipt_hash"):
-            errors.append(f"receipt {i}: missing parent_receipt_hash")
-    prev_canonical_hash = canonical
-
-if errors:
-    for e in errors:
-        print(f"  {e}")
-    sys.exit(1)
-sys.exit(0)
-PY
+echo "=== Check 3: chain order + previousReceiptHash linkage ==="
+python3 "$(dirname "${BASH_SOURCE[0]}")/check_chain.py" "$RECEIPTS_DIR"
 if [ "$?" -eq 0 ]; then
     pass "chain order + linkage"
 else
