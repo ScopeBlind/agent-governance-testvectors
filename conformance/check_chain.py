@@ -12,9 +12,10 @@ implementations in this repository, which is the finding this script exists to
 surface.
 
 Draft rule (Chain Hash Scope):
-    previousReceiptHash = lowercase-hex( SHA-256( JCS(entire signed receipt) ) )
+    previousReceiptHash = "sha256:" + lowercase-hex( SHA-256( JCS(receipt) ) )
   The signature is INCLUDED in the preimage, so re-signing an identical
-  payload yields a distinct link. Genesis omits the member entirely.
+  payload yields a distinct link. The prefix makes the digest self-describing,
+  matching policy_digest and source.ref. Genesis omits the member entirely.
 
 Usage: check_chain.py <receipts-dir>
 Exit:  0 conformant, 1 non-conformant, 2 usage/IO error.
@@ -46,12 +47,15 @@ def _b64url(b: bytes) -> str:
     return urlsafe_b64encode(b).decode().rstrip("=")
 
 
-# (name, preimage selector, encoder). The first entry is the draft's rule.
+# (name, preimage selector, encoder). The first entry is the draft's rule; the
+# rest are conventions that were in use before it was settled, kept so a
+# non-conformant set gets a diagnosis instead of "mismatch".
 CONVENTIONS = [
-    ("draft: hex(SHA256(JCS(receipt)))", lambda r, p: r, _hex),
-    ("sdk-js/sdk-py: sha256:+hex(SHA256(JCS(payload)))", lambda r, p: p, _prefixed_hex),
-    ("swarms/bindu: b64url(SHA256(JCS(receipt)))", lambda r, p: r, _b64url),
-    ("protect-mcp: hex(SHA256(JCS(payload)))", lambda r, p: p, _hex),
+    ("draft: sha256:+hex(SHA256(JCS(receipt)))", lambda r, p: r, _prefixed_hex),
+    ("pre-settlement bare hex over receipt", lambda r, p: r, _hex),
+    ("pre-settlement sha256:+hex over payload", lambda r, p: p, _prefixed_hex),
+    ("pre-settlement b64url over receipt", lambda r, p: r, _b64url),
+    ("pre-settlement bare hex over payload", lambda r, p: p, _hex),
     ("legacy suite: hex(SHA256(JCS(receipt minus signature)))",
      lambda r, p: {k: v for k, v in r.items() if k not in ("signature", "public_key")},
      _hex),
