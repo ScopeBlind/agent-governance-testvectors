@@ -1,11 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/ScopeBlind/agent-governance-testvectors/blob/main/expected/receipt-schema.json",
-  "title": "Acta Decision Receipt (v1 flat or v2 structured envelope)",
-  "description": "A conformant receipt matches either the v1 flat shape (protect-mcp, protect-mcp-adk) or the v2 structured envelope shape (sb-runtime, APS). `@veritasacta/verify` accepts both. Conformance requires exactly one shape to match.",
+  "title": "Agent governance decision receipt (four shapes in use)",
+  "description": "The receipt shapes this corpus actually contains. Four are in use and they are not interchangeable: the v1 flat shape (protect-mcp, protect-mcp-adk), the v2 structured envelope with a top-level pubkey (sb-runtime), the Acta 2.1 envelope specified by draft-farley-acta-signed-receipts-03 sections 2.1 and 2.1.1, and the APS gateway shape. Conformance to THIS schema means a receipt matches exactly one of the four, which is a statement about what exists rather than about what the draft requires. Only actaEnvelope is the shape the draft specifies; the other three are recorded because real implementations emit them and a corpus that described only the specified shape would not describe this corpus.",
   "oneOf": [
-    { "$ref": "#/definitions/v1Flat" },
-    { "$ref": "#/definitions/v2Envelope" }
+    {
+      "$ref": "#/definitions/v1Flat"
+    },
+    {
+      "$ref": "#/definitions/v2Envelope"
+    },
+    {
+      "$ref": "#/definitions/actaEnvelope"
+    },
+    {
+      "$ref": "#/definitions/apsGateway"
+    }
   ],
   "definitions": {
     "v1Flat": {
@@ -23,22 +33,72 @@
         "signature"
       ],
       "properties": {
-        "receipt_id":          { "type": "string", "pattern": "^rcpt-|^rec_" },
-        "receipt_version":     { "type": "string", "const": "1.0" },
-        "issuer_id":           { "type": "string" },
-        "tool_name":           { "type": "string" },
-        "tool_input":          { "type": "object" },
-        "input_hash":          { "type": "string", "pattern": "^sha256:" },
-        "decision":            { "type": "string", "enum": ["allow", "deny"] },
-        "policy_id":           { "type": "string" },
-        "policy_digest":       { "type": "string", "pattern": "^sha256:" },
-        "timestamp":           { "type": "string", "format": "date-time" },
-        "sequence":            { "type": "integer", "minimum": 1 },
-        "parent_receipt_hash": { "type": ["string", "null"] },
-        "parent_receipt_id":   { "type": ["string", "null"] },
-        "trust_tier":          { "type": "string" },
-        "public_key":          { "type": "string", "minLength": 32 },
-        "signature":           { "type": "string", "minLength": 32 }
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^rcpt-|^rec_"
+        },
+        "receipt_version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "issuer_id": {
+          "type": "string"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "tool_input": {
+          "type": "object"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^sha256:"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "policy_id": {
+          "type": "string"
+        },
+        "policy_digest": {
+          "type": "string",
+          "pattern": "^sha256:"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent_receipt_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_receipt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trust_tier": {
+          "type": "string"
+        },
+        "public_key": {
+          "type": "string",
+          "minLength": 32
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 32
+        }
       },
       "additionalProperties": true
     },
@@ -46,32 +106,159 @@
       "title": "v2 structured envelope receipt",
       "description": "Used by sb-runtime (Rust) and APS governance hook. Signed payload is a nested object.",
       "type": "object",
-      "required": ["payload", "signature", "pubkey"],
+      "required": [
+        "payload",
+        "signature",
+        "pubkey"
+      ],
       "properties": {
         "payload": {
           "type": "object",
-          "required": ["type", "decision", "action", "sequence", "timestamp"],
+          "required": [
+            "type",
+            "decision",
+            "action",
+            "sequence",
+            "timestamp"
+          ],
           "properties": {
-            "type":      { "type": "string", "pattern": "^scopeblind\\.receipt\\.v\\d+$" },
-            "decision":  { "type": "string", "enum": ["allow", "deny"] },
-            "action":    {
+            "type": {
+              "type": "string",
+              "pattern": "^scopeblind\\.receipt\\.v\\d+$"
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "allow",
+                "deny"
+              ]
+            },
+            "action": {
               "type": "object",
-              "required": ["kind", "target"],
+              "required": [
+                "kind",
+                "target"
+              ],
               "properties": {
-                "kind":   { "type": "string" },
-                "target": { "type": "string" }
+                "kind": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
               }
             },
-            "policy_id": { "type": ["string", "null"] },
-            "sequence":  { "type": "integer", "minimum": 0 },
-            "prev_hash": { "type": "string" },
-            "timestamp": { "type": "string", "format": "date-time" },
-            "context":   { "type": "object" }
+            "policy_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prev_hash": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "context": {
+              "type": "object"
+            }
           },
           "additionalProperties": true
         },
-        "signature": { "type": "string", "minLength": 32 },
-        "pubkey":    { "type": "string", "minLength": 32 }
+        "signature": {
+          "type": "string",
+          "minLength": 32
+        },
+        "pubkey": {
+          "type": "string",
+          "minLength": 32
+        }
+      },
+      "additionalProperties": true
+    },
+    "actaEnvelope": {
+      "title": "Acta 2.1 envelope receipt",
+      "description": "The shape specified by draft-farley-acta-signed-receipts-03 section 2.1, with the signature object of section 2.1.1. The key is named by signature.kid; there is no top-level pubkey member, which is what distinguishes this from v2Envelope. Payload members are deliberately unconstrained: the draft defines several receipt types carrying different fields, and no payload key is common to every receipt here. Some producers add canonicalization and pubkey inside the signature object; that is permitted and does not change the signed bytes.",
+      "type": "object",
+      "required": [
+        "payload",
+        "signature"
+      ],
+      "properties": {
+        "payload": {
+          "type": "object"
+        },
+        "signature": {
+          "type": "object",
+          "required": [
+            "alg",
+            "kid",
+            "sig"
+          ],
+          "properties": {
+            "alg": {
+              "type": "string"
+            },
+            "kid": {
+              "type": "string"
+            },
+            "sig": {
+              "type": "string",
+              "minLength": 32
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "apsGateway": {
+      "title": "APS gateway receipt",
+      "description": "Emitted by the APS gateway and shipped in aps-gateway-enforcement/, contributed to answer OWASP www-project-ai-security-and-privacy-guide#802. It is NOT the section 2.1 envelope: the algorithm is carried as \"algorithm\": \"ed25519\" rather than \"alg\": \"EdDSA\", the signature is a bare hex string rather than an object, and the key identifier sits at the top level. These vectors are recorded as emitted and MUST NOT be rewritten to satisfy this schema: 2-external-verification/ ships a canonical.txt alongside the receipt and is the artifact an outside reviewer used to resolve the signing-scope question in draft section 6.6, so its bytes are evidence.",
+      "type": "object",
+      "required": [
+        "v",
+        "type",
+        "algorithm",
+        "kid",
+        "issuer",
+        "issued_at",
+        "payload",
+        "signature"
+      ],
+      "properties": {
+        "v": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string"
+        },
+        "algorithm": {
+          "type": "string"
+        },
+        "kid": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 32
+        }
       },
       "additionalProperties": true
     }
