@@ -46,11 +46,18 @@ Every conformant implementation must pass these three checks:
 both receipt shapes. Check 1 is a shape-level test run by
 `conformance/verify.sh`.
 
-## Two conformant receipt shapes
+## Four receipt shapes in use
 
-The format has accumulated two interoperable shapes. A conformant receipt
-is one OR the other; `@veritasacta/verify` accepts both, and the
-test-vector schema uses `oneOf` to allow either.
+This repository contains four shapes, not two. The schema previously
+described two, and as a result none of the 25 signed receipts here
+validated against it. That was a defect in the schema rather than in the
+receipts, and it was reported from outside. The schema now describes what
+is actually here.
+
+A receipt conformant to `expected/receipt-schema.json` matches exactly one
+of the four. That is a statement about what exists in this corpus, not
+about what the draft requires. Only the Acta 2.1 envelope is the shape
+draft-farley-acta-signed-receipts-03 specifies.
 
 ### v1 flat (used by protect-mcp, protect-mcp-adk)
 
@@ -86,15 +93,62 @@ test-vector schema uses `oneOf` to allow either.
 }
 ```
 
-The two shapes express the same facts with different field layouts. The
-JCS-canonical bytes signed over differ between shapes; the signature still
-verifies because the signer and verifier agree on which bytes to sign
-within each shape. A v1 verifier does not verify v2 receipts and vice
-versa without the polyglot logic that `@veritasacta/verify` implements.
+### Acta 2.1 envelope (21 receipts here; the shape the draft specifies)
 
-A future v0.3 spec revision of this repo may converge the two shapes.
-Until then, conformance means producing at least one shape correctly and
-having the reference verifier accept the output.
+```json
+{
+  "payload": { "type": "protectmcp:decision", "decision": "allow", "...": "..." },
+  "signature": { "alg": "EdDSA", "kid": "conformance", "sig": "79cac95e..." }
+}
+```
+
+Specified by draft-farley-acta-signed-receipts-03 sections 2.1 and 2.1.1.
+The key is named by `signature.kid`; there is no top-level `pubkey`, which
+is what separates this from v2. Payload members vary by receipt type and no
+key is common to every receipt here, so the schema does not constrain them.
+Some producers carry `canonicalization` and `pubkey` inside the signature
+object; that is permitted and does not change the signed bytes.
+
+### APS gateway (4 receipts here; not the 2.1 envelope)
+
+```json
+{
+  "v": 2,
+  "type": "decision_receipt",
+  "algorithm": "ed25519",
+  "kid": "3iR-H6Xx...",
+  "issuer": "aps:gateway:test",
+  "issued_at": "2026-04-18T12:01:00Z",
+  "payload": { "decision": "allow", "...": "..." },
+  "signature": "f4512895..."
+}
+```
+
+Shipped in `aps-gateway-enforcement/`, contributed to answer
+[OWASP www-project-ai-security-and-privacy-guide#802](https://github.com/OWASP/www-project-ai-security-and-privacy-guide/issues/802).
+It differs from 2.1 in three ways: the algorithm is `"algorithm": "ed25519"`
+rather than `"alg": "EdDSA"`, the signature is a bare hex string rather than
+an object, and the key identifier is at the top level.
+
+These four vectors are recorded as emitted and MUST NOT be rewritten to
+satisfy the schema. `2-external-verification/` ships a `canonical.txt`
+beside its receipt, and those exact bytes are what an outside reviewer used
+to resolve the signing-scope question now settled in draft section 6.6.
+Editing them to look conformant would destroy the evidence that made them
+worth having.
+
+### On convergence
+
+The shapes express the same facts with different field layouts. The
+JCS-canonical bytes signed over differ between them; a signature still
+verifies because signer and verifier agree on which bytes to sign within
+one shape. A v1 verifier does not verify v2 receipts and vice versa without
+the polyglot logic `@veritasacta/verify` implements.
+
+Conformance here means producing one shape correctly and having the
+reference verifier accept the output. New producers should emit the Acta
+2.1 envelope, since that is the shape the draft specifies. The other three
+are recorded because they exist, not because they are recommended.
 
 ## Cedar evaluation semantics
 
