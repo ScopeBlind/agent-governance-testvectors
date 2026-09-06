@@ -1,11 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/ScopeBlind/agent-governance-testvectors/blob/main/expected/receipt-schema.json",
-  "title": "Acta Decision Receipt (v1 flat or v2 structured envelope)",
-  "description": "A conformant receipt matches either the v1 flat shape (protect-mcp, protect-mcp-adk) or the v2 structured envelope shape (sb-runtime, APS). `@veritasacta/verify` accepts both. Conformance requires exactly one shape to match.",
+  "title": "Acta Decision Receipt (decision_receipt, v1 flat, or v2 structured envelope)",
+  "description": "A conformant receipt matches exactly one of three shapes. `decision_receipt` is the shape the reference receipts in aps-gateway-enforcement/ carry and the shape `@veritasacta/verify` recognises as `v2 (draft-farley-acta-signed-receipts-03)`. The v1 flat shape is used by protect-mcp and protect-mcp-adk. The v2 envelope shape is used by sb-runtime. Note that `@veritasacta/verify` accepts neither the v1 flat nor the v2 envelope shape; it returns `unknown_format` for both. That is why this file previously rejected the repository's own reference receipts. See issue #13.",
   "oneOf": [
-    { "$ref": "#/definitions/v1Flat" },
-    { "$ref": "#/definitions/v2Envelope" }
+    {
+      "$ref": "#/definitions/decisionReceipt"
+    },
+    {
+      "$ref": "#/definitions/v1Flat"
+    },
+    {
+      "$ref": "#/definitions/v2Envelope"
+    }
   ],
   "definitions": {
     "v1Flat": {
@@ -23,22 +30,72 @@
         "signature"
       ],
       "properties": {
-        "receipt_id":          { "type": "string", "pattern": "^rcpt-|^rec_" },
-        "receipt_version":     { "type": "string", "const": "1.0" },
-        "issuer_id":           { "type": "string" },
-        "tool_name":           { "type": "string" },
-        "tool_input":          { "type": "object" },
-        "input_hash":          { "type": "string", "pattern": "^sha256:" },
-        "decision":            { "type": "string", "enum": ["allow", "deny"] },
-        "policy_id":           { "type": "string" },
-        "policy_digest":       { "type": "string", "pattern": "^sha256:" },
-        "timestamp":           { "type": "string", "format": "date-time" },
-        "sequence":            { "type": "integer", "minimum": 1 },
-        "parent_receipt_hash": { "type": ["string", "null"] },
-        "parent_receipt_id":   { "type": ["string", "null"] },
-        "trust_tier":          { "type": "string" },
-        "public_key":          { "type": "string", "minLength": 32 },
-        "signature":           { "type": "string", "minLength": 32 }
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^rcpt-|^rec_"
+        },
+        "receipt_version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "issuer_id": {
+          "type": "string"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "tool_input": {
+          "type": "object"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^sha256:"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "policy_id": {
+          "type": "string"
+        },
+        "policy_digest": {
+          "type": "string",
+          "pattern": "^sha256:"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent_receipt_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_receipt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trust_tier": {
+          "type": "string"
+        },
+        "public_key": {
+          "type": "string",
+          "minLength": 32
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 32
+        }
       },
       "additionalProperties": true
     },
@@ -46,32 +103,164 @@
       "title": "v2 structured envelope receipt",
       "description": "Used by sb-runtime (Rust) and APS governance hook. Signed payload is a nested object.",
       "type": "object",
-      "required": ["payload", "signature", "pubkey"],
+      "required": [
+        "payload",
+        "signature",
+        "pubkey"
+      ],
       "properties": {
         "payload": {
           "type": "object",
-          "required": ["type", "decision", "action", "sequence", "timestamp"],
+          "required": [
+            "type",
+            "decision",
+            "action",
+            "sequence",
+            "timestamp"
+          ],
           "properties": {
-            "type":      { "type": "string", "pattern": "^scopeblind\\.receipt\\.v\\d+$" },
-            "decision":  { "type": "string", "enum": ["allow", "deny"] },
-            "action":    {
+            "type": {
+              "type": "string",
+              "pattern": "^scopeblind\\.receipt\\.v\\d+$"
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "allow",
+                "deny"
+              ]
+            },
+            "action": {
               "type": "object",
-              "required": ["kind", "target"],
+              "required": [
+                "kind",
+                "target"
+              ],
               "properties": {
-                "kind":   { "type": "string" },
-                "target": { "type": "string" }
+                "kind": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
               }
             },
-            "policy_id": { "type": ["string", "null"] },
-            "sequence":  { "type": "integer", "minimum": 0 },
-            "prev_hash": { "type": "string" },
-            "timestamp": { "type": "string", "format": "date-time" },
-            "context":   { "type": "object" }
+            "policy_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prev_hash": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "context": {
+              "type": "object"
+            }
           },
           "additionalProperties": true
         },
-        "signature": { "type": "string", "minLength": 32 },
-        "pubkey":    { "type": "string", "minLength": 32 }
+        "signature": {
+          "type": "string",
+          "minLength": 32
+        },
+        "pubkey": {
+          "type": "string",
+          "minLength": 32
+        }
+      },
+      "additionalProperties": true
+    },
+    "decisionReceipt": {
+      "title": "decision_receipt",
+      "description": "Used by the aps-gateway-enforcement reference receipts and by the nobulex driver. The verification key is not carried inline: draft-farley-acta-signed-receipts says a verifier must not accept a key transported inside the envelope unless it is independently anchored, so `kid` names the key and resolution is the verifier's.",
+      "type": "object",
+      "required": [
+        "v",
+        "type",
+        "algorithm",
+        "kid",
+        "issuer",
+        "issued_at",
+        "payload",
+        "signature"
+      ],
+      "properties": {
+        "v": {
+          "const": 2
+        },
+        "type": {
+          "const": "decision_receipt"
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "kid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parent_receipt_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "required": [
+            "decision"
+          ],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "enum": [
+                "allow",
+                "deny"
+              ]
+            },
+            "tool_name": {
+              "type": "string"
+            },
+            "policy_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "input_hash": {
+              "type": "string",
+              "pattern": "^sha256:"
+            }
+          },
+          "additionalProperties": true
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 64
+        }
       },
       "additionalProperties": true
     }
