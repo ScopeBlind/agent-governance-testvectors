@@ -1,51 +1,50 @@
-# Nobulex conformance driver
+# nobulex
 
-Python implementation producing v1 flat receipts with Ed25519 signatures
-over JCS-canonical bytes.
-
-## What Nobulex is
-
-Credit scores for AI agents. An agent commits to its rulebook before it
-acts, every action leaves a signed receipt, and the verified track record
-becomes portable trust. The `action_ref` formula is normative implementation
-guidance in OWASP Agentic Skills Top 10 (AST09).
-
-- PyPI: `pip install nobulex`
-- npm: `npm install @nobulex/core`
-- GitHub: https://github.com/arian-gogani/nobulex
+Conformance driver for the agent-governance-testvectors suite.
 
 ## Running
 
 ```bash
-# From the repo root
-NOBULEX_PYTHON=/path/to/nobulex/packages/python \
-  python implementations/nobulex/driver.py
+pip install pynacl          # or: pip install cryptography
+./implementations/nobulex/run.sh
 ```
 
-Or with nobulex installed via pip:
+Writes one receipt per fixture to `receipts/nobulex/`.
 
-```bash
-pip install nobulex
-python implementations/nobulex/driver.py
-```
+## Shape
 
-## What it produces
+`decision_receipt`, the shape this repository's own `aps-gateway-enforcement/`
+reference receipts carry and the shape `@veritasacta/verify` reports as
+`v2 (draft-farley-acta-signed-receipts-03)`.
 
-4 v1 flat receipts in `output/`, one per test fixture:
+The receipt carries no inline public key. `draft-farley-acta-signed-receipts`
+says a verifier must not accept a key transported inside the envelope unless it
+is independently anchored, so `kid` names the key and resolving it is the
+verifier's job. `kid` is the RFC 7638 JWK thumbprint of the public half of the
+shared conformance seed in `fixtures/keys/README.md`, which is why it matches
+the `kid` on the `aps-gateway-enforcement` receipts.
 
-| Seq | Tool  | Decision | Signature | Chain |
-|-----|-------|----------|-----------|-------|
-| 1   | Read  | allow    | verified  | genesis |
-| 2   | Bash  | allow    | verified  | linked |
-| 3   | Bash  | deny     | verified  | linked |
-| 4   | Write | allow    | verified  | linked |
+Signature is Ed25519 (RFC 8032) over the RFC 8785 canonical bytes of the whole
+envelope with `signature` removed, hex encoded.
 
-All signatures are Ed25519 over JCS-canonical payload (signature field
-excluded from signed bytes). Chain linked via `parent_receipt_hash` =
-SHA-256 of the previous receipt's JCS-canonical form.
+## Two properties this driver holds itself to
 
-## Conformance checks
+**It never reads `expected_decision`.** Decisions come from parsing and
+evaluating `fixtures/policy/autoresearch-safe.cedar`. `cedar_lite.py` is a
+small evaluator for the subset of Cedar that policy uses, not a Cedar
+implementation, and it says so at the top of the file. A driver that reads the
+fixture's expected answer is copying the answer key, and until #14 the suite
+would have reported it conformant. That is finding 6 in #13.
 
-- Schema: v1 flat shape per `expected/receipt-schema.json`
-- Signatures: Ed25519, verified against deterministic test keypair
-- Chain: `parent_receipt_hash` forms valid ordered chain from genesis
+**Its parent-hash canonical form is byte-identical to the checker's.** If a
+driver computed a different canonical form, every parent hash would mismatch
+and the failure would look like tampering rather than like disagreement about
+bytes.
+
+## Files
+
+| File | Contents |
+|---|---|
+| `run.sh` | entry point, matches the other drivers' contract |
+| `emit.py` | evaluates each fixture, signs, writes `receipts/nobulex/` |
+| `cedar_lite.py` | the policy evaluator, so decisions are derived and not copied |

@@ -34,12 +34,17 @@ pass() { echo "PASS: $1"; PASS=$((PASS+1)); }
 fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 
 # ----- Check 1: schema conformance --------------------------------------------
-# The receipt-schema.json uses `oneOf` to accept both the v1 flat shape
-# (protect-mcp) and the v2 structured-envelope shape (sb-runtime). We check
-# for one of the two shapes here with a lightweight field-level test that
-# does not require a full JSON Schema validator dependency.
+# receipt-schema.json accepts three shapes: `decision_receipt` (the
+# aps-gateway-enforcement reference receipts and the nobulex driver), the v1
+# flat shape (protect-mcp), and the v2 structured envelope (sb-runtime). This
+# is a lightweight field-level test rather than a full JSON Schema validator,
+# so it stays dependency-free; keep it in step with expected/receipt-schema.json.
+#
+# decision_receipt was added per issue #13: the schema described two shapes,
+# neither of which `@veritasacta/verify` accepts, and rejected this
+# repository's own reference receipts.
 echo ""
-echo "=== Check 1: schema conformance (v1 flat OR v2 envelope) ==="
+echo "=== Check 1: schema conformance (decision_receipt OR v1 flat OR v2 envelope) ==="
 for f in "$RECEIPTS_DIR"/*.json; do
     [ -e "$f" ] || continue
     python3 - <<PY
@@ -49,6 +54,18 @@ r = json.load(open("$f"))
 # v1 flat: required top-level fields
 v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
                "policy_id", "timestamp", "public_key", "signature"]
+
+# decision_receipt: the shape the reference receipts carry and the shape
+# @veritasacta/verify recognises. The key is named by kid, not carried inline.
+def is_decision_receipt(r):
+    return (
+        isinstance(r, dict)
+        and r.get("type") == "decision_receipt"
+        and all(k in r for k in ("v", "algorithm", "kid", "issuer",
+                                 "issued_at", "payload", "signature"))
+        and isinstance(r.get("payload"), dict)
+        and "decision" in r["payload"]
+    )
 
 # v2 envelope: payload/signature/pubkey wrapper
 def is_v2(r):
@@ -64,7 +81,12 @@ def is_v2(r):
         and "action" in r["payload"]
     )
 
-if is_v2(r):
+if is_decision_receipt(r):
+    if r["payload"].get("decision") not in ("allow", "deny"):
+        print(f"  decision_receipt invalid decision in $f: {r['payload'].get('decision')}")
+        sys.exit(1)
+    sys.exit(0)
+elif is_v2(r):
     # v2 envelope checks
     if r["payload"].get("decision") not in ("allow", "deny"):
         print(f"  v2 invalid decision in $f: {r['payload'].get('decision')}")
@@ -74,7 +96,7 @@ else:
     # v1 flat checks
     missing = [k for k in v1_required if k not in r]
     if missing:
-        print(f"  $f matches neither v1 flat (missing {missing}) nor v2 envelope")
+        print(f"  $f matches none of decision_receipt, v1 flat (missing {missing}), v2 envelope")
         sys.exit(1)
     if r.get("receipt_version") != "1.0":
         print(f"  v1 wrong version in $f: {r.get('receipt_version')}")
