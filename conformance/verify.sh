@@ -92,16 +92,56 @@ PY
 done
 
 # ----- Check 2: signature verification ----------------------------------------
+#
+# One invocation per receipt, not a glob.
+#
+# @veritasacta/verify takes a single <file.json>. Given several positionally it
+# verifies only the LAST one and exits on that, printing one verdict line for
+# the whole set. Measured against a four-receipt directory by tampering each
+# position in turn, the glob form reported success for three of the four:
+#
+#     tampered receipt-0001 -> exit 0
+#     tampered receipt-0002 -> exit 0
+#     tampered receipt-0003 -> exit 0
+#     tampered receipt-0004 -> exit 1
+#
+# So an implementation could forge three of its four receipts and this check
+# would report "all signatures verify". The verifier is correct; handed the
+# tampered file alone it exits 1. The invocation was the defect. (Issue #13,
+# finding 7.)
+#
+# The pass line is deliberately after the loop rather than inside it, so it
+# reports the number actually checked instead of asserting over files that were
+# never opened.
 echo ""
 echo "=== Check 2: @veritasacta/verify signatures ==="
-npx --yes @veritasacta/verify "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
-RC=$?
-case "$RC" in
-    0) pass "all signatures verify (exit 0)" ;;
-    1) fail "one or more signatures failed (exit 1 = tampered)" ;;
-    2) fail "malformed receipt (exit 2)" ;;
-    *) fail "verifier exited with unexpected code $RC" ;;
-esac
+
+# Published fixture key from fixtures/keys/README.md. Receipts here carry `kid`
+# rather than an inline public key, so without this the verifier exits with
+# no_public_key and that gets reported as a failed signature — a missing key and
+# a tampered one are not the same finding. (Issue #13, finding 3.)
+CONFORMANCE_KEY="${CONFORMANCE_KEY:-4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29}"
+
+SIG_CHECKED=0
+SIG_FAILED=0
+for f in "$RECEIPTS_DIR"/*.json; do
+    [ -e "$f" ] || continue
+    SIG_CHECKED=$((SIG_CHECKED+1))
+    npx --yes @veritasacta/verify --key "$CONFORMANCE_KEY" "$f" >/dev/null 2>&1
+    RC=$?
+    case "$RC" in
+        0) ;;
+        1) fail "signature failed verification: $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        2) fail "malformed or unrecognised receipt: $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        *) fail "verifier exited with unexpected code $RC on $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+    esac
+done
+
+if [ "$SIG_CHECKED" -eq 0 ]; then
+    fail "no receipts to verify"
+elif [ "$SIG_FAILED" -eq 0 ]; then
+    pass "all $SIG_CHECKED signature(s) verify"
+fi
 
 # ----- Check 3: chain integrity (ordered sequence + parent hash linkage) ------
 echo ""
