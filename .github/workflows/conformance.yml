@@ -33,5 +33,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: conformance-receipts
+          name: conformance-receipts-node${{ matrix.node }}
           path: receipts/
