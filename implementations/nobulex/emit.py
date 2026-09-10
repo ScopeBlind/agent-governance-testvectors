@@ -37,7 +37,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cedar_lite import parse, evaluate  # noqa: E402
+from cedar_lite import parse, evaluate, PolicyTypeError  # noqa: E402
 
 SEED_HEX = "0000000000000000000000000000000000000000000000000000000000000001"
 POLICY_ID = "autoresearch-safe"
@@ -126,7 +126,22 @@ def main() -> int:
     for stale in out.glob("*.json"):
         stale.unlink()
 
-    rules = parse((repo / "fixtures" / "policy" / (POLICY_ID + ".cedar")).read_text())
+    # A policy the reference engine refuses is not something to emit receipts
+    # against. 77 is this suite's skip convention, so the summary says skipped
+    # rather than showing a traceback that would read as a defect in this
+    # driver. It is the corpus that is invalid here, and saying which is more
+    # useful than either crashing or quietly evaluating it anyway.
+    try:
+        rules = parse(
+            (repo / "fixtures" / "policy" / (POLICY_ID + ".cedar")).read_text())
+    except PolicyTypeError as exc:
+        sys.stderr.write(
+            "skip: the fixture policy is not valid Cedar, so no decision is "
+            "derived from it.\n  %s\n"
+            "  Corrected upstream in #17. This driver refuses what cedar-wasm "
+            "refuses rather than accepting a policy the reference engine will "
+            "not run.\n" % exc)
+        return 77
     sign, public_key = load_signer()
     kid = jwk_thumbprint(public_key)
 
