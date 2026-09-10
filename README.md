@@ -52,8 +52,10 @@ implementations/
 - **v0.3** (September 2026): the checks made to gate (see the next
   section), four receipt shapes recognised, the chain link pinned to
   section 6.7 of draft-farley-acta-signed-receipts-03, and a check 3 that
-  fails the reference driver honestly on outcomes, because protect-mcp's CLI
-  cannot yet sign a policy decision (see finding 6 below).
+  compares each receipt's outcome to the expected chain. The reference driver
+  now signs the decision protect-mcp actually makes (`sign --cedar`, 0.13.0)
+  and passes all three checks on Node 22; on Node 20 it needs protect-mcp
+  0.13.1 (see findings 9 and 10 below). CI runs on both.
 
 ## What the checks found about themselves
 
@@ -78,6 +80,25 @@ check is the same failure the receipts exist to prevent, one level up.
    The reference driver was doing exactly that.
 7. Check 2 handed the verifier a glob. It verified only the last file, so a
    driver could forge three of four signatures and still see `PASS`.
+8. The fixture policy was not valid Cedar. Its Bash clauses used `in`, which
+   is Cedar's entity-hierarchy operator, on a string (`"git" in ["git"]`);
+   cedar-wasm reports a type error and, fail-closed, denies. A subset
+   evaluator that treats `in` as list membership accepted it and matched the
+   expected decisions, so the invalid policy was never noticed. The clauses
+   now use `.contains()`, and `spec.md` records the rule.
+9. The reference driver signed receipts whose denies were not decisions. On
+   Node 20 the published protect-mcp could not load its Cedar engine (the
+   package root's ESM entry imports a `.wasm` module, which Node 20 rejects),
+   every evaluation was a fail-closed deny with reason
+   `cedar_wasm_not_available`, and `sign` recorded each one as `cedar_deny`.
+   Check 3 caught the wrong outcomes; the log could not say why. The driver
+   now prints the evaluator's verdict per input and refuses to sign when the
+   engine or policy failed to load, and protect-mcp 0.13.1 loads the engine
+   through the package's `/nodejs` entry and records the evaluator's reason.
+10. A driver's exit 77 ("cannot run on this runner") was counted as a
+    failure, so every run was red whether or not anything failed. Skips are
+    now reported as skips; the run fails only on a failure, or when nothing
+    was verified at all.
 
 Findings 1 to 7 were reported, with position-by-position measurements, by
 [@arian-gogani](https://github.com/arian-gogani) in
@@ -93,7 +114,10 @@ says which one the draft specifies; check 3 reads `expected/chain.jsonl`,
 compares each receipt's outcome to it, cross-checks it against the fixtures'
 `expected_decision`, and pins the chain link to section 6.7 of
 draft-farley-acta-signed-receipts-03, naming which convention a
-non-conformant producer actually used instead of failing with "mismatch".
+non-conformant producer actually used instead of failing with "mismatch";
+the fixture policy is valid Cedar; the reference driver signs real decisions
+and refuses to sign an engine outage; CI runs every driver on Node 20 and 22
+and reports skips as skips.
 
 The rule this leaves behind: a check that cannot fail manufactures confidence
 rather than withholding it. Each check here was rewritten so that a planted

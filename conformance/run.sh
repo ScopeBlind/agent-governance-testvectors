@@ -24,6 +24,7 @@ NC="$(printf '\033[0m')"
 # gate. Reported in #13.
 FAILED=0
 CHECKED=0
+SKIPPED=0
 
 for impl_dir in implementations/*/; do
     impl="$(basename "$impl_dir")"
@@ -39,6 +40,15 @@ for impl_dir in implementations/*/; do
     mkdir -p "receipts/$impl"
     (cd "$impl_dir" && ./run.sh)
     RC=$?
+    # Exit 77 is the driver's own "cannot run here" (a runtime or dependency
+    # the runner does not have). That is a skip, reported as one, not a
+    # failure: counting it as one made every run red for reasons that had
+    # nothing to do with conformance, and a permanently red gate is ignored.
+    if [ "$RC" -eq 77 ]; then
+        echo "${RED}SKIP${NC}: $impl run.sh exited 77 (cannot run on this runner)"
+        SKIPPED=$((SKIPPED+1))
+        continue
+    fi
     if [ "$RC" -ne 0 ]; then
         echo "${RED}FAIL${NC}: $impl run.sh exited $RC"
         FAILED=$((FAILED+1))
@@ -58,7 +68,7 @@ done
 
 echo ""
 echo "==========================================="
-echo "  $CHECKED implementation(s) verified, $FAILED failed"
+echo "  $CHECKED implementation(s) verified, $FAILED failed, $SKIPPED skipped"
 echo "==========================================="
 
 # An empty run is a failure too. If no implementation was exercised, the suite
