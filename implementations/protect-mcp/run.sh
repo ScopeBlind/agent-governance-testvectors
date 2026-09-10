@@ -35,6 +35,9 @@ require("node:fs").writeFileSync(process.argv[2], JSON.stringify({
 }, null, 2));
 ' "$SEED" "$KEY"
 
+# Say which gate and runtime produced these receipts, so a CI log explains itself.
+echo "protect-mcp: $($PMCP --version 2>/dev/null </dev/null | head -n 1 || echo 'version unknown') on node $(node --version)"
+
 WORK="$OUT/.work"
 rm -rf "$WORK" && mkdir -p "$WORK"
 signed_count=0
@@ -48,6 +51,10 @@ for input_file in "$FIXTURES/inputs"/*.json; do
     # models the tool name as the Cedar action. stdin is /dev/null: sign reads a
 # hook payload from stdin whenever stdin is a pipe, and under CI or a harness
 # an inherited pipe never closes.
+    # The evaluator's own verdict, with the matched policy ids and any errors,
+    # so a wrong decision in CI is diagnosable from the log.
+    echo "protect-mcp: $name evaluate -> $($PMCP evaluate --cedar "$FIXTURES/policy" --action-model tool --tool "$tool_name" \
+        --input "$tool_input" --context "$context" --json </dev/null 2>&1 | tr -d '\n' | cut -c1-400)"
     result="$($PMCP sign --cedar "$FIXTURES/policy" --action-model tool --tool "$tool_name" \
         --input "$tool_input" --context "$context" --receipts "$WORK" --key "$KEY" </dev/null 2>/dev/null)"
     line="$(tail -n 1 "$WORK/receipts.jsonl" 2>/dev/null || true)"
