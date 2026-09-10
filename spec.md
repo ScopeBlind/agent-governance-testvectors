@@ -109,7 +109,7 @@ key is common to every receipt here, so the schema does not constrain them.
 Some producers carry `canonicalization` and `pubkey` inside the signature
 object; that is permitted and does not change the signed bytes.
 
-### APS gateway (4 receipts here; not the 2.1 envelope)
+### decision_receipt: APS gateway and nobulex (4 receipts here; not the 2.1 envelope)
 
 ```json
 {
@@ -124,7 +124,9 @@ object; that is permitted and does not change the signed bytes.
 }
 ```
 
-Shipped in `aps-gateway-enforcement/`, contributed to answer
+Schema branch `decisionReceipt`; the name and the check-1 shape test are from
+[#12](https://github.com/ScopeBlind/agent-governance-testvectors/pull/12), which
+also emits it. Shipped in `aps-gateway-enforcement/`, contributed to answer
 [OWASP www-project-ai-security-and-privacy-guide#802](https://github.com/OWASP/www-project-ai-security-and-privacy-guide/issues/802).
 It differs from 2.1 in three ways: the algorithm is `"algorithm": "ed25519"`
 rather than `"alg": "EdDSA"`, the signature is a bare hex string rather than
@@ -176,10 +178,11 @@ deployments must generate their own keypairs; see
 
 ## Versioning
 
-This spec is tied to `draft-farley-acta-signed-receipts-01`. When the
-draft revises to `-02`, this repo will tag a v0.x release that exercises
-the old format, and the `main` branch will move to the new format. Old
-tags remain runnable for backwards-compatibility testing.
+This spec tracks `draft-farley-acta-signed-receipts-03`. The chain-link rule
+is section 6.7 of that revision (`previousReceiptHash`, `sha256:`-prefixed,
+hashed over the whole signed receipt including its signature); the signature
+scope is section 6.6. Earlier tags of this repo exercised the -01 and -02
+formats and remain runnable for backwards-compatibility testing.
 
 ## Open questions
 

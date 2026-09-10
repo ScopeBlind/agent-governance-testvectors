@@ -34,23 +34,49 @@ pass() { echo "PASS: $1"; PASS=$((PASS+1)); }
 fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 
 # ----- Check 1: schema conformance --------------------------------------------
-# The receipt-schema.json uses `oneOf` to accept both the v1 flat shape
-# (protect-mcp) and the v2 structured-envelope shape (sb-runtime). We check
-# for one of the two shapes here with a lightweight field-level test that
-# does not require a full JSON Schema validator dependency.
+# expected/receipt-schema.json is a oneOf over the four shapes actually in
+# use here: the Acta 2.1 envelope, decision_receipt, the v2 envelope, and v1
+# flat. This is a lightweight field-level test that does not need a JSON
+# Schema validator dependency; keep it in step with the schema.
 echo ""
-echo "=== Check 1: schema conformance (v1 flat OR v2 envelope) ==="
+echo "=== Check 1: schema conformance (one of four shapes) ==="
 for f in "$RECEIPTS_DIR"/*.json; do
     [ -e "$f" ] || continue
     python3 - <<PY
 import json, sys
 r = json.load(open("$f"))
 
-# v1 flat: required top-level fields
-v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
-               "policy_id", "timestamp", "public_key", "signature"]
+# Four shapes are in use in this repository. Only the Acta 2.1 envelope is
+# the shape draft-farley-acta-signed-receipts-03 specifies; the others are
+# recorded because real implementations emit them. This is a field-level
+# test, not a JSON Schema validator, so keep it in step with
+# expected/receipt-schema.json (issue #13, finding 4).
 
-# v2 envelope: payload/signature/pubkey wrapper
+# Acta 2.1 envelope (protect-mcp 0.12+): {payload, signature:{alg,kid,sig}}.
+# No top-level pubkey; the key is named by signature.kid.
+def is_acta_envelope(r):
+    return (
+        isinstance(r, dict)
+        and isinstance(r.get("payload"), dict)
+        and isinstance(r.get("signature"), dict)
+        and all(k in r["signature"] for k in ("alg", "kid", "sig"))
+        and "decision" in r["payload"]
+    )
+
+# decision_receipt (APS gateway, nobulex): a payload member, a bare hex
+# signature, and algorithm/kid/issuer at the top level. Not the 2.1 envelope.
+# Shape test contributed in #12.
+def is_decision_receipt(r):
+    return (
+        isinstance(r, dict)
+        and r.get("type") == "decision_receipt"
+        and all(k in r for k in ("v", "algorithm", "kid", "issuer",
+                                 "issued_at", "payload", "signature"))
+        and isinstance(r.get("payload"), dict)
+        and "decision" in r["payload"]
+    )
+
+# v2 envelope (sb-runtime): payload/signature/pubkey wrapper
 def is_v2(r):
     return (
         isinstance(r, dict)
@@ -58,31 +84,37 @@ def is_v2(r):
         and "signature" in r
         and "pubkey" in r
         and isinstance(r["payload"], dict)
-        and "type" in r["payload"]
         and r["payload"].get("type", "").startswith("scopeblind.receipt.")
         and "decision" in r["payload"]
         and "action" in r["payload"]
     )
 
-if is_v2(r):
-    # v2 envelope checks
-    if r["payload"].get("decision") not in ("allow", "deny"):
-        print(f"  v2 invalid decision in $f: {r['payload'].get('decision')}")
+# v1 flat (protect-mcp-adk): required top-level fields
+v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
+               "policy_id", "timestamp", "public_key", "signature"]
+
+shape = ("actaEnvelope" if is_acta_envelope(r) else
+         "decision_receipt" if is_decision_receipt(r) else
+         "v2 envelope" if is_v2(r) else None)
+if shape:
+    d = r["payload"].get("decision")
+    if d not in ("allow", "deny"):
+        print(f"  {shape} invalid decision in $f: {d}")
         sys.exit(1)
     sys.exit(0)
-else:
-    # v1 flat checks
-    missing = [k for k in v1_required if k not in r]
-    if missing:
-        print(f"  $f matches neither v1 flat (missing {missing}) nor v2 envelope")
-        sys.exit(1)
-    if r.get("receipt_version") != "1.0":
-        print(f"  v1 wrong version in $f: {r.get('receipt_version')}")
-        sys.exit(1)
-    if r.get("decision") not in ("allow", "deny"):
-        print(f"  v1 invalid decision in $f: {r.get('decision')}")
-        sys.exit(1)
-    sys.exit(0)
+
+missing = [k for k in v1_required if k not in r]
+if missing:
+    print(f"  $f matches none of actaEnvelope, decision_receipt, v2 envelope, "
+          f"v1 flat (missing {missing})")
+    sys.exit(1)
+if r.get("receipt_version") != "1.0":
+    print(f"  v1 wrong version in $f: {r.get('receipt_version')}")
+    sys.exit(1)
+if r.get("decision") not in ("allow", "deny"):
+    print(f"  v1 invalid decision in $f: {r.get('decision')}")
+    sys.exit(1)
+sys.exit(0)
 PY
     if [ "$?" -eq 0 ]; then
         pass "schema ok: $(basename "$f")"

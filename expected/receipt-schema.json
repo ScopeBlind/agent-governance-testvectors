@@ -14,7 +14,7 @@
       "$ref": "#/definitions/actaEnvelope"
     },
     {
-      "$ref": "#/definitions/apsGateway"
+      "$ref": "#/definitions/decisionReceipt"
     }
   ],
   "definitions": {
@@ -218,9 +218,9 @@
       },
       "additionalProperties": true
     },
-    "apsGateway": {
-      "title": "APS gateway receipt",
-      "description": "Emitted by the APS gateway and shipped in aps-gateway-enforcement/, contributed to answer OWASP www-project-ai-security-and-privacy-guide#802. It is NOT the section 2.1 envelope: the algorithm is carried as \"algorithm\": \"ed25519\" rather than \"alg\": \"EdDSA\", the signature is a bare hex string rather than an object, and the key identifier sits at the top level. These vectors are recorded as emitted and MUST NOT be rewritten to satisfy this schema: 2-external-verification/ ships a canonical.txt alongside the receipt and is the artifact an outside reviewer used to resolve the signing-scope question in draft section 6.6, so its bytes are evidence.",
+    "decisionReceipt": {
+      "title": "decision_receipt (APS gateway, nobulex)",
+      "description": "Emitted by the APS gateway and by nobulex (#12); shipped in aps-gateway-enforcement/, contributed to answer OWASP www-project-ai-security-and-privacy-guide#802. It is NOT the section 2.1 envelope: the algorithm is carried as \"algorithm\": \"ed25519\" rather than \"alg\": \"EdDSA\", the signature is a bare hex string rather than an object, and the key identifier sits at the top level. These vectors are recorded as emitted and MUST NOT be rewritten to satisfy this schema: 2-external-verification/ ships a canonical.txt alongside the receipt and is the artifact an outside reviewer used to resolve the signing-scope question in draft section 6.6, so its bytes are evidence.",
       "type": "object",
       "required": [
         "v",
