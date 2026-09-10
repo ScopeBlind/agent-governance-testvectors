@@ -52,10 +52,11 @@ implementations/
 - **v0.3** (September 2026): the checks made to gate (see the next
   section), four receipt shapes recognised, the chain link pinned to
   section 6.7 of draft-farley-acta-signed-receipts-03, and a check 3 that
-  compares each receipt's outcome to the expected chain. The reference driver
-  now signs the decision protect-mcp actually makes (`sign --cedar`, 0.13.0)
-  and passes all three checks on Node 22; on Node 20 it needs protect-mcp
-  0.13.1 (see findings 9 and 10 below). CI runs on both.
+  compares each receipt's outcome to the expected chain. Three implementations
+  now verify in CI on Node 20 and Node 22: the protect-mcp reference (0.13.1;
+  `sign --cedar` signs the decision it actually makes), nobulex (#12), and the
+  APS governance hook (#1). protect-mcp-adk is still a placeholder driver and
+  sb-runtime needs a CLI that is not public, so both report a skip.
 
 ## What the checks found about themselves
 
@@ -99,6 +100,30 @@ check is the same failure the receipts exist to prevent, one level up.
     failure, so every run was red whether or not anything failed. Skips are
     now reported as skips; the run fails only on a failure, or when nothing
     was verified at all.
+11. An engine that skips erroring policies turns an invalid policy into a
+    silent deny. cedarpy does not raise on the string-in-list clauses of
+    finding 8; it skips those policies, returns Deny, and reports the type
+    error only in diagnostics. Under it, sequence 2 was a deny for the wrong
+    reason and sequence 3, the one negative vector in the set, was a deny
+    with an empty reason list: the forbid clause never evaluated, so the
+    vector passed without testing anything. Measured and reported by
+    [@aeoess](https://github.com/aeoess) in
+    [#1](https://github.com/ScopeBlind/agent-governance-testvectors/pull/1).
+    The APS driver now fails on any Cedar diagnostic instead of reading the
+    resulting Deny as a decision, and nobulex's subset evaluator refuses the
+    invalid form rather than guessing at it
+    ([@arian-gogani](https://github.com/arian-gogani),
+    [#12](https://github.com/ScopeBlind/agent-governance-testvectors/pull/12)).
+12. A driver rewrote the policy before evaluating it. An earlier revision of
+    the APS driver turned `context.X in [ ... ]` into `[ ... ].contains(context.X)`
+    for evaluation while computing `policy_digest` over the on-disk bytes, so
+    its receipts matched the expected set by evaluating text the fixture did
+    not contain. The rewrite was disclosed in the pull request body and not
+    weighed in review; it stayed invisible for three months because the
+    transformed clauses are the same text #17 later wrote into the fixture.
+    Disclosed and removed by [@aeoess](https://github.com/aeoess); the
+    rule it leaves behind is in `spec.md`: the policy under test is the
+    on-disk bytes.
 
 Findings 1 to 7 were reported, with position-by-position measurements, by
 [@arian-gogani](https://github.com/arian-gogani) in
@@ -116,8 +141,9 @@ compares each receipt's outcome to it, cross-checks it against the fixtures'
 draft-farley-acta-signed-receipts-03, naming which convention a
 non-conformant producer actually used instead of failing with "mismatch";
 the fixture policy is valid Cedar; the reference driver signs real decisions
-and refuses to sign an engine outage; CI runs every driver on Node 20 and 22
-and reports skips as skips.
+and refuses to sign an engine outage; CI installs the Python drivers'
+dependencies and runs every driver on Node 20 and 22, reporting skips as
+skips; drivers evaluate the on-disk policy and fail on Cedar diagnostics.
 
 The rule this leaves behind: a check that cannot fail manufactures confidence
 rather than withholding it. Each check here was rewritten so that a planted
@@ -129,6 +155,9 @@ that closed each finding.
 For APS, A2A, Hermes, and ACTA interop, this repo follows one rule: compose by content-hash reference, not by re-signing another system's receipt. See [docs/composition-conformance.md](docs/composition-conformance.md).
 
 ## Running locally
+
+The two Python drivers need `pip install pynacl cedarpy agent-passport-system`;
+without it they report a skip (exit 77) rather than a failure.
 
 ```bash
 # Run all drivers whose dependencies are installed

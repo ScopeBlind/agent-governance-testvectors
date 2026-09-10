@@ -166,6 +166,25 @@ denied every Bash call. The policy now uses `[...].contains(...)`. Drivers
 that ship their own evaluator must reject what Cedar rejects, or say plainly
 that they implement a subset.
 
+## The policy under test is the on-disk bytes
+
+A driver evaluates `fixtures/policy/*.cedar` exactly as stored. Three rules
+follow, each learned from a driver in this repository (README findings 8, 11
+and 12):
+
+1. No rewriting for evaluation. A driver must not transform the policy text
+   before evaluating it, even when the transformation preserves the intended
+   meaning. `policy_digest` binds a receipt to the bytes on disk; a decision
+   derived from other bytes is not the decision the digest names.
+2. A policy the engine cannot run is a failure, not a deny. If the engine
+   reports a diagnostic error for any policy it was asked to evaluate, the
+   driver exits non-zero and emits no receipt for that step. Reading the
+   engine's fail-closed Deny as a decision records an outage as an outcome.
+3. A subset evaluator refuses what the reference refuses. An evaluator that
+   covers only part of Cedar must reject any input cedar-wasm would reject,
+   rather than assigning it a meaning. Agreement with the expected decisions
+   reached by accepting an invalid policy is an artifact, not conformance.
+
 ## Cedar evaluation semantics
 
 The policy in `fixtures/policy/autoresearch-safe.cedar` uses standard Cedar
