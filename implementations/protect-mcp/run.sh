@@ -53,8 +53,16 @@ for input_file in "$FIXTURES/inputs"/*.json; do
 # an inherited pipe never closes.
     # The evaluator's own verdict, with the matched policy ids and any errors,
     # so a wrong decision in CI is diagnosable from the log.
-    echo "protect-mcp: $name evaluate -> $($PMCP evaluate --cedar "$FIXTURES/policy" --action-model tool --tool "$tool_name" \
+    verdict="$($PMCP evaluate --cedar "$FIXTURES/policy" --action-model tool --tool "$tool_name" \
         --input "$tool_input" --context "$context" --json </dev/null 2>&1 | tr -d '\n' | cut -c1-400)"
+    echo "protect-mcp: $name evaluate -> $verdict"
+    # A fail-closed deny because the policy engine could not load is not a
+    # policy decision. Refuse to sign receipts that would record it as one.
+    case "$verdict" in *cedar_wasm_not_available*|*policy_error*)
+        echo "protect-mcp: the gate could not evaluate the policy on this runtime ($verdict);" >&2
+        echo "  receipts signed now would record an engine outage as a policy deny. Failing instead." >&2
+        rm -rf "$WORK"; rm -f "$KEY"; exit 1;;
+    esac
     result="$($PMCP sign --cedar "$FIXTURES/policy" --action-model tool --tool "$tool_name" \
         --input "$tool_input" --context "$context" --receipts "$WORK" --key "$KEY" </dev/null 2>/dev/null)"
     line="$(tail -n 1 "$WORK/receipts.jsonl" 2>/dev/null || true)"
