@@ -1,4 +1,4 @@
-{"sequence": 1, "tool_name": "Read", "decision": "allow", "policy_id": "autoresearch-safe"}
-{"sequence": 2, "tool_name": "Bash", "decision": "allow", "policy_id": "autoresearch-safe"}
-{"sequence": 3, "tool_name": "Bash", "decision": "deny",  "policy_id": "autoresearch-safe"}
-{"sequence": 4, "tool_name": "Write", "decision": "allow", "policy_id": "autoresearch-safe"}
+{"sequence": 1, "tool_name": "Read", "decision": "allow", "policy_id": "autoresearch-safe", "policy_digest": "sha256:81ba074a4843cb722407feb2a9c43ec1ac4c8e19fd057dc19962af8aef9c05af"}
+{"sequence": 2, "tool_name": "Bash", "decision": "allow", "policy_id": "autoresearch-safe", "policy_digest": "sha256:81ba074a4843cb722407feb2a9c43ec1ac4c8e19fd057dc19962af8aef9c05af"}
+{"sequence": 3, "tool_name": "Bash", "decision": "deny", "policy_id": "autoresearch-safe", "policy_digest": "sha256:81ba074a4843cb722407feb2a9c43ec1ac4c8e19fd057dc19962af8aef9c05af"}
+{"sequence": 4, "tool_name": "Write", "decision": "allow", "policy_id": "autoresearch-safe", "policy_digest": "sha256:81ba074a4843cb722407feb2a9c43ec1ac4c8e19fd057dc19962af8aef9c05af"}

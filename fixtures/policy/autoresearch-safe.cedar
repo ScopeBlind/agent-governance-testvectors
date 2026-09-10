@@ -11,13 +11,15 @@ permit (
     resource
 );
 
-// Allow Bash for a safe command list only.
+// Allow Bash for a safe command list only. Set membership on a string is
+// .contains(); `in` is the entity-hierarchy operator and a string on its
+// left is a type error in Cedar (found 2026-09-10 with cedar-wasm).
 permit (
     principal,
     action == Action::"Bash",
     resource
 ) when {
-    context.command_pattern in ["git", "npm", "ls", "cat", "pwd", "echo", "node", "python"]
+    ["git", "npm", "ls", "cat", "pwd", "echo", "node", "python"].contains(context.command_pattern)
 };
 
 // Deny destructive Bash regardless of any permit.
@@ -27,7 +29,7 @@ forbid (
     action == Action::"Bash",
     resource
 ) when {
-    context.command_pattern in ["rm -rf", "dd", "mkfs", "shred"]
+    ["rm -rf", "dd", "mkfs", "shred"].contains(context.command_pattern)
 };
 
 // Writes must be within the project directory.

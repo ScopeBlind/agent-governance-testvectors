@@ -152,6 +152,20 @@ reference verifier accept the output. New producers should emit the Acta
 2.1 envelope, since that is the shape the draft specifies. The other three
 are recorded because they exist, not because they are recommended.
 
+## The fixture policy must be valid Cedar
+
+Until 2026-09-10 `fixtures/policy/autoresearch-safe.cedar` used
+`context.command_pattern in [...]` in its two Bash clauses. `in` is Cedar's
+entity-hierarchy operator; a string on its left is a type error, and real
+Cedar (cedar-wasm, the Rust crate) rejects the policy with
+"expected (entity of type any_entity_type), got string; use .contains() to
+test set membership". A subset evaluator that treats `in` as list membership
+accepts it and produces the intended decisions anyway. That is how two
+implementations agreed with the expected outcomes while the reference engine
+denied every Bash call. The policy now uses `[...].contains(...)`. Drivers
+that ship their own evaluator must reject what Cedar rejects, or say plainly
+that they implement a subset.
+
 ## Cedar evaluation semantics
 
 The policy in `fixtures/policy/autoresearch-safe.cedar` uses standard Cedar
