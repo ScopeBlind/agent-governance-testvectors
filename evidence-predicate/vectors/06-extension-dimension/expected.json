@@ -1,0 +1,20 @@
+{
+  "about": "A vendor dimension in the x-<vendor>:<name> form, independently attested. Unknown dimensions stay ignorable; known ones are checked like any other.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "x-usetruth:contradiction",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": true,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": true,
+      "reason": "independent_source_signature_verified"
+    }
+  ],
+  "independent_dimensions": [
+    "x-usetruth:contradiction"
+  ],
+  "receipt_digest": "sha256:e8fa3df4fc22f0faa90ea2bb5d3b178a3c5fa8ad6583f54b155b0160ad4f269e"
+}

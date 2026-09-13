@@ -1,0 +1,18 @@
+{
+  "about": "The signer's key bytes, pinned by the relying party under a fresh kid and a different domain label. The label says independent; the bytes say otherwise. Section 4.3: the source key MUST NOT equal the receipt signer's key.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "data_rights",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": false,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": false,
+      "reason": "source_key_not_independent"
+    }
+  ],
+  "independent_dimensions": [],
+  "receipt_digest": "sha256:592cd2a510c89c5e599dba09d8728445469229dca03c7e2c5bee0024f656fa7f"
+}

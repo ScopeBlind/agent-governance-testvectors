@@ -1,0 +1,18 @@
+{
+  "about": "The custodian's kid is named, but the receipt signer made the signature. The named key does not verify it. Section 9.9: a named-key forgery.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "data_rights",
+      "source_signature_present": true,
+      "source_signature_valid": false,
+      "source_key_out_of_band": true,
+      "source_key_distinct": true,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": false,
+      "reason": "source_signature_invalid"
+    }
+  ],
+  "independent_dimensions": [],
+  "receipt_digest": "sha256:8049201937e53f1b7312352eed1cd47375d99fdfce40176935aa7e9182e1abf2"
+}

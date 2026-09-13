@@ -1,0 +1,23 @@
+{
+  "about": "A deny whose basis is a failed freshness check attested by an independent administrator; the entry carries no as_of, so the signed claim omits it.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "freshness",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": true,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": true,
+      "reason": "independent_source_signature_verified"
+    }
+  ],
+  "independent_dimensions": [
+    "freshness"
+  ],
+  "signed_claim_omits_as_of": [
+    true
+  ],
+  "receipt_digest": "sha256:508de57f7f35bd1bf5049f111b6eb137b3ff16af40d0790dd206274dfb7b83a9"
+}
