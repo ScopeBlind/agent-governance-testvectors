@@ -30,10 +30,13 @@ jobs:
         run: python -m pip install --quiet pynacl cedarpy==4.8.7 agent-passport-system
 
       - name: Make scripts executable
-        run: chmod +x conformance/*.sh implementations/*/run.sh
+        run: chmod +x conformance/*.sh implementations/*/run.sh evidence-predicate/run.sh
 
       - name: Run all implementation drivers
         run: ./conformance/run.sh
+
+      - name: Verify evidence predicate vectors
+        run: ./evidence-predicate/run.sh
 
       - name: Upload receipts
         if: always()

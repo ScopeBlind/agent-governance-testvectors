@@ -1,0 +1,18 @@
+{
+  "about": "The receipt signer signs the claim with its own pinned key. Everything verifies, and it is still the signer's own word. Section 9.9: self-corroboration.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "data_rights",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": false,
+      "source_control_domain_distinct": false,
+      "independent_corroboration": false,
+      "reason": "source_key_not_independent"
+    }
+  ],
+  "independent_dimensions": [],
+  "receipt_digest": "sha256:a6bdaa7ce6deded43c486f289cd17ff0c7e6e47bfa046964981354caecbf38aa"
+}

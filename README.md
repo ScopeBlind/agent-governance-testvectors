@@ -167,6 +167,15 @@ rather than withholding it. Each check here was rewritten so that a planted
 failure is caught, and the planted failures are recorded in the pull requests
 that closed each finding.
 
+## Evidence predicate conformance
+
+[`evidence-predicate/`](evidence-predicate/) is a separate semantic suite for the
+OPTIONAL `evidence` field of -03 Section 4: eight signed `decision_receipt`s that
+verify under the published verifier and settle, entry by entry, whether a basis
+is independent corroboration or the signer's own word (Section 4.3), plus six
+entries rejected on structure. Dependency-free; runs in CI beside the receipt
+checks.
+
 ## Composition conformance
 
 For APS, A2A, Hermes, and ACTA interop, this repo follows one rule: compose by content-hash reference, not by re-signing another system's receipt. See [docs/composition-conformance.md](docs/composition-conformance.md).

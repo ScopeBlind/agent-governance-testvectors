@@ -1,0 +1,30 @@
+{
+  "v": 2,
+  "type": "decision_receipt",
+  "algorithm": "ed25519",
+  "kid": "test:manager:meridian:ed25519",
+  "issuer": "manager:meridian",
+  "issued_at": "2026-09-13T12:00:00Z",
+  "payload": {
+    "decision": "deny",
+    "request_id": "ev-02",
+    "agent_id": "agent:trading-desk:1",
+    "tool": "trade.submit",
+    "params_hash": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+    "policy_id": "restricted-securities",
+    "policy_digest": "sha256:5dbdea0fbf9f2c0c47a7b9a0f7d3b4a0f5b8e2b0b6b32f4b7f5f2ab3c3f0d6e1",
+    "evidence": [
+      {
+        "dimension": "freshness",
+        "state": "failed",
+        "source": {
+          "authority": "administrator:demo",
+          "ref": "sha256:6e0a9aa1f9d5c8ce3d545fb7b1d452f84514e93f493f94f24fa7c8180cb49ac4",
+          "kid": "test:administrator:demo:ed25519",
+          "sig": "e0433533279394de470a1f2803b39692aa6d095a15f04eab84369fdd0dc194510fd7cf18b1eaa1a1783fd3657323ea8299d236f4c74f1c1fb228c2fcd48d6c07"
+        }
+      }
+    ]
+  },
+  "signature": "6d78bc5a3b000811cc8943b0d0100c98012375b170342e2392bdc825c44705903af00b7b1476a4c72c4321cdedcf966bccc7ba649680ea80eb4a6a23a2d5990c"
+}
