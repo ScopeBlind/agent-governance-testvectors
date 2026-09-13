@@ -122,10 +122,17 @@ def main() -> int:
         return 1
 
     out = repo / "receipts" / "nobulex"
-    out.mkdir(parents=True, exist_ok=True)
-    for stale in out.glob("*.json"):
-        stale.unlink()
 
+    # Nothing below this point deletes anything. The previous run's receipts
+    # stay on disk until every step that can fail has already succeeded: the
+    # policy parses, the signer loads, and all receipts are built in memory.
+    # Deleting first meant a refused policy left the tree emptier than it found
+    # it, destroying the last good output to produce none. And the refusals
+    # below are a designed path, not a hypothetical: cedar_lite raises
+    # PolicyTypeError on principal/resource constraints, on `unless`, and on
+    # `context.x in [ ... ]`, so this is the ordinary outcome for an invalid
+    # corpus rather than an edge case.
+    #
     # A policy the reference engine refuses is not something to emit receipts
     # against. 77 is this suite's skip convention, so the summary says skipped
     # rather than showing a traceback that would read as a defect in this
@@ -146,7 +153,7 @@ def main() -> int:
     kid = jwk_thumbprint(public_key)
 
     parent_hash = None
-    written = 0
+    pending = []
     for path in fixtures:
         fixture = json.loads(path.read_text())
         # Removed before use so a future edit cannot quietly start depending on it.
@@ -184,14 +191,23 @@ def main() -> int:
         receipt["signature"] = sign(jcs(
             {k: v for k, v in receipt.items() if k != "signature"})).hex()
 
-        name = out / ("receipt-%04d.json" % fixture["sequence"])
-        name.write_text(json.dumps(receipt, indent=2) + "\n")
+        pending.append((out / ("receipt-%04d.json" % fixture["sequence"]),
+                        json.dumps(receipt, indent=2) + "\n"))
         # Computed from the receipt AFTER its signature is attached, because
         # 6.7 makes the signature part of the preimage.
         parent_hash = chain_link(receipt)
-        written += 1
 
-    print("nobulex: %d receipts in %s" % (written, out))
+    # Every fixture read, evaluated and signed without raising, so replacing
+    # the previous run's output is now safe. Building the whole set first also
+    # covers a malformed fixture partway through the corpus, which would
+    # otherwise have left a truncated chain where a complete one used to be.
+    out.mkdir(parents=True, exist_ok=True)
+    for stale in out.glob("*.json"):
+        stale.unlink()
+    for name, text in pending:
+        name.write_text(text)
+
+    print("nobulex: %d receipts in %s" % (len(pending), out))
     return 0
 
 
