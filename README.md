@@ -124,6 +124,23 @@ check is the same failure the receipts exist to prevent, one level up.
     Disclosed and removed by [@aeoess](https://github.com/aeoess); the
     rule it leaves behind is in `spec.md`: the policy under test is the
     on-disk bytes.
+13. Check 3 compared `policy_digest` only when a receipt carried no `policy_id`:
+    the digest branch was the `else` of the id branch. A receipt carrying a
+    correct `policy_id` and `policy_digest: sha256:deadbeef` passed, and every
+    driver in the tree carries `policy_id`, so the digest the draft makes
+    normative was never checked in practice. Reported by
+    [@arian-gogani](https://github.com/arian-gogani) on #12 and, from the
+    other direction, by [@aeoess](https://github.com/aeoess) in #18. Both
+    comparisons are now independent.
+14. The reference `policy_digest` in `expected/chain.jsonl` could not be
+    derived from anything the repository said. It is the section 6.8
+    construction over the fixture policy, and reproduces exactly, but nothing
+    named the construction, so two implementers hashed the file and concluded
+    the value matched no revision on disk. A reference value nobody can derive
+    is not a reference. The construction is now named beside the chain rule
+    and `harness/policy-digest.py` recomputes it. Reported by
+    [@aeoess](https://github.com/aeoess) (#18) and
+    [@arian-gogani](https://github.com/arian-gogani) (#12).
 
 Findings 1 to 7 were reported, with position-by-position measurements, by
 [@arian-gogani](https://github.com/arian-gogani) in
@@ -176,13 +193,22 @@ Each driver produces a `receipts/<implementation>/` directory. The
 2. Every receipt's Ed25519 signature verifies against the test keypair, one
    verifier invocation per receipt.
 3. Each receipt's `tool_name`, `decision` and policy identity (`policy_id` for
-   the flat shapes, `policy_digest` for the envelope) match the canonical chain
-   in `expected/chain.jsonl`, and every `previousReceiptHash` reproduces as
+   the flat shapes, `policy_digest` for the envelope; a receipt carrying both has
+   both checked) match the canonical chain in `expected/chain.jsonl`, and every
+   `previousReceiptHash` reproduces as
    `"sha256:" + hex(SHA-256(JCS(previous receipt)))` per section 6.7 of
    draft-farley-acta-signed-receipts-03. A receipt that identifies no policy
    fails; a decision that does not say what it rested on is not evidence.
 
 Exit 0 = all checks pass. Exit 1 = at least one check failed.
+
+The `policy_digest` in `expected/chain.jsonl` is not a hash of the policy file.
+It is the section 6.8 construction, `acta-policy-digest-v1`: a manifest
+`{construction, engine: "cedar", files: [{name: "autoresearch-safe.cedar", sha256}]}`
+with each file hashed over its exact bytes, sorted by name, canonicalised with JCS,
+then SHA-256, prefixed `sha256:`. `harness/policy-digest.py` recomputes it from the
+fixture; the value in `chain.jsonl` must equal that output after any change to the policy.
+
 
 ## Adding a new implementation
 

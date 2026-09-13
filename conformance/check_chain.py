@@ -164,22 +164,24 @@ def check_outcomes(name: str, receipt: dict, step: dict, errors: list):
             errors.append(f"{name}: {key} is {got!r}, expected {want!r}")
 
     # Policy identity. The flat shapes carry policy_id; the Acta 2.1 envelope
-    # carries policy_digest, which section 6.8 of the draft makes normative.
-    # Compare whichever the receipt carries against the fixture. Carrying
-    # neither, or a placeholder digest, means the decision does not say which
-    # policy it rested on, and that is a failure rather than a pass.
+    # carries policy_digest, which section 6.8 of the draft makes normative
+    # (acta-policy-digest-v1: a manifest of the policy files, each hashed over
+    # its exact bytes, sorted by name, JCS, SHA-256). Both comparisons are
+    # independent: a receipt carrying both has both checked, so a correct
+    # policy_id cannot excuse a wrong digest. Carrying neither, or a
+    # placeholder digest, means the decision does not say which policy it
+    # rested on, and that is a failure rather than a pass.
     pid = field(receipt, "policy_id")
     pdg = field(receipt, "policy_digest")
-    if pid is not None:
-        if step.get("policy_id") is not None and pid != step["policy_id"]:
-            errors.append(f"{name}: policy_id is {pid!r}, expected {step['policy_id']!r}")
-    elif pdg not in (None, "", "none"):
+    if pid is not None and step.get("policy_id") is not None and pid != step["policy_id"]:
+        errors.append(f"{name}: policy_id is {pid!r}, expected {step['policy_id']!r}")
+    if pdg not in (None, "", "none"):
         if step.get("policy_digest") is None:
             errors.append(f"{name}: carries policy_digest {pdg!r} but expected/chain.jsonl has no "
                           f"policy_digest to compare it against; add one (draft section 6.8)")
         elif pdg != step["policy_digest"]:
             errors.append(f"{name}: policy_digest is {pdg!r}, expected {step['policy_digest']!r}")
-    else:
+    if pid is None and pdg in (None, "", "none"):
         errors.append(f"{name}: carries neither policy_id nor policy_digest; "
                       f"the policy the decision rested on is not identified")
 

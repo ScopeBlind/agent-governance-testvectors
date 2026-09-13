@@ -175,7 +175,11 @@ and 12):
 1. No rewriting for evaluation. A driver must not transform the policy text
    before evaluating it, even when the transformation preserves the intended
    meaning. `policy_digest` binds a receipt to the bytes on disk; a decision
-   derived from other bytes is not the decision the digest names.
+   derived from other bytes is not the decision the digest names. The digest
+   is the section 6.8 construction over those bytes (a manifest of the policy
+   files with per-file SHA-256, JCS, SHA-256), not a hash of the file; the
+   suite compares it whether or not the receipt also carries `policy_id`
+   (README findings 13 and 14).
 2. A policy the engine cannot run is a failure, not a deny. If the engine
    reports a diagnostic error for any policy it was asked to evaluate, the
    driver exits non-zero and emits no receipt for that step. Reading the

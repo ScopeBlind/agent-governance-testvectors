@@ -93,8 +93,21 @@ kid = b64url(hashlib.sha256(_thumb_input.encode("utf-8")).digest())
 # fixture is valid Cedar as of #17, and the text is now evaluated unmodified.
 policy = POLICY_PATH.read_text()
 
-# Policy digest over the on-disk policy text, which is also the text evaluated.
-policy_digest = "sha256:" + hashlib.sha256(policy.encode("utf-8")).hexdigest()
+# Policy digest per draft-farley-acta-signed-receipts-03 section 6.8
+# (acta-policy-digest-v1): a manifest of the policy files, each hashed over
+# its exact on-disk bytes, sorted by name, JCS-canonicalised, then SHA-256.
+# Not a hash of the file: an earlier revision emitted one, and the suite
+# never compared it because the receipt also carried policy_id (README
+# finding 13). The bytes hashed here are the bytes evaluated below.
+_policy_manifest = {
+    "construction": "acta-policy-digest-v1",
+    "engine": "cedar",
+    "files": [{"name": POLICY_PATH.name,
+               "sha256": hashlib.sha256(POLICY_PATH.read_bytes()).hexdigest()}],
+}
+policy_digest = "sha256:" + hashlib.sha256(
+    json.dumps(_policy_manifest, separators=(",", ":"), sort_keys=True, ensure_ascii=False).encode("utf-8")
+).hexdigest()
 
 
 # ---- JCS canonicalization + signing (APS SDK, reused) ------------------
