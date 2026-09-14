@@ -12,9 +12,12 @@
 #
 # from a clone of https://github.com/ScopeBlind/sb-runtime
 #
-# The receipts produced follow the v2 structured-envelope format
-# ({payload, signature, pubkey}). `@veritasacta/verify` accepts this
-# format in parallel with the v1 flat format used by protect-mcp.
+# The receipts produced follow sb-runtime's v0.1 structured envelope
+# ({payload, signature, pubkey}). The published verifier does NOT read this
+# shape (unknown_format, measured 2026-09-13), and the corpus schema records
+# it without accepting it, so this driver's output is non-conformant until
+# sb-runtime emits the Acta 2.1 envelope. It exits 77 (skipped) whenever `sb`
+# is not on PATH, which is the case in CI.
 
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

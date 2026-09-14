@@ -1,15 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/ScopeBlind/agent-governance-testvectors/blob/main/expected/receipt-schema.json",
-  "title": "Agent governance decision receipt (four shapes in use)",
-  "description": "The receipt shapes this corpus actually contains. Four are in use and they are not interchangeable: the v1 flat shape (protect-mcp, protect-mcp-adk), the v2 structured envelope with a top-level pubkey (sb-runtime), the Acta 2.1 envelope specified by draft-farley-acta-signed-receipts-03 sections 2.1 and 2.1.1, and the APS gateway shape. Conformance to THIS schema means a receipt matches exactly one of the four, which is a statement about what exists rather than about what the draft requires. Only actaEnvelope is the shape the draft specifies; the other three are recorded because real implementations emit them and a corpus that described only the specified shape would not describe this corpus.",
+  "title": "Agent governance decision receipt (two shapes the published verifier reads)",
+  "description": "The receipt shapes this corpus accepts: the Acta 2.1 envelope specified by draft-farley-acta-signed-receipts-03 sections 2.1 and 2.1.1 (protect-mcp), and the APS gateway decision_receipt shape (APS governance hook, nobulex). Conformance to THIS schema means a receipt matches exactly one of the two, and both are shapes @veritasacta/verify reads. Two further shapes are kept under definitions for the record and are NOT accepted: the v1 flat shape (protect-mcp-adk, a placeholder driver that emits nothing) and the v2 structured envelope with a top-level pubkey (sb-runtime v0.1). Measured on 2026-09-13 with real sb-runtime output: those receipts pass a schema that lists them and then fail signature verification with unknown_format, because the published verifier does not read either shape, so listing them let an implementation pass check 1 and fail check 2 with nothing saying why (issue #21). A verifier that reads them, or a driver that emits them conformantly, is what would put them back.",
   "oneOf": [
-    {
-      "$ref": "#/definitions/v1Flat"
-    },
-    {
-      "$ref": "#/definitions/v2Envelope"
-    },
     {
       "$ref": "#/definitions/actaEnvelope"
     },
@@ -20,7 +14,7 @@
   "definitions": {
     "v1Flat": {
       "title": "v1 flat receipt",
-      "description": "Used by protect-mcp (TypeScript) and protect-mcp-adk (Python). Fields at the top level.",
+      "description": "RECORDED, NOT ACCEPTED (not in oneOf): Used by protect-mcp (TypeScript) and protect-mcp-adk (Python). Fields at the top level.",
       "type": "object",
       "required": [
         "receipt_id",
@@ -104,7 +98,7 @@
     },
     "v2Envelope": {
       "title": "v2 structured envelope receipt",
-      "description": "Used by sb-runtime (Rust) and APS governance hook. Signed payload is a nested object.",
+      "description": "RECORDED, NOT ACCEPTED (not in oneOf): Used by sb-runtime (Rust) and APS governance hook. Signed payload is a nested object.",
       "type": "object",
       "required": [
         "payload",

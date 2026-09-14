@@ -151,7 +151,7 @@ The schema half of finding 4 was independently reported through the draft's
 errata review.
 
 What changed: `run.sh` returns its verdict; check 2 loops over every receipt
-with the fixture key; check 1 recognises the four shapes actually in use and
+with the fixture key; check 1 validates against the schema, which accepts the two shapes the published verifier reads (the Acta 2.1 envelope and the APS decision_receipt) and
 says which one the draft specifies; check 3 reads `expected/chain.jsonl`,
 compares each receipt's outcome to it, cross-checks it against the fixtures'
 `expected_decision`, and pins the chain link to section 6.7 of
@@ -196,7 +196,7 @@ without it they report a skip (exit 77) rather than a failure.
 Each driver produces a `receipts/<implementation>/` directory. The
 `verify.sh` script runs three checks:
 
-1. Every receipt matches one of the four shapes in `expected/receipt-schema.json`.
+1. Every receipt matches one of the two shapes in `expected/receipt-schema.json` (a JSON Schema validator, draft-07). The v1 flat and v2 envelope shapes stay in the schema's definitions for the record but are not accepted: the published verifier does not read them, measured on real sb-runtime output on 2026-09-13 (#21).
    Only the Acta 2.1 envelope is the shape the draft specifies; the others are
    recorded because real implementations emit them.
 2. Every receipt's Ed25519 signature verifies against the test keypair, one

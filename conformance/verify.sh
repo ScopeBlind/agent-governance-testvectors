@@ -34,91 +34,22 @@ pass() { echo "PASS: $1"; PASS=$((PASS+1)); }
 fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 
 # ----- Check 1: schema conformance --------------------------------------------
-# expected/receipt-schema.json is a oneOf over the four shapes actually in
-# use here: the Acta 2.1 envelope, decision_receipt, the v2 envelope, and v1
-# flat. This is a lightweight field-level test that does not need a JSON
-# Schema validator dependency; keep it in step with the schema.
+# expected/receipt-schema.json is a oneOf over the two shapes the published
+# verifier reads: the Acta 2.1 envelope and decision_receipt (v1 flat and the
+# v2 envelope are recorded there, not accepted). It is validated with a JSON Schema validator (ajv, draft-07), not a
+# hand-rolled field test: the field test drifted permissive (it never tested
+# receipt_id and accepted a bare string where the schema requires an object),
+# so a vector could pass Check 1 and fail the schema with nothing saying so
+# (issue #21).
 echo ""
-echo "=== Check 1: schema conformance (one of four shapes) ==="
+echo "=== Check 1: schema conformance (expected/receipt-schema.json, draft-07; two accepted shapes) ==="
+SCHEMA="$REPO_ROOT/expected/receipt-schema.json"
 for f in "$RECEIPTS_DIR"/*.json; do
     [ -e "$f" ] || continue
-    python3 - <<PY
-import json, sys
-r = json.load(open("$f"))
-
-# Four shapes are in use in this repository. Only the Acta 2.1 envelope is
-# the shape draft-farley-acta-signed-receipts-03 specifies; the others are
-# recorded because real implementations emit them. This is a field-level
-# test, not a JSON Schema validator, so keep it in step with
-# expected/receipt-schema.json (issue #13, finding 4).
-
-# Acta 2.1 envelope (protect-mcp 0.12+): {payload, signature:{alg,kid,sig}}.
-# No top-level pubkey; the key is named by signature.kid.
-def is_acta_envelope(r):
-    return (
-        isinstance(r, dict)
-        and isinstance(r.get("payload"), dict)
-        and isinstance(r.get("signature"), dict)
-        and all(k in r["signature"] for k in ("alg", "kid", "sig"))
-        and "decision" in r["payload"]
-    )
-
-# decision_receipt (APS gateway, nobulex): a payload member, a bare hex
-# signature, and algorithm/kid/issuer at the top level. Not the 2.1 envelope.
-# Shape test contributed in #12.
-def is_decision_receipt(r):
-    return (
-        isinstance(r, dict)
-        and r.get("type") == "decision_receipt"
-        and all(k in r for k in ("v", "algorithm", "kid", "issuer",
-                                 "issued_at", "payload", "signature"))
-        and isinstance(r.get("payload"), dict)
-        and "decision" in r["payload"]
-    )
-
-# v2 envelope (sb-runtime): payload/signature/pubkey wrapper
-def is_v2(r):
-    return (
-        isinstance(r, dict)
-        and "payload" in r
-        and "signature" in r
-        and "pubkey" in r
-        and isinstance(r["payload"], dict)
-        and r["payload"].get("type", "").startswith("scopeblind.receipt.")
-        and "decision" in r["payload"]
-        and "action" in r["payload"]
-    )
-
-# v1 flat (protect-mcp-adk): required top-level fields
-v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
-               "policy_id", "timestamp", "public_key", "signature"]
-
-shape = ("actaEnvelope" if is_acta_envelope(r) else
-         "decision_receipt" if is_decision_receipt(r) else
-         "v2 envelope" if is_v2(r) else None)
-if shape:
-    d = r["payload"].get("decision")
-    if d not in ("allow", "deny"):
-        print(f"  {shape} invalid decision in $f: {d}")
-        sys.exit(1)
-    sys.exit(0)
-
-missing = [k for k in v1_required if k not in r]
-if missing:
-    print(f"  $f matches none of actaEnvelope, decision_receipt, v2 envelope, "
-          f"v1 flat (missing {missing})")
-    sys.exit(1)
-if r.get("receipt_version") != "1.0":
-    print(f"  v1 wrong version in $f: {r.get('receipt_version')}")
-    sys.exit(1)
-if r.get("decision") not in ("allow", "deny"):
-    print(f"  v1 invalid decision in $f: {r.get('decision')}")
-    sys.exit(1)
-sys.exit(0)
-PY
-    if [ "$?" -eq 0 ]; then
+    if npx --yes -p ajv-cli@5 -p ajv-formats@2 ajv validate --spec=draft7 -c ajv-formats -s "$SCHEMA" -d "$f" --errors=text >/tmp/ajv-out.txt 2>&1; then
         pass "schema ok: $(basename "$f")"
     else
+        sed 's/^/  /' /tmp/ajv-out.txt | head -8
         fail "schema fail: $(basename "$f")"
     fi
 done
@@ -148,10 +79,11 @@ done
 echo ""
 echo "=== Check 2: @veritasacta/verify signatures ==="
 
-# Published fixture key from fixtures/keys/README.md. Receipts here carry `kid`
-# rather than an inline public key, so without this the verifier exits with
-# no_public_key and that gets reported as a failed signature — a missing key and
-# a tampered one are not the same finding. (Issue #13, finding 3.)
+# Published fixture key from fixtures/keys/README.md. The reference receipts
+# carry their key inside the signed bytes; the verifier refuses to trust it
+# (embedded_key_rejected, section 9.5) and verifies only against the key
+# given here. A missing key and a tampered one are not the same finding
+# (issue #13, finding 3; issue #21).
 CONFORMANCE_KEY="${CONFORMANCE_KEY:-4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29}"
 
 SIG_CHECKED=0
@@ -159,12 +91,22 @@ SIG_FAILED=0
 for f in "$RECEIPTS_DIR"/*.json; do
     [ -e "$f" ] || continue
     SIG_CHECKED=$((SIG_CHECKED+1))
-    npx --yes @veritasacta/verify --key "$CONFORMANCE_KEY" "$f" >/dev/null 2>&1
+    # Exit 2 covers every undecidable outcome (no key resolved, an embedded
+    # key refused, an unknown shape, malformed JSON), so the JSON verdict's
+    # error code is what tells them apart. ERRORS.md in the verifier lists them.
+    OUT="$(npx --yes @veritasacta/verify --key "$CONFORMANCE_KEY" "$f" --json 2>/dev/null)"
     RC=$?
+    CODE="$(printf '%s' "$OUT" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("error") or "")
+except Exception: print("")' 2>/dev/null)"
     case "$RC" in
         0) ;;
-        1) fail "signature failed verification: $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
-        2) fail "malformed or unrecognised receipt: $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        1) fail "signature failed verification (${CODE:-tampered}): $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        2) case "$CODE" in
+               no_public_key|embedded_key_rejected) fail "no trusted key resolved ($CODE); set CONFORMANCE_KEY to the fixture key: $(basename "$f")" ;;
+               unknown_format) fail "unrecognised receipt shape ($CODE); the verifier does not read this shape: $(basename "$f")" ;;
+               *) fail "undecidable (${CODE:-no code}): $(basename "$f")" ;;
+           esac; SIG_FAILED=$((SIG_FAILED+1)) ;;
         *) fail "verifier exited with unexpected code $RC on $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
     esac
 done
