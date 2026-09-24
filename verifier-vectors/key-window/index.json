@@ -1,0 +1,71 @@
+{
+  "suite": "key-validity-windows",
+  "profile": "draft-farley-acta-signed-receipts-04 Section 5.5 (Section 9.2 of -03), envelope shape",
+  "key": {
+    "kid": "test:rotating:ed25519",
+    "public_key_hex": "43aae8ebbdedb969415d020b0121118022722a577758c5fa88dcd9d8a2116533",
+    "seed": "00..0b",
+    "window": {
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2026-06-01T00:00:00Z"
+    }
+  },
+  "verification_mode": "archival: no freshness window (Section 9.1) is applied, so the dates are never \"stale\".",
+  "invocation": "verify <file> --jwks <jwks> --mode receipt --json",
+  "cases": [
+    {
+      "file": "inside.json",
+      "jwks": "jwks.json",
+      "expected": "ACCEPT",
+      "code": null,
+      "key_status": "inside",
+      "note": "Issued inside the window.",
+      "issued_at": "2026-03-15T00:00:00Z"
+    },
+    {
+      "file": "at-valid-from.json",
+      "jwks": "jwks.json",
+      "expected": "ACCEPT",
+      "code": null,
+      "key_status": "inside",
+      "note": "Issued exactly at valid_from: the window includes its start.",
+      "issued_at": "2026-01-01T00:00:00Z"
+    },
+    {
+      "file": "at-valid-until.json",
+      "jwks": "jwks.json",
+      "expected": "REJECT",
+      "code": "key_outside_validity_window",
+      "key_status": "outside",
+      "note": "Issued exactly at valid_until: the window excludes its end, as RFC 7519 treats exp. Discriminates [from, until) from [from, until].",
+      "issued_at": "2026-06-01T00:00:00Z"
+    },
+    {
+      "file": "after-valid-until.json",
+      "jwks": "jwks.json",
+      "expected": "REJECT",
+      "code": "key_outside_validity_window",
+      "key_status": "outside",
+      "note": "A valid signature from a key already rotated out. issued_at is signer-asserted, so this catches honest rotation, not backdating.",
+      "issued_at": "2026-07-15T00:00:00Z"
+    },
+    {
+      "file": "before-valid-from.json",
+      "jwks": "jwks.json",
+      "expected": "REJECT",
+      "code": "key_outside_validity_window",
+      "key_status": "outside",
+      "note": "Issued before the key came into use.",
+      "issued_at": "2025-12-01T00:00:00Z"
+    },
+    {
+      "file": "inside.json",
+      "jwks": "jwks-no-window.json",
+      "expected": "ACCEPT",
+      "code": null,
+      "key_status": "no_window",
+      "note": "The same receipt with a key set that carries no window: the signature verifies, and the key's validity at issuance is reported as not established, never as valid.",
+      "issued_at": "2026-03-15T00:00:00Z"
+    }
+  ]
+}

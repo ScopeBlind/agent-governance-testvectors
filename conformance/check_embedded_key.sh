@@ -28,6 +28,7 @@
 # Usage:
 #   ./conformance/check_embedded_key.sh
 #   SIMULATE_EMBEDDED_KEY_RESOLUTION=1 ./conformance/check_embedded_key.sh
+#   VERIFY_PKG=@veritasacta/verify@0.10.20 ./conformance/check_embedded_key.sh   (pin a verifier)
 #
 # Exit: 0 all vectors behaved, 1 a vector was trusted or a case failed,
 #       2 nothing could be measured.
@@ -58,7 +59,7 @@ SIMULATE="${SIMULATE_EMBEDDED_KEY_RESOLUTION:-0}"
 # redirected it to /dev/null and then reported the verifier as silent. It was
 # not silent; the codes were there the whole time in --json.
 verify_receipt() {
-    VOUT="$(npx --yes @veritasacta/verify "$@" --json 2>/dev/null)"
+    VOUT="$(npx --yes "${VERIFY_PKG:-@veritasacta/verify}" "$@" --json 2>/dev/null)"
     RC=$?
     case "$VOUT" in
         *"npm ERR"*|*"npm error"*|*"could not determine executable"*)
