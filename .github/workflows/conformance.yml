@@ -38,7 +38,16 @@ jobs:
       - name: Verify evidence predicate vectors
         run: ./evidence-predicate/run.sh
 
-      - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys)
+      - name: Verifier vectors that need no verifier (fixtures current, timeliness reference evaluation)
+        # Runs while the pinned verifier below is still a skip: every generated file is current, and the timeliness
+        # reference evaluation reaches its expected verdicts and catches its planted defects.
+        run: |
+          node verifier-vectors/key-window/scripts/generate.mjs --check
+          node verifier-vectors/revocation/scripts/generate.mjs --check
+          node verifier-vectors/timeliness/scripts/generate.mjs --check
+          node verifier-vectors/timeliness/scripts/check.mjs
+
+      - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys, revocation, timeliness)
         # Pinned to the first verifier release implementing -04 Section 5.5. Until it is on npm the runner exits 77
         # and this step reports a skip, not a failure. See verifier-vectors/README.md.
         run: |

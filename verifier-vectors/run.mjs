@@ -5,11 +5,14 @@
 //
 //   VERIFY_PKG  the verifier run through npx (default: the first release implementing -04 Section 5.5)
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
+//   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
-// Three parts:
+// Five parts:
 //   1. key-window/                    this repository's key validity window vectors (Section 5.5)
 //   2. farley-receipt-signature       giskard09/argentum-core's vectors (Apache-2.0), fetched at a pinned commit
 //   3. conformance/check_embedded_key.sh   a receipt's own key must never be trusted (Section 9.5)
+//   4. revocation/                    a key revoked before issued_at: the gap, since the draft defines no revocation
+//   5. timeliness/                    one issued_at, alone and against an external chain commitment (Section 9.7)
 //
 // Exit: 0 every case matched, 1 a case did not, 77 the pinned verifier cannot be installed here.
 
@@ -107,6 +110,46 @@ if (process.env.VERIFY_CMD) {
   if (ek.status === 0) passed += 1
   else { failed += 1; console.log(`  FAIL  check_embedded_key.sh exited ${ek.status}`) }
 }
+
+// 4. Revocation. The draft defines none, so under -04 the receipt signed after revoked_at is accepted and its key is
+//    reported inside its window. A verifier that reads revoked_at declares it and is scored against the other column.
+const REVOKED = process.env.REVOCATION_CHECKED === '1'
+console.log(`\n=== revocation (not defined by -03 or -04; scored ${REVOKED ? 'as revocation checked' : 'under -04'}) ===`)
+const rg = spawnSync(process.execPath, [path.join(HERE, 'revocation', 'scripts', 'generate.mjs'), '--check'], { encoding: 'utf8' })
+if (rg.status !== 0) bad(`revocation vectors are stale: ${rg.stderr.trim()}`)
+const rv = JSON.parse(fs.readFileSync(path.join(HERE, 'revocation', 'index.json'), 'utf8'))
+for (const c of rv.cases) {
+  const { out } = run([c.file, '--jwks', c.jwks, '--mode', 'receipt', '--json'], path.join(HERE, 'revocation'))
+  const label = `${c.file} with ${c.jwks}`
+  if (!out) { bad(`${label}: no JSON from the verifier`); continue }
+  const verdict = verdictOf(out)
+  const expected = REVOKED ? c.expected_if_revocation_checked : c.expected
+  const code = REVOKED ? c.code_if_revocation_checked : c.code
+  const status = out.keyStatus && out.keyStatus.result
+  if (verdict !== expected) bad(`${label}: ${verdict}, expected ${expected}`)
+  else if (code && out.error !== code) bad(`${label}: code ${out.error}, expected ${code}`)
+  else if (!REVOKED && status !== c.key_status) bad(`${label}: key status ${status || 'not reported'}, expected ${c.key_status}`)
+  else ok(`${label}: ${verdict}${code ? ` (${code})` : ''}${REVOKED ? '' : `, key ${status}`}`)
+}
+
+// 5. Timeliness. The verifier checks each receipt of the chain; scripts/check.mjs checks the Section 6.7 link and
+//    evaluates the proposed commitment rule, which no revision of the draft defines yet.
+console.log('\n=== timeliness (Section 9.7; the commitment rule is proposed, not in the draft) ===')
+const tg = spawnSync(process.execPath, [path.join(HERE, 'timeliness', 'scripts', 'generate.mjs'), '--check'], { encoding: 'utf8' })
+if (tg.status !== 0) bad(`timeliness vectors are stale: ${tg.stderr.trim()}`)
+for (const file of ['genesis.json', 'receipt.json']) {
+  const { out } = run([file, '--jwks', 'jwks.json', '--mode', 'receipt', '--json'], path.join(HERE, 'timeliness'))
+  if (!out) { bad(`${file}: no JSON from the verifier`); continue }
+  const verdict = verdictOf(out)
+  const status = out.keyStatus && out.keyStatus.result
+  if (verdict !== 'ACCEPT') bad(`${file}: ${verdict}, expected ACCEPT`)
+  else if (status !== 'inside') bad(`${file}: key status ${status || 'not reported'}, expected inside`)
+  else ok(`${file}: ACCEPT, key inside`)
+}
+const tc = spawnSync(process.execPath, [path.join(HERE, 'timeliness', 'scripts', 'check.mjs')], { encoding: 'utf8' })
+process.stdout.write(tc.stdout.split('\n').filter((l) => l.startsWith('  ')).map((l) => `${l}\n`).join(''))
+if (tc.status === 0) passed += 1
+else { failed += 1; console.log(`  FAIL  timeliness/scripts/check.mjs exited ${tc.status}`) }
 
 console.log(`\n${passed} passed, ${failed} failed`)
 process.exit(failed ? 1 : 0)
