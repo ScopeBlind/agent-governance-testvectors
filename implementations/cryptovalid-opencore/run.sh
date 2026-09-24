@@ -13,8 +13,14 @@ command -v python3 >/dev/null 2>&1 || { echo "skip: python3 required"; exit 77; 
 VENV="${CRYPTOVALID_VENV:-$SCRIPT_DIR/.venv}"
 if [ ! -x "$VENV/bin/python" ]; then
     python3 -m venv "$VENV" || { echo "skip: cannot create a venv"; exit 77; }
-    "$VENV/bin/pip" install -q --extra-index-url https://robertolocatelli81-dev.github.io/pypi/ "cryptovalid-opencore>=0.15.0" cedarpy cryptography \
-        || { echo "skip: cannot install cryptovalid-opencore / cedarpy / cryptography"; exit 77; }
+    # Immutable install (review of #25): the package from a pinned commit with --no-deps, its two dependencies from
+    # PyPI at pinned versions. No extra index — with one, pip would take whichever index offers the highest version of
+    # ANY of these names, so a later run of this oracle could execute whatever that index served at the time.
+    CV_COMMIT="4a92a54e1847a376d5879f3c4dbc1ac6c3de2fb2"
+    "$VENV/bin/pip" install -q --no-deps "cryptovalid-opencore @ git+https://github.com/robertolocatelli81-dev/cryptovalid-opencore@${CV_COMMIT}" \
+        || { echo "skip: cannot install cryptovalid-opencore at ${CV_COMMIT}"; exit 77; }
+    "$VENV/bin/pip" install -q "cedarpy==4.12.0" "cryptography==50.0.1" \
+        || { echo "skip: cannot install cedarpy / cryptography"; exit 77; }
 fi
 "$VENV/bin/python" -c "import cedarpy, cryptovalid_acta" 2>/dev/null || { echo "skip: cedarpy or cryptovalid_acta not importable"; exit 77; }
 echo "cryptovalid-opencore: $("$VENV/bin/python" -c 'import importlib.metadata as m; print(m.version("cryptovalid-opencore"))') on $("$VENV/bin/python" --version), cedarpy $("$VENV/bin/python" -c 'import importlib.metadata as m; print(m.version("cedarpy"))')"
