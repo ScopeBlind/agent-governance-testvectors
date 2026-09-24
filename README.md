@@ -3,10 +3,19 @@
 Shared test vectors for conformance between implementations of
 [`draft-farley-acta-signed-receipts`](https://datatracker.ietf.org/doc/draft-farley-acta-signed-receipts/).
 
-Four independent implementations emit the receipt format today. This repo
-lets any of them prove interop against the others: the same input JSON
-plus the same Cedar policy plus the same test keypair must produce a
-receipt chain that any conformant verifier accepts.
+Several implementations emit the receipt format today. Three are maintained
+by the draft's author (protect-mcp, protect-mcp-adk, sb-runtime); others are
+independent of it (nobulex, the APS governance hook, and cryptovalid-opencore,
+whose driver is in review in #25). This repo lets any of them prove interop
+against the others: the same input JSON plus the same Cedar policy plus the
+same test keypair must produce a receipt chain that any conformant verifier
+accepts. The fixed seed pins the key, not the bytes: timestamps differ across
+implementations, and no check compares signature bytes between them.
+
+`verifier-vectors/` tests the other side: fixed receipts and key sets, and the
+outcome a verifier must reach, for cases such as a key used outside its
+validity window, where every signature is valid and the verdict still has to
+be a rejection.
 
 ## Why this exists
 
@@ -38,6 +47,9 @@ implementations/
 ├── protect-mcp-adk/             Python driver (stub; PR welcome)
 ├── sb-runtime/                  Rust driver (stub; PR welcome)
 └── aps-governance-hook/         Python driver (stub; PR welcome)
+verifier-vectors/
+├── key-window/                  Key validity windows (-04 Section 5.5)
+└── run.mjs                      Runs these, argentum-core's farley vectors, and the embedded-key check
 .github/workflows/
 └── conformance.yml              CI running all implementations against fixtures
 ```
