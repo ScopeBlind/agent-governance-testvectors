@@ -51,6 +51,7 @@ verifier-vectors/
 ├── key-window/                  Key validity windows (-04 Section 5.5)
 ├── revocation/                  A key revoked before issued_at (the gap: no revision defines revocation)
 ├── timeliness/                  One issued_at, alone and against an external chain commitment (Section 9.7)
+├── signing-input/               A signature member in the object canonicalized, null included (Section 6.6)
 └── run.mjs                      Runs these, argentum-core's farley vectors, and the embedded-key check
 .github/workflows/
 └── conformance.yml              CI running all implementations against fixtures

@@ -6,7 +6,7 @@ wrong while every signature is perfectly valid.
 
 ```bash
 node verifier-vectors/run.mjs                                            # the pinned release, through npx
-VERIFY_PKG=@veritasacta/verify@0.10.20 node verifier-vectors/run.mjs     # pin another release
+VERIFY_PKG=@veritasacta/verify@0.10.20 node verifier-vectors/run.mjs     # pin another release (0.10.20 fails signing-input/)
 VERIFY_CMD="node /path/to/verify-cli/cli.js" node verifier-vectors/run.mjs   # a local build
 ```
 
@@ -20,6 +20,7 @@ Exit status: 0 every case matched, 1 a case did not, 77 the pinned verifier cann
 | `../conformance/check_embedded_key.sh` | §9.5 | [#24](https://github.com/ScopeBlind/agent-governance-testvectors/pull/24) (arian-gogani): a receipt's own key must never be trusted. |
 | `revocation/` | not defined by -03 or -04; §5.5, §9.2 | This repository. States the gap: a key revoked before `issued_at`. `revocation/scripts/generate.mjs --check`. |
 | `timeliness/` | §6.7, §9.7 | This repository. One `issued_at`, alone and against an external chain commitment. `timeliness/scripts/check.mjs` evaluates the proposed rule. |
+| `signing-input/` | -03 §6.6 (unchanged in -04) | This repository. A signature member in the object canonicalized, `null` and `""` included, is refused even though the signature over it verifies. `signing-input/scripts/generate.mjs --check`. |
 
 ## Key validity windows
 
@@ -80,6 +81,21 @@ was not issued before `logged_at`, and the commitment's `terminal_hash` must equ
 `timeliness/scripts/check.mjs`, which reaches both columns and catches three planted defects: a genesis altered after
 signing, the two receipts in reverse order, and a commitment altered after signing.
 
+## Signing input: a signature member in the object canonicalized
+
+-03 §6.6: "In either shape the object canonicalized MUST NOT contain a signature member, and that member MUST NOT be
+included as null or as the empty string." Every receipt here is signed over `JCS(payload)` with its member inside, so the
+signature verifies; the refusal has to come from the member itself. One key (`test:signing-input:ed25519`, seed `00..0e`):
+
+| Receipt | Payload `signature` member | Expected | Code |
+|---|---|---|---|
+| `null-member.json` | `null` | REJECT | `signature_in_signing_input` (exit 1, invalid) |
+| `empty-member.json` | `""` | REJECT | `signature_in_signing_input` (exit 1, invalid) |
+| `string-member.json` | `"not the signature"` | REJECT | `signature_in_signing_input` (exit 1, invalid) |
+| `no-member.json` | none | ACCEPT | |
+
+@veritasacta/verify 0.10.20 accepts the first three; 0.10.21 refuses them.
+
 ## Credit
 
 The key-window cases follow a measurement by @giskard09 and @robertolocatelli81-dev on
@@ -87,9 +103,11 @@ The key-window cases follow a measurement by @giskard09 and @robertolocatelli81-
 could apply a key's validity window or skip it and conform either way, so the verdict on a receipt from a rotated
 key belonged to the verifier, not to the receipt. -04 §5.5 makes the rule determinate, and these vectors hold a
 verifier to it. The `farley-receipt-signature` vectors are theirs; @astrogilda proposed the cases they grew from.
+The signing-input case is @astrogilda's, found with `vectors-receipt-signature` in
+[probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.13.0 (`v5397adb77c3e6754`).
 
 ## In CI
 
-The workflow runs this with the verifier pinned to the first release implementing §5.5 (`@veritasacta/verify@0.10.20`).
-Until that release is on npm the step reports a skip rather than a failure, and the pin is the only line to change
-when a later release should be held to the same cases.
+The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.21`, the first release implementing §5.5
+and the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is
+the only line to change when a later release should be held to the same cases.

@@ -45,11 +45,13 @@ jobs:
           node verifier-vectors/key-window/scripts/generate.mjs --check
           node verifier-vectors/revocation/scripts/generate.mjs --check
           node verifier-vectors/timeliness/scripts/generate.mjs --check
+          node verifier-vectors/signing-input/scripts/generate.mjs --check
           node verifier-vectors/timeliness/scripts/check.mjs
 
-      - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys, revocation, timeliness)
-        # Pinned to the first verifier release implementing -04 Section 5.5. Until it is on npm the runner exits 77
-        # and this step reports a skip, not a failure. See verifier-vectors/README.md.
+      - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys, revocation, timeliness, signing input)
+        # Pinned to 0.10.21, the first verifier release implementing -04 Section 5.5 and the Section 6.6 refusal. If the
+        # pinned release is not on npm the runner exits 77 and this step reports a skip, not a failure. See
+        # verifier-vectors/README.md.
         run: |
           set +e
           node verifier-vectors/run.mjs
