@@ -3,16 +3,18 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: the first release implementing -04 Section 5.5)
+//   VERIFY_PKG  the verifier run through npx (default: 0.10.21, the first release that implements -04 Section 5.5
+//               and refuses a signature member in the signing input, Section 6.6)
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
 //   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
-// Five parts:
+// Six parts:
 //   1. key-window/                    this repository's key validity window vectors (Section 5.5)
 //   2. farley-receipt-signature       giskard09/argentum-core's vectors (Apache-2.0), fetched at a pinned commit
 //   3. conformance/check_embedded_key.sh   a receipt's own key must never be trusted (Section 9.5)
 //   4. revocation/                    a key revoked before issued_at: the gap, since the draft defines no revocation
 //   5. timeliness/                    one issued_at, alone and against an external chain commitment (Section 9.7)
+//   6. signing-input/                 a signature member in the object canonicalized, null included (Section 6.6)
 //
 // Exit: 0 every case matched, 1 a case did not, 77 the pinned verifier cannot be installed here.
 
@@ -24,7 +26,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.20'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.21'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
@@ -150,6 +152,22 @@ const tc = spawnSync(process.execPath, [path.join(HERE, 'timeliness', 'scripts',
 process.stdout.write(tc.stdout.split('\n').filter((l) => l.startsWith('  ')).map((l) => `${l}\n`).join(''))
 if (tc.status === 0) passed += 1
 else { failed += 1; console.log(`  FAIL  timeliness/scripts/check.mjs exited ${tc.status}`) }
+
+// 6. Signing input. Each rejected receipt is signed over JCS(payload) with the member inside, so its signature verifies;
+//    Section 6.6 forbids the member itself, null and the empty string included.
+console.log('\n=== signing input (Section 6.6) ===')
+const sg = spawnSync(process.execPath, [path.join(HERE, 'signing-input', 'scripts', 'generate.mjs'), '--check'], { encoding: 'utf8' })
+if (sg.status !== 0) bad(`signing-input vectors are stale: ${sg.stderr.trim()}`)
+const si = JSON.parse(fs.readFileSync(path.join(HERE, 'signing-input', 'index.json'), 'utf8'))
+for (const c of si.cases) {
+  const { rc, out } = run([c.file, '--jwks', c.jwks, '--mode', 'receipt', '--json'], path.join(HERE, 'signing-input'))
+  if (!out) { bad(`${c.file}: no JSON from the verifier`); continue }
+  const verdict = verdictOf(out)
+  if (verdict !== c.expected) bad(`${c.file}: ${verdict}, expected ${c.expected}`)
+  else if (c.code && out.error !== c.code) bad(`${c.file}: code ${out.error}, expected ${c.code}`)
+  else if (c.code && rc !== 1) bad(`${c.file}: exit ${rc}, expected 1 (invalid, not undecidable)`)
+  else ok(`${c.file}: ${verdict}${c.code ? ` (${c.code}, exit 1)` : ''}`)
+}
 
 console.log(`\n${passed} passed, ${failed} failed`)
 process.exit(failed ? 1 : 0)
