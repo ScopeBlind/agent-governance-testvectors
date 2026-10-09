@@ -61,6 +61,11 @@ jobs:
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
+      - uses: actions/setup-python@v5
+        # agent-evidence-vectors requires Python 3.13; this step and the ones after it use it,
+        # and every earlier driver keeps the 3.12 set up above.
+        with:
+          python-version: '3.13'
       - name: Verifier vectors from agent-evidence-vectors (receipt-signature corpus, same pinned verifier)
         # Installs the release by wheel hash, checks its corpus digest against the release's signed digest list, and
         # replays its receipt-signature corpus through the 0.10.21 verifier pinned above. See
