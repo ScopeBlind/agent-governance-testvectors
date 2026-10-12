@@ -3,18 +3,20 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: 0.10.21, the first release that implements -04 Section 5.5
-//               and refuses a signature member in the signing input, Section 6.6)
+//   VERIFY_PKG  the verifier run through npx (default: 0.10.22, the first release that refuses a malformed or
+//               other-algorithm chain link on a receipt checked alone, Section 6.7; 0.10.21 was the first to implement
+//               -04 Section 5.5 and refuse a signature member in the signing input, Section 6.6)
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
 //   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
-// Six parts:
+// Seven parts:
 //   1. key-window/                    this repository's key validity window vectors (Section 5.5)
 //   2. farley-receipt-signature       giskard09/argentum-core's vectors (Apache-2.0), fetched at a pinned commit
 //   3. conformance/check_embedded_key.sh   a receipt's own key must never be trusted (Section 9.5)
 //   4. revocation/                    a key revoked before issued_at: the gap, since the draft defines no revocation
 //   5. timeliness/                    one issued_at, alone and against an external chain commitment (Section 9.7)
 //   6. signing-input/                 a signature member in the object canonicalized, null included (Section 6.6)
+//   7. chain-link/                    a malformed or other-algorithm previousReceiptHash, each receipt alone (Section 6.7)
 //
 // Exit: 0 every case matched, 1 a case did not, 77 the pinned verifier cannot be installed here.
 
@@ -26,7 +28,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.21'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.22'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
@@ -167,6 +169,23 @@ for (const c of si.cases) {
   else if (c.code && out.error !== c.code) bad(`${c.file}: code ${out.error}, expected ${c.code}`)
   else if (c.code && rc !== 1) bad(`${c.file}: exit ${rc}, expected 1 (invalid, not undecidable)`)
   else ok(`${c.file}: ${verdict}${c.code ? ` (${c.code}, exit 1)` : ''}`)
+}
+
+// 7. Chain links. Each receipt is checked alone and signed over JCS(payload) with its link inside, so its signature
+//    verifies; Section 6.7 fixes the link's form and has a verifier refuse an algorithm it does not implement. The two
+//    refusals differ in kind: a malformed link is invalid (exit 1), an unimplemented algorithm undecidable (exit 2).
+console.log('\n=== chain links (Section 6.7) ===')
+const cg = spawnSync(process.execPath, [path.join(HERE, 'chain-link', 'scripts', 'generate.mjs'), '--check'], { encoding: 'utf8' })
+if (cg.status !== 0) bad(`chain-link vectors are stale: ${cg.stderr.trim()}`)
+const cl = JSON.parse(fs.readFileSync(path.join(HERE, 'chain-link', 'index.json'), 'utf8'))
+for (const c of cl.cases) {
+  const { rc, out } = run([c.file, '--jwks', c.jwks, '--mode', 'receipt', '--json'], path.join(HERE, 'chain-link'))
+  if (!out) { bad(`${c.file}: no JSON from the verifier`); continue }
+  const verdict = verdictOf(out)
+  if (verdict !== c.expected) bad(`${c.file}: ${verdict}, expected ${c.expected}`)
+  else if (c.code && out.error !== c.code) bad(`${c.file}: code ${out.error}, expected ${c.code}`)
+  else if (rc !== c.exit) bad(`${c.file}: exit ${rc}, expected ${c.exit}`)
+  else ok(`${c.file}: ${verdict}${c.code ? ` (${c.code}, exit ${rc})` : ''}`)
 }
 
 console.log(`\n${passed} passed, ${failed} failed`)

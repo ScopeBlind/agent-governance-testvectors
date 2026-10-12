@@ -6,7 +6,7 @@ wrong while every signature is perfectly valid.
 
 ```bash
 node verifier-vectors/run.mjs                                            # the pinned release, through npx
-VERIFY_PKG=@veritasacta/verify@0.10.20 node verifier-vectors/run.mjs     # pin another release (0.10.20 fails signing-input/)
+VERIFY_PKG=@veritasacta/verify@0.10.21 node verifier-vectors/run.mjs     # pin another release (0.10.21 fails chain-link/)
 VERIFY_CMD="node /path/to/verify-cli/cli.js" node verifier-vectors/run.mjs   # a local build
 ```
 
@@ -21,6 +21,7 @@ Exit status: 0 every case matched, 1 a case did not, 77 the pinned verifier cann
 | `revocation/` | not defined by -03 or -04; §5.5, §9.2 | This repository. States the gap: a key revoked before `issued_at`. `revocation/scripts/generate.mjs --check`. |
 | `timeliness/` | §6.7, §9.7 | This repository. One `issued_at`, alone and against an external chain commitment. `timeliness/scripts/check.mjs` evaluates the proposed rule. |
 | `signing-input/` | -03 §6.6 (unchanged in -04) | This repository. A signature member in the object canonicalized, `null` and `""` included, is refused even though the signature over it verifies. `signing-input/scripts/generate.mjs --check`. |
+| `chain-link/` | -03 §6.7 (unchanged in -04) | This repository. A malformed `previousReceiptHash`, or one naming another algorithm, is refused on a receipt checked alone, though its signature verifies. `chain-link/scripts/generate.mjs --check`. |
 | `agent-evidence-vectors/` | -03 §5.1, §6.6, §9.2 | [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.17.4 `vectors-receipt-signature`, installed from PyPI by hash and checked against the release's signed digest list, never copied. `agent-evidence-vectors/run.sh`. |
 
 ## Key validity windows
@@ -97,6 +98,31 @@ signature verifies; the refusal has to come from the member itself. One key (`te
 
 @veritasacta/verify 0.10.20 accepts the first three; 0.10.21 refuses them.
 
+## Chain links: the form of `previousReceiptHash`, on a receipt alone
+
+-03 §6.7 (unchanged in -04): "The previousReceiptHash field MUST be the string `"sha256:"` followed by the lowercase hex
+encoding of SHA-256(JCS(receipt))", and "A verifier MUST reject a previousReceiptHash whose prefix names an algorithm it
+does not implement, rather than assuming SHA-256 from the length." A chain check compares a link with its predecessor,
+but a receipt is often verified alone, and then nothing else ever reads its link. Every receipt here is checked with no
+predecessor and signed over `JCS(payload)` with its link inside, so the signature verifies; the refusal has to come from
+the link's form. One key (`test:chain-link:ed25519`, seed `00..0f`):
+
+| Receipt | `previousReceiptHash` | Expected | Code |
+|---|---|---|---|
+| `genesis.json` | none (§2.2) | ACCEPT | |
+| `linked.json` | `sha256:` and the lowercase hex of SHA-256(JCS(`genesis.json`)) | ACCEPT | |
+| `malformed-digest.json` | `sha256:not-a-digest` | REJECT | `malformed_chain_link` (exit 1, invalid) |
+| `uppercase-hex.json` | the same digest in uppercase hex | REJECT | `malformed_chain_link` (exit 1, invalid) |
+| `sha3-256-link.json` | `sha3-256:` and 64 hex characters, the length of a SHA-256 digest | REJECT | `unsupported_chain_hash_algorithm` (exit 2, undecidable) |
+| `sha512-link.json` | `sha512:` and 128 hex characters | REJECT | `unsupported_chain_hash_algorithm` (exit 2, undecidable) |
+
+The codes and exit statuses are @veritasacta/verify's; another verifier is held to the verdict. Two forms are not
+cases. A bare 64-hex digest, the encoding of earlier revisions, is one a verifier MAY accept under §6.7 and MUST NOT
+emit. A `null` link breaks §2.2, which has the first receipt omit the member, and @veritasacta/verify still
+accepts it with a warning, because its own 0.9.3 wrote it.
+
+@veritasacta/verify 0.10.21 accepts the four refusals; 0.10.22 refuses them.
+
 ## Credit
 
 The key-window cases follow a measurement by @giskard09 and @robertolocatelli81-dev on
@@ -109,6 +135,7 @@ The signing-input case is @astrogilda's, found with `vectors-receipt-signature` 
 
 ## In CI
 
-The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.21`, the first release implementing §5.5
-and the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is
+The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.22`, the first release that refuses a
+malformed or other-algorithm chain link on a receipt checked alone (§6.7); 0.10.21 was the first implementing §5.5 and
+the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is
 the only line to change when a later release should be held to the same cases.
