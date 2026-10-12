@@ -21,6 +21,7 @@ Exit status: 0 every case matched, 1 a case did not, 77 the pinned verifier cann
 | `revocation/` | not defined by -03 or -04; §5.5, §9.2 | This repository. States the gap: a key revoked before `issued_at`. `revocation/scripts/generate.mjs --check`. |
 | `timeliness/` | §6.7, §9.7 | This repository. One `issued_at`, alone and against an external chain commitment. `timeliness/scripts/check.mjs` evaluates the proposed rule. |
 | `signing-input/` | -03 §6.6 (unchanged in -04) | This repository. A signature member in the object canonicalized, `null` and `""` included, is refused even though the signature over it verifies. `signing-input/scripts/generate.mjs --check`. |
+| `agent-evidence-vectors/` | -03 §5.1, §6.6, §9.2 | [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.17.4 `vectors-receipt-signature`, installed from PyPI by hash and checked against the release's signed digest list, never copied. `agent-evidence-vectors/run.sh`. |
 
 ## Key validity windows
 
