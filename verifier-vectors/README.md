@@ -135,7 +135,7 @@ The signing-input case is @astrogilda's, found with `vectors-receipt-signature` 
 
 ## In CI
 
-The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.22`, the first release that refuses a
-malformed or other-algorithm chain link on a receipt checked alone (§6.7); 0.10.21 was the first implementing §5.5 and
-the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is
+The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.23`, the latest release, published with
+npm provenance. 0.10.22 was the first release that refuses a malformed or other-algorithm chain link on a receipt
+checked alone (§6.7), and 0.10.21 the first implementing §5.5 and the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is
 the only line to change when a later release should be held to the same cases.

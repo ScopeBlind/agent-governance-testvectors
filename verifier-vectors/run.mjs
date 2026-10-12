@@ -3,9 +3,10 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: 0.10.22, the first release that refuses a malformed or
-//               other-algorithm chain link on a receipt checked alone, Section 6.7; 0.10.21 was the first to implement
-//               -04 Section 5.5 and refuse a signature member in the signing input, Section 6.6)
+//   VERIFY_PKG  the verifier run through npx (default: 0.10.23, the latest release, published with npm provenance;
+//               0.10.22 was the first to refuse a malformed or other-algorithm chain link on a receipt checked alone,
+//               Section 6.7, and 0.10.21 the first to implement -04 Section 5.5 and refuse a signature member in the
+//               signing input, Section 6.6)
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
 //   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
@@ -28,7 +29,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.22'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.23'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
