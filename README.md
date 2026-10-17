@@ -3,14 +3,16 @@
 Shared test vectors for conformance between implementations of
 [`draft-farley-acta-signed-receipts`](https://datatracker.ietf.org/doc/draft-farley-acta-signed-receipts/).
 
-Several implementations emit the receipt format today. Three are maintained
-by the draft's author (protect-mcp, protect-mcp-adk, sb-runtime); others are
-independent of it (nobulex, the APS governance hook, and cryptovalid-opencore,
-whose driver is in review in #25). This repo lets any of them prove interop
-against the others: the same input JSON plus the same Cedar policy plus the
-same test keypair must produce a receipt chain that any conformant verifier
-accepts. The fixed seed pins the key, not the bytes: timestamps differ across
-implementations, and no check compares signature bytes between them.
+Several implementations emit the receipt format today. Four pass every
+check here in CI: protect-mcp (TypeScript, maintained by the draft's author)
+and three independent Python implementations, nobulex, the APS governance hook
+and cryptovalid-opencore. Two more by the draft's author do not yet:
+protect-mcp-adk has no driver, and sb-runtime still emits an older envelope.
+[Status](#status) has the details. The same input JSON plus the same Cedar
+policy plus the same test keypair must produce a receipt chain that a
+conformant verifier accepts. The fixed seed pins the key, not the bytes:
+timestamps differ across implementations, and no check compares signature
+bytes between them.
 
 `verifier-vectors/` tests the other side: fixed receipts and key sets, and the
 outcome a verifier must reach, for cases such as a key used outside its
@@ -19,12 +21,11 @@ be a rejection.
 
 ## Why this exists
 
-If there are four implementations of a wire format, "it works" is provable
-only by cross-verification. A receipt minted by the Rust implementation
-(`sb-runtime`) should verify against the TypeScript verifier
-(`@veritasacta/verify`), against the Python implementation
-(`protect-mcp-adk`), and against any future implementation. This repo is
-where that property gets tested instead of assumed.
+If there are several implementations of a wire format, "it works" is
+provable only by checking each one's output the same way. A receipt chain
+minted by nobulex, the APS governance hook or cryptovalid-opencore has to
+pass the same checks as one minted by protect-mcp. This repo is where that
+property gets tested instead of assumed.
 
 Also a place for a fifth, sixth, or seventh implementation to prove
 conformance before their author calls it shipped.
@@ -43,12 +44,14 @@ conformance/
 ├── run.sh                       Exercise an implementation against fixtures
 └── verify.sh                    Cross-implementation verification
 implementations/
-├── protect-mcp/                 TypeScript driver
-├── protect-mcp-adk/             Python driver (stub; PR welcome)
-├── sb-runtime/                  Rust driver (stub; PR welcome)
-└── aps-governance-hook/         Python driver (stub; PR welcome)
+├── protect-mcp/                 TypeScript driver (the reference implementation)
+├── nobulex/                     Python driver
+├── aps-governance-hook/         Python driver
+├── cryptovalid-opencore/        Python driver
+├── protect-mcp-adk/             Python driver (placeholder, not written yet)
+└── sb-runtime/                  Rust driver (skips: see Status)
 verifier-vectors/
-├── key-window/                  Key validity windows (-04 Section 5.5)
+├── key-window/                  Key validity windows (-03 Section 9.2)
 ├── revocation/                  A key revoked before issued_at (the gap: no revision defines revocation)
 ├── timeliness/                  One issued_at, alone and against an external chain commitment (Section 9.7)
 ├── signing-input/               A signature member in the object canonicalized, null included (Section 6.6)
@@ -60,7 +63,28 @@ verifier-vectors/
 
 ## Status
 
-- **v0.1** (this release): fixtures, expected schema, TypeScript driver,
+As of the CI run on `main` on 13 October 2026 (Node 20 and Node 22):
+
+| Implementation | Language | Maintained by | Result |
+|---|---|---|---|
+| protect-mcp | TypeScript | the draft's author | Conformant |
+| nobulex | Python | independent ([#12](https://github.com/ScopeBlind/agent-governance-testvectors/pull/12)) | Conformant |
+| APS governance hook | Python | independent ([#1](https://github.com/ScopeBlind/agent-governance-testvectors/pull/1)) | Conformant |
+| cryptovalid-opencore | Python | independent ([#25](https://github.com/ScopeBlind/agent-governance-testvectors/pull/25)) | Conformant |
+| GDI | Python | independent | Driver in review ([#7](https://github.com/ScopeBlind/agent-governance-testvectors/pull/7)) |
+| protect-mcp-adk | Python | the draft's author | Skipped: no driver yet |
+| sb-runtime | Rust | the draft's author | Skipped: emits the v0.1 envelope, which carries its own public key, so it is not conformant until it moves to the Acta envelope |
+
+"Conformant" means all three checks pass: the schema, every signature under
+the supplied key, and the chain against `expected/chain.jsonl`. One verifier
+runs those checks for every implementation (see
+[Reference verifier](#reference-verifier)); a matrix in which each
+implementation's own verifier checks every other implementation's output is
+still to do.
+
+History:
+
+- **v0.1** (first release): fixtures, expected schema, TypeScript driver,
   bash runner, GitHub Actions CI stub. Drivers for the other three
   implementations are placeholders inviting their authors to open PRs.
 - **v0.2 target**: all four drivers plus a proper cross-verification
@@ -260,9 +284,16 @@ the latter, open an issue explaining what diverged.
 ## Reference verifier
 
 The tests use [`@veritasacta/verify`](https://www.npmjs.com/package/@veritasacta/verify)
-as the reference verifier. This is independent of any single producer; its
-source is public and its behavior is documented. Additional verifiers
-welcome as PRs.
+as the reference verifier. Its source is public and its behavior is
+documented, but it is maintained by the draft's author, who also maintains
+protect-mcp, so a verifier from someone else is the most useful addition.
+One exists: the TRACE specification ships an independently written Acta
+receipt verifier
+([agentrust-io/trace-spec#469](https://github.com/agentrust-io/trace-spec/pull/469)),
+not yet run here. Independent test data also checks the reference verifier:
+`verifier-vectors/` replays the
+[agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors)
+receipt-signature corpus against it. Additional verifiers welcome as PRs.
 
 ## License
 
@@ -275,3 +306,13 @@ where @aeoess offered to contribute a worked example demonstrating interop
 between the APS governance hook and `protect-mcp-adk`. This repo is the
 shared ground for that example and every similar cross-implementation
 demonstration.
+
+Most of what makes the suite trustworthy came from outside contributors:
+
+- @arian-gogani: the nobulex driver, the audit in #13 that made the checks
+  gate, and the embedded-key negative vectors;
+- @aeoess: the APS vectors and driver;
+- @robertolocatelli81-dev: the cryptovalid-opencore driver;
+- @astrogilda: the revocation and timeliness vectors, the
+  agent-evidence-vectors replay and the pinned signing key;
+- @mj3b: the GDI driver, in review.
