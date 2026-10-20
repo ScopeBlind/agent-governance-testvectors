@@ -3,10 +3,13 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: 0.10.23, the latest release, published with npm provenance;
-//               0.10.22 was the first to refuse a malformed or other-algorithm chain link on a receipt checked alone,
-//               Section 6.7, and 0.10.21 the first to implement -04 Section 5.5 and refuse a signature member in the
-//               signing input, Section 6.6)
+//   VERIFY_PKG  the verifier run through npx (default: 0.10.26, the latest release, published with npm provenance).
+//               0.10.26 was the first to check a receipt against a supplied predecessor (--previous), to read --jwks
+//               with --replay-chain, and to combine checks as -04 Section 5.3 does; 0.10.25 the first to refuse a
+//               payload-only link in a sequence whatever the receipt before it cites, and to report each chain a
+//               sequence holds; 0.10.22 the first to refuse a malformed or other-algorithm chain link on a receipt
+//               checked alone, Section 6.7; and 0.10.21 the first to implement -04 Section 5.5 and refuse a signature
+//               member in the signing input, Section 6.6.
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
 //   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
@@ -17,7 +20,7 @@
 //   4. revocation/                    a key revoked before issued_at: the gap, since the draft defines no revocation
 //   5. timeliness/                    one issued_at, alone and against an external chain commitment (Section 9.7)
 //   6. signing-input/                 a signature member in the object canonicalized, null included (Section 6.6)
-//   7. chain-link/                    a malformed or other-algorithm previousReceiptHash, each receipt alone (Section 6.7)
+//   7. chain-link/                    the link alone, against a supplied predecessor, in a sequence (6.7, 6.7.1, 5.3)
 //
 // Exit: 0 every case matched, 1 a case did not, 77 the pinned verifier cannot be installed here.
 
@@ -29,7 +32,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.23'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.26'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
@@ -172,21 +175,36 @@ for (const c of si.cases) {
   else ok(`${c.file}: ${verdict}${c.code ? ` (${c.code}, exit 1)` : ''}`)
 }
 
-// 7. Chain links. Each receipt is checked alone and signed over JCS(payload) with its link inside, so its signature
-//    verifies; Section 6.7 fixes the link's form and has a verifier refuse an algorithm it does not implement. The two
-//    refusals differ in kind: a malformed link is invalid (exit 1), an unimplemented algorithm undecidable (exit 2).
-console.log('\n=== chain links (Section 6.7) ===')
+// 7. Chain links. Every receipt is signed over JCS(payload) with its link inside, so its signature verifies. A case is a
+//    receipt checked alone, a receipt checked against the predecessor the caller supplies (--previous, which asserts
+//    the succession), or a log read as a sequence (--replay-chain, which does not). Section 6.7 fixes the link's form,
+//    Section 6.7.1 how it is read, and Section 5.3 how the checks combine: a malformed link, or one that does not follow
+//    a supplied predecessor, is invalid (exit 1); one naming another hash algorithm is undecidable (exit 2), unless
+//    another check ran and failed.
+console.log('\n=== chain links (Sections 6.7 and 6.7.1, and the combination rule of Section 5.3) ===')
 const cg = spawnSync(process.execPath, [path.join(HERE, 'chain-link', 'scripts', 'generate.mjs'), '--check'], { encoding: 'utf8' })
 if (cg.status !== 0) bad(`chain-link vectors are stale: ${cg.stderr.trim()}`)
 const cl = JSON.parse(fs.readFileSync(path.join(HERE, 'chain-link', 'index.json'), 'utf8'))
 for (const c of cl.cases) {
-  const { rc, out } = run([c.file, '--jwks', c.jwks, '--mode', 'receipt', '--json'], path.join(HERE, 'chain-link'))
-  if (!out) { bad(`${c.file}: no JSON from the verifier`); continue }
+  const keyArgs = c.jwks ? ['--jwks', c.jwks] : []
+  const args = c.check === 'sequence'
+    ? ['--replay-chain', c.file, ...keyArgs, '--json']
+    : [c.file, ...(c.check === 'supplied-predecessor' ? ['--previous', c.previous] : []), ...keyArgs, '--mode', 'receipt', '--json']
+  const { rc, out } = run(args, path.join(HERE, 'chain-link'))
+  const label = `${c.file}${c.previous ? ` after ${c.previous}` : ''}${c.jwks === null ? ' with no key' : c.jwks !== 'jwks.json' ? ` with ${c.jwks}` : ''}`
+  if (!out) { bad(`${label}: no JSON from the verifier (exit ${rc})`); continue }
   const verdict = verdictOf(out)
-  if (verdict !== c.expected) bad(`${c.file}: ${verdict}, expected ${c.expected}`)
-  else if (c.code && out.error !== c.code) bad(`${c.file}: code ${out.error}, expected ${c.code}`)
-  else if (rc !== c.exit) bad(`${c.file}: exit ${rc}, expected ${c.exit}`)
-  else ok(`${c.file}: ${verdict}${c.code ? ` (${c.code}, exit ${rc})` : ''}`)
+  // A sequence is reported line by line, and each case turns on one line of it.
+  const subject = c.check === 'sequence' ? (Array.isArray(out.receipts) && out.receipts[c.line - 1]) || {} : out
+  const where = c.check === 'sequence' ? ` on line ${c.line}` : ''
+  if (verdict !== c.expected) bad(`${label}: ${verdict}, expected ${c.expected}`)
+  else if (c.code && subject.error !== c.code) bad(`${label}: code ${subject.error}${where}, expected ${c.code}`)
+  else if (rc !== c.exit) bad(`${label}: exit ${rc}, expected ${c.exit} (${c.outcome})`)
+  else if (c.check === 'supplied-predecessor' && !out.previous) bad(`${label}: the result does not report the link compared with ${c.previous}`)
+  else if (c.check === 'sequence' && out.chains !== c.chains) bad(`${label}: ${out.chains === undefined ? 'no count of' : out.chains} chains reported, expected ${c.chains}`)
+  else if (c.check === 'sequence' && out.chainBreaks !== c.chain_breaks) bad(`${label}: ${out.chainBreaks} chain breaks, expected ${c.chain_breaks}`)
+  else if (c.warn && !subject.warning) bad(`${label}: no warning that the issuer emitted a null link${where}`)
+  else ok(`${label}: ${verdict}, ${c.outcome}${c.code ? ` (${c.code}, exit ${rc})` : ''}${c.check === 'sequence' ? `, ${c.chains} chain${c.chains === 1 ? '' : 's'}` : ''}${c.warn ? ', warned' : ''}`)
 }
 
 console.log(`\n${passed} passed, ${failed} failed`)
