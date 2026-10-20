@@ -1,5 +1,8 @@
 # agent-governance-testvectors
 
+[![Verified by Probity](https://raw.githubusercontent.com/probityai/agent-evidence/main/assets/verified-by-probity.svg)](https://github.com/probityai/probity)
+Verified by Probity (github.com/probityai/probity): [latest passing run](https://github.com/ScopeBlind/agent-governance-testvectors/actions/workflows/conformance.yml)
+
 Shared test vectors for conformance between implementations of
 [`draft-farley-acta-signed-receipts`](https://datatracker.ietf.org/doc/draft-farley-acta-signed-receipts/).
 
