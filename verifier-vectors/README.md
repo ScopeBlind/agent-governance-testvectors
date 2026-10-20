@@ -114,6 +114,11 @@ omits the link; every other receipt was issued five minutes later with the same 
 only in `previousReceiptHash`. `index.json` records, for each case, whether it is checked alone, against a supplied
 predecessor or as a sequence, its verdict, outcome, code and exit status, and the -04 section it tests.
 
+If you run these cases from `index.json`, read each case's `check` first. Only `alone` cases are a single receipt.
+A `supplied-predecessor` case names its predecessor in `previous`, and a `sequence` case is a JSONL file read in order.
+`invocation` is now an object with one command per `check`, where it was one string when every case was checked alone, so
+a reader written for the earlier index would run the new cases as single receipts and score them wrongly.
+
 ### Each receipt alone
 
 | Receipt | `previousReceiptHash` | Expected | Code |
