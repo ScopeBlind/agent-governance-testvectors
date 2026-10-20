@@ -1,0 +1,13 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "test:chain-link:ed25519",
+      "x": "Z1QDBDKIzHzREMakpw7KE3tuulu4z8AIpAzfs-RTwp4",
+      "use": "sig",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2026-07-01T00:00:00Z"
+    }
+  ]
+}
