@@ -1,5 +1,7 @@
 # agent-governance-testvectors
 
+**Interop:** CI replays the receipt-signature corpus of [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) v0.17.4 against the pinned verifier, 25 of 25: [latest run](https://github.com/ScopeBlind/agent-governance-testvectors/actions/workflows/conformance.yml).
+
 Shared test vectors for conformance between implementations of
 [`draft-farley-acta-signed-receipts`](https://datatracker.ietf.org/doc/draft-farley-acta-signed-receipts/).
 
