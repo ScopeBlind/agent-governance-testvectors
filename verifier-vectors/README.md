@@ -22,7 +22,7 @@ Exit status: 0 every case matched, 1 a case did not, 77 the pinned verifier cann
 | `timeliness/` | §6.7, §9.7 | This repository. One `issued_at`, alone and against an external chain commitment. `timeliness/scripts/check.mjs` evaluates the proposed rule. |
 | `signing-input/` | -03 §6.6 (unchanged in -04) | This repository. A signature member in the object canonicalized, `null` and `""` included, is refused even though the signature over it verifies. `signing-input/scripts/generate.mjs --check`. |
 | `chain-link/` | -04 §6.7, §6.7.1, §5.3 | This repository. `previousReceiptHash` on a receipt checked alone, against a predecessor the caller supplies, and in a sequence: its form, how it is read, and a failed link check beside one that could not run. Every signature verifies. `chain-link/scripts/generate.mjs --check`. |
-| `agent-evidence-vectors/` | -03 §5.1, §6.6, §9.2 | [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.17.4 `vectors-receipt-signature`, installed from PyPI by hash and checked against the release's signed digest list, never copied. `agent-evidence-vectors/run.sh`. |
+| `agent-evidence-vectors/` | -03 §5.1, §6.6, §9.2 | [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.24.0 `vectors-receipt-signature`, installed from PyPI by hash and checked against the release's signed digest list, never copied. `agent-evidence-vectors/run.sh`. |
 
 ## Key validity windows
 
