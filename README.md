@@ -90,8 +90,9 @@ here yet. Each description is the project's own:
 - [asqav](https://github.com/jagmarques/asqav-sdk) (Python and TypeScript):
   its Internet-Draft
   [draft-marques-asqav-compliance-receipts](https://datatracker.ietf.org/doc/draft-marques-asqav-compliance-receipts/)
-  is a compliance profile of draft-farley-acta-signed-receipts, signed with
-  ML-DSA.
+  builds a compliance profile on draft-farley-acta-signed-receipts as an
+  informative antecedent, and its hosted service signs receipts with
+  ML-DSA-65.
 - [EMILIA](https://github.com/emiliaprotocol/emilia-protocol/tree/main/examples/acta-ep-join)
   (TypeScript): an example that checks `protectmcp:decision` receipts under a
   pinned issuer key and composes them with EMILIA's own receipts.
