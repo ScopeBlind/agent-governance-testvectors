@@ -3,7 +3,9 @@
 # Needs python3 with requirements.txt installed and `verify` on PATH. See README.md.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
-release="v0.24.0"
+# The release is the installed package's version, so requirements.txt is the only pin: moving it there
+# moves the signed digest list fetched below with it.
+release="v$(python3 -c 'from importlib.metadata import version; print(version("agent-evidence-vectors"))')"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
