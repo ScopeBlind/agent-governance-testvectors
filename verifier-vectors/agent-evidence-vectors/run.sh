@@ -3,7 +3,7 @@
 # Needs python3 with requirements.txt installed and `verify` on PATH. See README.md.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
-release="v0.17.4"
+release="v0.24.0"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
