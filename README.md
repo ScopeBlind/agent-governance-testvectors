@@ -84,6 +84,27 @@ runs those checks for every implementation (see
 implementation's own verifier checks every other implementation's output is
 still to do.
 
+Elsewhere, public work implements or checks the format without a driver
+here yet. Each description is the project's own:
+
+- [asqav](https://github.com/jagmarques/asqav-sdk) (Python and TypeScript):
+  its Internet-Draft
+  [draft-marques-asqav-compliance-receipts](https://datatracker.ietf.org/doc/draft-marques-asqav-compliance-receipts/)
+  is a compliance profile of draft-farley-acta-signed-receipts, signed with
+  ML-DSA.
+- [EMILIA](https://github.com/emiliaprotocol/emilia-protocol/tree/main/examples/acta-ep-join)
+  (TypeScript): an example that checks `protectmcp:decision` receipts under a
+  pinned issuer key and composes them with EMILIA's own receipts.
+- [receipt-verify](https://github.com/LembaGang/receipt-verify) (TypeScript):
+  a verifier whose CI checks published Acta receipts.
+- Independent test sets: TRACE's Acta fixtures and verifier
+  ([agentrust-io/trace-spec](https://github.com/agentrust-io/trace-spec/tree/main/examples/action-receipts/acta)),
+  the agent-evidence-vectors corpus credited above, and argentum-core's
+  `farley-receipt-signature` vectors, which `verifier-vectors/run.mjs` runs.
+
+A driver for any of them is welcome: see
+[Adding a new implementation](#adding-a-new-implementation).
+
 History:
 
 - **v0.1** (first release): fixtures, expected schema, TypeScript driver,
