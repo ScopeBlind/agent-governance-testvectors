@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # The agent-evidence-vectors pin in verifier-vectors/agent-evidence-vectors/requirements.txt stays exact and
+  # hash-locked; this opens a pull request for each new release, so the Conformance workflow replays the new
+  # corpus before the pin moves. run.sh reads the release tag from the installed version, so this one file is
+  # the whole pin.
+  - package-ecosystem: "pip"
+    directory: "/verifier-vectors/agent-evidence-vectors"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "verifier-vectors"
