@@ -135,8 +135,10 @@ For APS, A2A, Hermes, and ACTA interop, this repo follows one rule: compose by c
 
 ## Running locally
 
-The two Python drivers need `pip install pynacl cedarpy agent-passport-system`;
-without it they report a skip (exit 77) rather than a failure.
+The nobulex and APS drivers need `pip install pynacl cedarpy agent-passport-system`;
+without the required dependencies they report a skip (exit 77) rather than a failure.
+The cryptovalid-opencore driver creates its own virtual environment and installs
+its pinned package and dependencies, requiring network access on the first run.
 
 ```bash
 # Run all drivers whose dependencies are installed
