@@ -106,7 +106,7 @@ adds contributor guidance without changing receipt formats or the Acta Charter.
 
 | Project | Reviewed source | Checks |
 | --- | --- | --- |
-| protect-mcp maintenance source | [Maintenance PR](https://github.com/ScopeBlind/scopeblind-gateway/pull/12), merged as `cf20b7d2e3faa4ad475ed50dab02e1bd2c82b3a7` | 769 tests; isolated Docker smoke; clean package install; the literal README allow/deny, receipt-chain, tamper and embedded-key checks. [PR validation](https://github.com/ScopeBlind/scopeblind-gateway/actions/runs/39733391142). |
+| protect-mcp 0.31.2 | [Maintenance PR](https://github.com/ScopeBlind/scopeblind-gateway/pull/12), merged as `cf20b7d2e3faa4ad475ed50dab02e1bd2c82b3a7` | 769 tests; isolated Docker smoke; clean package install; the literal README allow/deny, receipt-chain, tamper and embedded-key checks. [PR validation](https://github.com/ScopeBlind/scopeblind-gateway/actions/runs/39733391142). |
 | Verifier 0.10.28 | [Maintenance PR](https://github.com/VeritasActa/verify/pull/18), merged as `c170060400a18c128ea79b49c742911379c3d966` | 542 tests passed and 14 existing fixture-dependent skips; 16 standalone conformance tests; browser, Sigil and packed-install checks. [Release validation and publication](https://github.com/VeritasActa/verify/actions/runs/39732981998). |
 | Acta application | [Maintenance PR](https://github.com/VeritasActa/Acta/pull/18), merged as `2fcc063efcc7da1a87b03ae24fec6ed992e18fdd` | 137 tests; local routes and protocol-identity checks. The new local development configuration has no production routes or remote storage bindings. |
 
@@ -118,6 +118,13 @@ The published package was also installed in a fresh directory with lifecycle
 scripts disabled: the documented sample passed, and missing-key, wrong-key and
 changed-payload cases returned their expected failure results. Its complete
 Apache-2.0 licence matched the reviewed source.
+
+Gateway [0.31.2](https://github.com/ScopeBlind/scopeblind-gateway/releases/tag/v0.31.2)
+was accepted by npm through the
+[trusted-publishing run](https://github.com/ScopeBlind/scopeblind-gateway/actions/runs/39733817590/attempts/2)
+from the same gateway source above. The workflow repeated all release checks and
+generated provenance. Its first attempt received a registry 503; the same
+source/version succeeded on retry.
 
 For the earlier compatibility baseline, verifier 0.10.27 was published by the
 [trusted-publishing workflow](https://github.com/VeritasActa/verify/actions/runs/39699567539)
