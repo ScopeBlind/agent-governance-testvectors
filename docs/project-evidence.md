@@ -123,8 +123,9 @@ Gateway [0.31.2](https://github.com/ScopeBlind/scopeblind-gateway/releases/tag/v
 was accepted by npm through the
 [trusted-publishing run](https://github.com/ScopeBlind/scopeblind-gateway/actions/runs/39733817590/attempts/2)
 from the same gateway source above. The workflow repeated all release checks and
-generated provenance. Its first attempt received a registry 503; the same
-source/version succeeded on retry.
+generated provenance. The registry attestation identifies that source commit and
+workflow. A fresh install of the published package also passed the literal README
+checks, including independent-key chain verification and tamper rejection.
 
 For the earlier compatibility baseline, verifier 0.10.27 was published by the
 [trusted-publishing workflow](https://github.com/VeritasActa/verify/actions/runs/39699567539)
