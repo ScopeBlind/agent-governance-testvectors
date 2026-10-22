@@ -101,12 +101,30 @@ also records a reported integration problem and the maintainer's released fix.
 
 ## Release evidence
 
-Verifier 0.10.27 was published by the
+The 22 October maintenance pass makes the documented entry points executable and
+adds contributor guidance without changing receipt formats or the Acta Charter.
+
+| Project | Reviewed source | Checks |
+| --- | --- | --- |
+| protect-mcp maintenance source | [Maintenance PR](https://github.com/ScopeBlind/scopeblind-gateway/pull/12), merged as `cf20b7d2e3faa4ad475ed50dab02e1bd2c82b3a7` | 769 tests; isolated Docker smoke; clean package install; the literal README allow/deny, receipt-chain, tamper and embedded-key checks. [PR validation](https://github.com/ScopeBlind/scopeblind-gateway/actions/runs/39733391142). |
+| Verifier 0.10.28 | [Maintenance PR](https://github.com/VeritasActa/verify/pull/18), merged as `c170060400a18c128ea79b49c742911379c3d966` | 542 tests passed and 14 existing fixture-dependent skips; 16 standalone conformance tests; browser, Sigil and packed-install checks. [Release validation and publication](https://github.com/VeritasActa/verify/actions/runs/39732981998). |
+| Acta application | [Maintenance PR](https://github.com/VeritasActa/Acta/pull/18), merged as `2fcc063efcc7da1a87b03ae24fec6ed992e18fdd` | 137 tests; local routes and protocol-identity checks. The new local development configuration has no production routes or remote storage bindings. |
+
+Verifier [0.10.28](https://github.com/VeritasActa/verify/releases/tag/v0.10.28)
+was published with npm provenance from the source and run above. Its browser
+JavaScript is unchanged; release metadata and the recomputable Sigil commitment
+were refreshed. A Sigil self-check is not publisher authentication.
+The published package was also installed in a fresh directory with lifecycle
+scripts disabled: the documented sample passed, and missing-key, wrong-key and
+changed-payload cases returned their expected failure results. Its complete
+Apache-2.0 licence matched the reviewed source.
+
+For the earlier compatibility baseline, verifier 0.10.27 was published by the
 [trusted-publishing workflow](https://github.com/VeritasActa/verify/actions/runs/39699567539)
 from commit `0c819c920ab9b9b4557e4bd51b85e74040fbffa0`, with npm provenance.
 Provenance connects a package to its build; it is not a security assessment.
-The gateway's 0.31.1 registry metadata did not carry npm provenance at this
-review. A configured workflow is not evidence that a particular release used it.
+The gateway's older 0.31.1 registry metadata did not carry npm provenance at this
+review. A newer publication does not retroactively add provenance to that version.
 
 ## Next work, not current results
 
