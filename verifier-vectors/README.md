@@ -175,7 +175,7 @@ that carries a link is checked against the line before it, except the first:
 A receipt with no link begins a new chain, and a verifier MUST NOT report it as linked to the line before it. A `null`
 link is read the same way, and a verifier SHOULD warn that its issuer emitted a value it must not. A link on the first
 receipt, whose predecessor the sequence does not hold, is reported, not failed. §6.7.1 also has a verifier say that this
-predecessor was not supplied; that SHOULD is not scored, and @veritasacta/verify 0.10.26 does not say it.
+predecessor was not supplied; that SHOULD is not scored, and @veritasacta/verify 0.10.27 does not say it.
 
 ### The combination rule
 
@@ -199,7 +199,7 @@ verifier is held to the verdict and the outcome.
 key, and the two combination cases are undecidable (`no_public_key` and `unsupported_chain_hash_algorithm`, exit 2).
 Given the key with `--key` instead, 0.10.25 passes four of the five sequences and fails the fifth only on line 2 of
 `sequence-payload-only.jsonl`, which it counts as a break but reports as a valid line; 0.10.23 reads that link as a
-legacy one, since `genesis.json` names no `spec`, counts no chains, and does not warn on the `null` line. 0.10.26 passes
+legacy one, since `genesis.json` names no `spec`, counts no chains, and does not warn on the `null` line. 0.10.26 and 0.10.27 pass
 all 27 cases.
 
 ## Credit
@@ -214,8 +214,8 @@ The signing-input case is @astrogilda's, found with `vectors-receipt-signature` 
 
 ## In CI
 
-The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.26`, the latest release, published with
-npm provenance, and the first that checks a receipt against a supplied predecessor (`--previous`), reads `--jwks` with
+The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.27`, the latest release, published with
+npm provenance. 0.10.26 was the first that checks a receipt against a supplied predecessor (`--previous`), reads `--jwks` with
 `--replay-chain`, and combines checks as -04 §5.3 does. 0.10.25 was the first to refuse a payload-only link in a sequence
 whatever the receipt before it cites, and to report each chain a sequence holds, 0.10.22 the first release that refuses a
 malformed or other-algorithm chain link on a receipt checked alone (§6.7), and 0.10.21 the first implementing §5.5 and
