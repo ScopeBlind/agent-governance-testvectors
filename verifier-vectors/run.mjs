@@ -3,7 +3,7 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: 0.10.26, the latest release, published with npm provenance).
+//   VERIFY_PKG  the verifier run through npx (default: 0.10.27, the latest release, published with npm provenance).
 //               0.10.26 was the first to check a receipt against a supplied predecessor (--previous), to read --jwks
 //               with --replay-chain, and to combine checks as -04 Section 5.3 does; 0.10.25 the first to refuse a
 //               payload-only link in a sequence whatever the receipt before it cites, and to report each chain a
@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.26'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.27'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
