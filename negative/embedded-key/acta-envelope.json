@@ -1,0 +1,23 @@
+{
+  "payload": {
+    "type": "protectmcp:decision",
+    "tool_name": "Read",
+    "decision": "allow",
+    "reason": "post_execution_receipt",
+    "policy_digest": "none",
+    "scope": "negative-embedded-key",
+    "mode": "enforce",
+    "request_id": "negative-embedded-key",
+    "spec": "draft-farley-acta-signed-receipts-03",
+    "issuer_certification": "self-signed",
+    "public_key": "5699a9cef870e2ff0c022b67689cc76fe05e90915c5f0143f9356ca72f4aff99",
+    "issuer_name": "protect-mcp",
+    "issued_at": "2026-01-01T00:00:00Z",
+    "issuer_id": "conformance"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "conformance",
+    "sig": "5dc366651eb38efc6b6823da1b552ac52527b1721ab0b3bcc8f46ed4462b7218df393586c5e973d5c2cb184aa9df2f15f8f057efec41966694ab484779923300"
+  }
+}

@@ -14,12 +14,14 @@
 
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
 import {
   canonicalizeJCS,
   verify,
-} from '/Users/tima/agent-passport-system/src/index.js'
+} from 'agent-passport-system'
 
-const DIR = '/Users/tima/agent-governance-testvectors/a2a-trust-header'
+const DIR = dirname(fileURLToPath(import.meta.url))
 
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
 

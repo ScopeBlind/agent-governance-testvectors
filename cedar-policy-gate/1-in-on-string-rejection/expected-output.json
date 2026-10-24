@@ -1,0 +1,8 @@
+{
+  "decision": "DENY",
+  "allowed": false,
+  "acceptable_decisions": ["DENY", "POLICY_LOAD_REJECTED"],
+  "exit_code": 2,
+  "reason": "cedar_policy_errored: the forbid rule type-errors (`in` on a String operand) and is discarded by Cedar; a residual permit must not be allowed to stand. Any per-policy evaluation error denies under enforcement.",
+  "rationale": "This is the core advisory vector. A non-conformant gate lets Cedar silently drop the erroring forbid and returns the terminal permit as ALLOW. A conformant gate detects the per-policy error and denies (protect-mcp 0.7.0 via the onEvalError chokepoint after extractPolicyErrors), or rejects the policy at load time. Either outcome blocks the dangerous tool call."
+}

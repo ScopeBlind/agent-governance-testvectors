@@ -34,124 +34,103 @@ pass() { echo "PASS: $1"; PASS=$((PASS+1)); }
 fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 
 # ----- Check 1: schema conformance --------------------------------------------
-# The receipt-schema.json uses `oneOf` to accept both the v1 flat shape
-# (protect-mcp) and the v2 structured-envelope shape (sb-runtime). We check
-# for one of the two shapes here with a lightweight field-level test that
-# does not require a full JSON Schema validator dependency.
+# expected/receipt-schema.json is a oneOf over the two shapes the published
+# verifier reads: the Acta 2.1 envelope and decision_receipt (v1 flat and the
+# v2 envelope are recorded there, not accepted). It is validated with a JSON Schema validator (ajv, draft-07), not a
+# hand-rolled field test: the field test drifted permissive (it never tested
+# receipt_id and accepted a bare string where the schema requires an object),
+# so a vector could pass Check 1 and fail the schema with nothing saying so
+# (issue #21).
 echo ""
-echo "=== Check 1: schema conformance (v1 flat OR v2 envelope) ==="
+echo "=== Check 1: schema conformance (expected/receipt-schema.json, draft-07; two accepted shapes) ==="
+SCHEMA="$REPO_ROOT/expected/receipt-schema.json"
 for f in "$RECEIPTS_DIR"/*.json; do
     [ -e "$f" ] || continue
-    python3 - <<PY
-import json, sys
-r = json.load(open("$f"))
-
-# v1 flat: required top-level fields
-v1_required = ["receipt_id", "receipt_version", "tool_name", "decision",
-               "policy_id", "timestamp", "public_key", "signature"]
-
-# v2 envelope: payload/signature/pubkey wrapper
-def is_v2(r):
-    return (
-        isinstance(r, dict)
-        and "payload" in r
-        and "signature" in r
-        and "pubkey" in r
-        and isinstance(r["payload"], dict)
-        and "type" in r["payload"]
-        and r["payload"].get("type", "").startswith("scopeblind.receipt.")
-        and "decision" in r["payload"]
-        and "action" in r["payload"]
-    )
-
-if is_v2(r):
-    # v2 envelope checks
-    if r["payload"].get("decision") not in ("allow", "deny"):
-        print(f"  v2 invalid decision in $f: {r['payload'].get('decision')}")
-        sys.exit(1)
-    sys.exit(0)
-else:
-    # v1 flat checks
-    missing = [k for k in v1_required if k not in r]
-    if missing:
-        print(f"  $f matches neither v1 flat (missing {missing}) nor v2 envelope")
-        sys.exit(1)
-    if r.get("receipt_version") != "1.0":
-        print(f"  v1 wrong version in $f: {r.get('receipt_version')}")
-        sys.exit(1)
-    if r.get("decision") not in ("allow", "deny"):
-        print(f"  v1 invalid decision in $f: {r.get('decision')}")
-        sys.exit(1)
-    sys.exit(0)
-PY
-    if [ "$?" -eq 0 ]; then
+    if npx --yes -p ajv-cli@5 -p ajv-formats@2 ajv validate --spec=draft7 -c ajv-formats -s "$SCHEMA" -d "$f" --errors=text >/tmp/ajv-out.txt 2>&1; then
         pass "schema ok: $(basename "$f")"
     else
+        sed 's/^/  /' /tmp/ajv-out.txt | head -8
         fail "schema fail: $(basename "$f")"
     fi
 done
 
 # ----- Check 2: signature verification ----------------------------------------
+#
+# One invocation per receipt, not a glob.
+#
+# @veritasacta/verify takes a single <file.json>. Given several positionally it
+# verifies only the LAST one and exits on that, printing one verdict line for
+# the whole set. Measured against a four-receipt directory by tampering each
+# position in turn, the glob form reported success for three of the four:
+#
+#     tampered receipt-0001 -> exit 0
+#     tampered receipt-0002 -> exit 0
+#     tampered receipt-0003 -> exit 0
+#     tampered receipt-0004 -> exit 1
+#
+# So an implementation could forge three of its four receipts and this check
+# would report "all signatures verify". The verifier is correct; handed the
+# tampered file alone it exits 1. The invocation was the defect. (Issue #13,
+# finding 7.)
+#
+# The pass line is deliberately after the loop rather than inside it, so it
+# reports the number actually checked instead of asserting over files that were
+# never opened.
 echo ""
 echo "=== Check 2: @veritasacta/verify signatures ==="
-npx --yes @veritasacta/verify "$RECEIPTS_DIR"/*.json >/dev/null 2>&1
-RC=$?
-case "$RC" in
-    0) pass "all signatures verify (exit 0)" ;;
-    1) fail "one or more signatures failed (exit 1 = tampered)" ;;
-    2) fail "malformed receipt (exit 2)" ;;
-    *) fail "verifier exited with unexpected code $RC" ;;
-esac
 
-# ----- Check 3: chain integrity (ordered sequence + parent hash linkage) ------
+# Published fixture key from fixtures/keys/README.md. The reference receipts
+# carry their key inside the signed bytes; the verifier refuses to trust it
+# (embedded_key_rejected, section 9.5) and verifies only against the key
+# given here. A missing key and a tampered one are not the same finding
+# (issue #13, finding 3; issue #21).
+CONFORMANCE_KEY="${CONFORMANCE_KEY:-4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29}"
+
+SIG_CHECKED=0
+SIG_FAILED=0
+for f in "$RECEIPTS_DIR"/*.json; do
+    [ -e "$f" ] || continue
+    SIG_CHECKED=$((SIG_CHECKED+1))
+    # Exit 2 covers every undecidable outcome (no key resolved, an embedded
+    # key refused, an unknown shape, malformed JSON), so the JSON verdict's
+    # error code is what tells them apart. ERRORS.md in the verifier lists them.
+    OUT="$(npx --yes @veritasacta/verify --key "$CONFORMANCE_KEY" "$f" --json 2>/dev/null)"
+    RC=$?
+    CODE="$(printf '%s' "$OUT" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("error") or "")
+except Exception: print("")' 2>/dev/null)"
+    case "$RC" in
+        0) ;;
+        1) fail "signature failed verification (${CODE:-tampered}): $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        2) case "$CODE" in
+               no_public_key|embedded_key_rejected) fail "no trusted key resolved ($CODE); set CONFORMANCE_KEY to the fixture key: $(basename "$f")" ;;
+               unknown_format) fail "unrecognised receipt shape ($CODE); the verifier does not read this shape: $(basename "$f")" ;;
+               *) fail "undecidable (${CODE:-no code}): $(basename "$f")" ;;
+           esac; SIG_FAILED=$((SIG_FAILED+1)) ;;
+        *) fail "verifier exited with unexpected code $RC on $(basename "$f")"; SIG_FAILED=$((SIG_FAILED+1)) ;;
+    esac
+done
+
+if [ "$SIG_CHECKED" -eq 0 ]; then
+    fail "no receipts to verify"
+elif [ "$SIG_FAILED" -eq 0 ]; then
+    pass "all $SIG_CHECKED signature(s) verify"
+fi
+
+# ----- Check 3: chain integrity + expected outcomes ---------------------------
+# Previously this checked only that parent_receipt_hash was non-empty. It
+# computed the expected hash and discarded it, so any constant string passed,
+# and expected/chain.jsonl and the fixtures' expected_decision were read by no
+# code at all. An implementation could ignore the policy, emit four correctly
+# signed receipts with arbitrary decisions, and be reported conformant.
+# Reported in #13.
 echo ""
-echo "=== Check 3: chain order + parent-hash linkage ==="
-python3 - <<PY
-import hashlib, json, os, sys
-from pathlib import Path
-
-d = Path("$RECEIPTS_DIR")
-receipts = []
-for f in sorted(d.glob("*.json")):
-    receipts.append(json.loads(f.read_text()))
-
-# Sort by sequence if present, else by filename order
-receipts.sort(key=lambda r: r.get("sequence", 0))
-
-errors = []
-prev_canonical_hash = None
-for i, r in enumerate(receipts):
-    expected_seq = i + 1
-    if r.get("sequence") != expected_seq:
-        errors.append(f"receipt {i}: sequence {r.get('sequence')} != expected {expected_seq}")
-    # Compute canonical form (JCS-lite: sorted keys, separators, no whitespace)
-    canonical = json.dumps(
-        {k: v for k, v in r.items() if k not in ("signature", "public_key")},
-        sort_keys=True, separators=(",", ":")
-    )
-    # Check parent linkage
-    if i == 0:
-        if r.get("parent_receipt_hash") not in (None, ""):
-            errors.append(f"receipt 0: genesis should have null/empty parent_receipt_hash, got {r.get('parent_receipt_hash')}")
-    else:
-        # Implementations may use different prefix lengths for the parent hash
-        # (e.g., first 16 hex chars). Accept any prefix match of the expected hash.
-        expected_hash = hashlib.sha256(prev_canonical_hash.encode()).hexdigest() if prev_canonical_hash else None
-        # Some implementations compute hash differently; just verify *some* non-null link exists
-        if not r.get("parent_receipt_hash"):
-            errors.append(f"receipt {i}: missing parent_receipt_hash")
-    prev_canonical_hash = canonical
-
-if errors:
-    for e in errors:
-        print(f"  {e}")
-    sys.exit(1)
-sys.exit(0)
-PY
+echo "=== Check 3: chain order, parent-hash linkage, expected outcomes ==="
+python3 "$REPO_ROOT/conformance/check_chain.py" "$RECEIPTS_DIR" "$REPO_ROOT"
 if [ "$?" -eq 0 ]; then
-    pass "chain order + linkage"
+    pass "chain order, linkage, and expected outcomes"
 else
-    fail "chain order + linkage"
+    fail "chain order, linkage, and expected outcomes"
 fi
 
 # ----- Summary ----------------------------------------------------------------

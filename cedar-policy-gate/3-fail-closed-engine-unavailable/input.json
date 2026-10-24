@@ -1,0 +1,9 @@
+{
+  "tool": "Bash",
+  "policy": "permit(principal, action, resource);",
+  "input": {
+    "command": "rm"
+  },
+  "engine_state": "unavailable",
+  "note": "The policy itself is a valid permit-all. The test condition is that the policy engine cannot be reached or evaluation throws (for example the Cedar WASM module is not installed, or the engine call raises). A gate must DENY when it cannot decide, never default to the permit. This case is checked by removing or disabling the engine, not by the policy text. See `simulate` below for how an implementation reproduces engine-unavailable."
+}

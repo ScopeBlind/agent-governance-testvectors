@@ -1,0 +1,34 @@
+{
+  "tool": "Bash",
+  "self_test": {
+    "description": "Before arming enforcement, the gate must run a boot self-test that proves it denies a known-forbidden vector, and must refuse to arm if that self-test does not pass.",
+    "required_vectors": [
+      {
+        "name": "engine-unavailable denies",
+        "policy": "permit(principal, action, resource);",
+        "input": { "command": "rm" },
+        "condition": "engine absent",
+        "expected": "DENY"
+      },
+      {
+        "name": "valid forbid denies rm",
+        "policy": "forbid(principal, action, resource) when { [\"rm\", \"dd\", \"mkfs\"].contains(context.command) };\npermit(principal, action, resource);",
+        "input": { "command": "rm" },
+        "expected": "DENY"
+      },
+      {
+        "name": "valid permit allows ls",
+        "policy": "forbid(principal, action, resource) when { [\"rm\", \"dd\", \"mkfs\"].contains(context.command) };\npermit(principal, action, resource);",
+        "input": { "command": "ls" },
+        "expected": "ALLOW"
+      },
+      {
+        "name": "in-on-String forbid does not permit-all",
+        "policy": "forbid(principal, action, resource) when { context.command in [\"rm\", \"dd\"] };\npermit(principal, action, resource);",
+        "input": { "command": "rm" },
+        "expected": "DENY"
+      }
+    ],
+    "note": "These are the vectors protect-mcp 0.7.0's runEvaluatorSelfTest() runs live through the real evaluator. The engine-unavailable vector runs even when the engine is absent; the other three run when the engine is present. The enforcing entrypoint refuses to start if any vector fails."
+  }
+}

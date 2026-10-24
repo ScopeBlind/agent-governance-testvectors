@@ -1,0 +1,8 @@
+{
+  "tool": "Bash",
+  "policy": "forbid(principal, action, resource) when { [\"rm\", \"dd\", \"mkfs\"].contains(context.command) };\npermit(principal, action, resource);",
+  "input": {
+    "command": "rm"
+  },
+  "note": "Positive control. This forbid uses the CORRECT Cedar idiom `[\"a\",\"b\"].contains(context.<attr>)`, which is set-membership on a set literal and does not type-error. The forbid matches `rm` and denies for the right reason (the rule actually fired), not because a policy errored. This proves the bar is not satisfied merely by denying on errors: a correctly written forbid must really deny."
+}

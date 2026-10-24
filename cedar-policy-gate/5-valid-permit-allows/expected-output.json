@@ -1,0 +1,8 @@
+{
+  "decision": "ALLOW",
+  "allowed": true,
+  "acceptable_decisions": ["ALLOW"],
+  "exit_code": 0,
+  "reason": "cedar_allow: the forbid did not match (command=ls is not in the forbidden set) and the terminal permit applies.",
+  "rationale": "Liveness control. A safe action under a valid, non-erroring policy must be allowed, proving the gate is not a degenerate deny-all. protect-mcp 0.7.0 returns parsed.kind == 'allow' with an empty policy-error list and exits 0."
+}

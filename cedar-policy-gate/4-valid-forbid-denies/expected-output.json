@@ -1,0 +1,8 @@
+{
+  "decision": "DENY",
+  "allowed": false,
+  "acceptable_decisions": ["DENY"],
+  "exit_code": 2,
+  "reason": "cedar_deny: the forbid rule matched (`[\"rm\",\"dd\",\"mkfs\"].contains(context.command)` is true for command=rm), so the action is denied.",
+  "rationale": "DENY for the right reason: a correctly written, non-erroring forbid actually matched. No per-policy error is present, so this is a clean deny, distinguishing real enforcement from the deny-on-error behavior of cases 1 and 2. protect-mcp 0.7.0 returns parsed.kind == 'deny' with an empty policy-error list."
+}

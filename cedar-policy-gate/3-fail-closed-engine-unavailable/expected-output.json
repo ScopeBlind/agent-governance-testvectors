@@ -1,0 +1,8 @@
+{
+  "decision": "DENY",
+  "allowed": false,
+  "acceptable_decisions": ["DENY"],
+  "exit_code": 2,
+  "reason": "cedar_wasm_not_available (or cedar_eval_error): the engine could not produce a decision, so the gate fails closed and denies.",
+  "rationale": "Even though the policy is a valid permit-all, an unreachable or throwing engine means the gate cannot know what the policy says. It must deny rather than fall back to allow. protect-mcp 0.7.0 returns DENY through onEvalError() when ensureCedarWasm() is false or the isAuthorized call throws. Note this is the inverse of the naive default: a permit-all that would ALLOW with a working engine must still DENY when the engine is gone."
+}

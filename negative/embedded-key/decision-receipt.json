@@ -1,0 +1,17 @@
+{
+  "v": 2,
+  "type": "decision_receipt",
+  "algorithm": "ed25519",
+  "kid": "9pTIRIanaPRNDHhaVT4F1X3nPh9nNg-BLwgUxd3fscM",
+  "issuer": "aps:gateway:test",
+  "issued_at": "2026-01-01T00:00:00Z",
+  "payload": {
+    "decision": "allow",
+    "request_id": "req-negative-embedded-key",
+    "tool": "http.get",
+    "policy_id": "autoresearch-safe",
+    "reason_code": "policy_match"
+  },
+  "public_key": "5699a9cef870e2ff0c022b67689cc76fe05e90915c5f0143f9356ca72f4aff99",
+  "signature": "5047744ff7f859838d197b4b9cbe3c4e2e01fe9c98d3de156c52812474380fd571a29d0ea57d614160cd745171ec08f852c50bba7d1c778f47949bcc1d6a9204"
+}

@@ -1,0 +1,17 @@
+{
+  "reason": "unknown source field key",
+  "entry": {
+    "dimension": "provenance",
+    "state": "satisfied",
+    "source": {
+      "authority": "custodian:demo",
+      "ref": "sha256:6e0a9aa1f9d5c8ce3d545fb7b1d452f84514e93f493f94f24fa7c8180cb49ac4",
+      "kid": "test:custodian:demo:ed25519",
+      "key": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "dCK5iHWYBo4yxESKlJrbKQ0PTjW54BsO5fGh5gD-JnQ"
+      }
+    }
+  }
+}

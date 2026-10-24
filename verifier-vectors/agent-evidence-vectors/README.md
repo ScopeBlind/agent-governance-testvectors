@@ -1,0 +1,13 @@
+# agent-evidence-vectors receipt-signature corpus
+
+CI replays the `vectors-receipt-signature` corpus of [agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.24.0 (25 vectors for draft-farley-acta-signed-receipts: refusals with their failure codes, acceptances, and key-window cases) through the same `@veritasacta/verify@0.10.27` that `../run.mjs` pins.
+
+```bash
+python -m pip install --require-hashes -r verifier-vectors/agent-evidence-vectors/requirements.txt
+npm install --prefix /tmp/verify --no-save @veritasacta/verify@0.10.27
+PATH="/tmp/verify/node_modules/.bin:$PATH" ./verifier-vectors/agent-evidence-vectors/run.sh
+```
+
+The corpus is installed from PyPI by wheel hash and never copied here. Before the replay, `run.sh` fetches the release's `CORPUS-DIGESTS.txt`, checks its signature with cosign against `release/cosign.pub` read at the release tag and pinned by its SHA-256 in `run.sh`, and `check_digest.py` confirms the installed corpus carries the signed digest and vector count. `adapter.py` maps the verifier's JSON onto the corpus contract (`valid`, `invalid` with a code, `undecidable`) and replays a receipt's chain context where the vector supplies one.
+
+Exit status: 0 every vector reached its expected outcome, non-zero otherwise. The report lands in `receipts/agent-evidence-vectors-report.json`, which the workflow uploads with the other receipts. The pin is the version and hash in `requirements.txt`; `run.sh` takes the release tag from the installed version, and Dependabot opens a pull request for each new release.

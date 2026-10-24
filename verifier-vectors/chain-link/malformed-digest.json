@@ -1,0 +1,16 @@
+{
+  "payload": {
+    "type": "protectmcp:decision",
+    "tool_name": "records.share",
+    "decision": "allow",
+    "issuer_id": "test:chain-link:ed25519",
+    "policy_digest": "sha256:8ca92f7dfaaf6f4fee88f3892cd7122ab48912c0f9666f70df79b2973627b888",
+    "issued_at": "2026-07-15T12:05:00Z",
+    "previousReceiptHash": "sha256:not-a-digest"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "test:chain-link:ed25519",
+    "sig": "828eee47891b6ecd315a5a427bf0a4e975a67444f1cbdafdc749ce1fbe36b7a49ee4cc72a02d0c210cd088b0cdbf246cb4db4263ff2c0e0cc9a04eeed5d53900"
+  }
+}

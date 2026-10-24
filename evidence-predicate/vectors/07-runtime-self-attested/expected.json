@@ -1,0 +1,18 @@
+{
+  "about": "A basis the runtime asserts about itself: no kid, no sig, authority runtime:<component>. It is the signer's claim and raises no assurance.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "provenance",
+      "source_signature_present": false,
+      "source_signature_valid": false,
+      "source_key_out_of_band": false,
+      "source_key_distinct": false,
+      "source_control_domain_distinct": false,
+      "independent_corroboration": false,
+      "reason": "source_signature_absent"
+    }
+  ],
+  "independent_dimensions": [],
+  "receipt_digest": "sha256:40dba06058ab6cd9bdbcfbb25bd6738f854e085cdd2f3fade314b8fc8d4c083e"
+}

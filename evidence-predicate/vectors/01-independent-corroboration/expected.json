@@ -1,0 +1,20 @@
+{
+  "about": "An allow whose data_rights basis is attested by the custodian, a key the relying party pinned out of band, distinct from the receipt signer.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "data_rights",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": true,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": true,
+      "reason": "independent_source_signature_verified"
+    }
+  ],
+  "independent_dimensions": [
+    "data_rights"
+  ],
+  "receipt_digest": "sha256:9097f0d2d16f53a3797b9af3b00c2fbf8c6c9d106289a1a912bc6a7f7739054a"
+}

@@ -1,0 +1,15 @@
+{
+  "payload": {
+    "type": "protectmcp:decision",
+    "tool_name": "read_file",
+    "decision": "allow",
+    "issued_at": "2026-07-15T00:00:00Z",
+    "issuer_id": "test:rotating:ed25519",
+    "policy_digest": "sha256:8ca92f7dfaaf6f4fee88f3892cd7122ab48912c0f9666f70df79b2973627b888"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "test:rotating:ed25519",
+    "sig": "b517382e1d4944dcb0ba87012a3c5b9b4a1127368c27723454bd5d007125510d731a1b3e5f7e585bd3b8668475efc4b9f501bff9e1817fc07e41c729f30e550c"
+  }
+}

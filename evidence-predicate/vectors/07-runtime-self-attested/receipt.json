@@ -1,0 +1,28 @@
+{
+  "v": 2,
+  "type": "decision_receipt",
+  "algorithm": "ed25519",
+  "kid": "test:manager:meridian:ed25519",
+  "issuer": "manager:meridian",
+  "issued_at": "2026-09-13T12:00:00Z",
+  "payload": {
+    "decision": "deny",
+    "request_id": "ev-07",
+    "agent_id": "agent:trading-desk:1",
+    "tool": "trade.submit",
+    "params_hash": "sha256:2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+    "policy_id": "restricted-securities",
+    "policy_digest": "sha256:5dbdea0fbf9f2c0c47a7b9a0f7d3b4a0f5b8e2b0b6b32f4b7f5f2ab3c3f0d6e1",
+    "evidence": [
+      {
+        "dimension": "provenance",
+        "state": "unverified",
+        "source": {
+          "authority": "runtime:request-origin",
+          "ref": "request/origin-header"
+        }
+      }
+    ]
+  },
+  "signature": "e80c161c7cf7b11b8eaf266944e250b143918a5cd5b9814ee37d33bbfddcceab634b6df866841911d79b82765c5da8a5edbdc79b956564848fb6136a57740c0b"
+}

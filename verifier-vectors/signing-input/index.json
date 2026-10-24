@@ -1,0 +1,41 @@
+{
+  "suite": "signing-input",
+  "profile": "draft-farley-acta-signed-receipts-03 Section 6.6 (unchanged in -04), envelope shape",
+  "key": {
+    "kid": "test:signing-input:ed25519",
+    "public_key_hex": "9035dd13c4c9eb3d8f71adf9cfd629abbcb6849a4d8ec9ed772996aaeab8fa65",
+    "seed": "00..0e"
+  },
+  "source": "astrogilda, probityai/agent-evidence-vectors 0.13.0, vectors-receipt-signature v5397adb77c3e6754",
+  "invocation": "verify <file> --jwks jwks.json --mode receipt --json",
+  "cases": [
+    {
+      "file": "null-member.json",
+      "expected": "REJECT",
+      "code": "signature_in_signing_input",
+      "note": "The payload carries \"signature\": null. The signature over JCS(payload) verifies; Section 6.6 still forbids the member.",
+      "jwks": "jwks.json"
+    },
+    {
+      "file": "empty-member.json",
+      "expected": "REJECT",
+      "code": "signature_in_signing_input",
+      "note": "The payload carries \"signature\": \"\", which Section 6.6 names alongside null.",
+      "jwks": "jwks.json"
+    },
+    {
+      "file": "string-member.json",
+      "expected": "REJECT",
+      "code": "signature_in_signing_input",
+      "note": "Any signature member in the object canonicalized, whatever its value.",
+      "jwks": "jwks.json"
+    },
+    {
+      "file": "no-member.json",
+      "expected": "ACCEPT",
+      "code": null,
+      "note": "The twin: the same fields with no signature member. It verifies.",
+      "jwks": "jwks.json"
+    }
+  ]
+}

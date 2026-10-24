@@ -1,0 +1,30 @@
+{
+  "about": "Two entries on one receipt: an independently attested data_rights and a runtime-asserted provenance. Section 9.9: the two MUST be visibly distinguished.",
+  "receipt_signature_valid": true,
+  "entries": [
+    {
+      "dimension": "data_rights",
+      "source_signature_present": true,
+      "source_signature_valid": true,
+      "source_key_out_of_band": true,
+      "source_key_distinct": true,
+      "source_control_domain_distinct": true,
+      "independent_corroboration": true,
+      "reason": "independent_source_signature_verified"
+    },
+    {
+      "dimension": "provenance",
+      "source_signature_present": false,
+      "source_signature_valid": false,
+      "source_key_out_of_band": false,
+      "source_key_distinct": false,
+      "source_control_domain_distinct": false,
+      "independent_corroboration": false,
+      "reason": "source_signature_absent"
+    }
+  ],
+  "independent_dimensions": [
+    "data_rights"
+  ],
+  "receipt_digest": "sha256:ab05d30a92a846f96d1fee87d3ffd040c5dfdfd980afc65297d44313d8857fda"
+}

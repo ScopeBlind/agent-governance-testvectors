@@ -1,0 +1,14 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "test:revoked:ed25519",
+      "x": "EmK8bVQIo8TgJaoMFeZPaRl82ziRG-WtNEqUl3nfPaY",
+      "use": "sig",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z",
+      "revoked_at": "2026-04-01T00:00:00Z"
+    }
+  ]
+}

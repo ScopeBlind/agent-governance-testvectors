@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aeoess.com/schemas/a2a-trust-header/v1/a2a-trust-header.schema.json",
+  "title": "A2A x-agent-trust composite header",
+  "description": "Canonical 5-field composite header for A2A x-agent-trust extension. Locked in A2A#1742 between APS + MolTrust. Providers MAY emit additional sibling fields (additionalProperties=true); consumers MUST read these 5.",
+  "type": "object",
+  "required": [
+    "trust_level",
+    "attestation_count",
+    "last_verified",
+    "evidence_bundle",
+    "delegation_chain_root"
+  ],
+  "properties": {
+    "trust_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "Reputation dimension. 0 = unverified / newly issued; 4 = highest-confidence issuer-backed."
+    },
+    "attestation_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of attestations accumulated by the issuer for this agent at last_verified time."
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of last issuer-side verification. Consumers MAY apply a half-life policy (MolTrust default: 45 days)."
+    },
+    "evidence_bundle": {
+      "type": "string",
+      "description": "Pointer to the full attestation bundle. Typically an ipfs://... URI or an HTTPS URL.",
+      "pattern": "^(ipfs://|https?://).+"
+    },
+    "delegation_chain_root": {
+      "type": "string",
+      "description": "Self-describing authority root. Inline hash form `sha256:<hex>` or pointer form `uri:https://...`. Both providers MUST emit sha256:<hex> for happy-path fixtures; drift/revocation cases MAY flag variant formats explicitly.",
+      "pattern": "^(sha256:[0-9a-f]{64}|uri:https?://.+)$"
+    }
+  },
+  "additionalProperties": true
+}

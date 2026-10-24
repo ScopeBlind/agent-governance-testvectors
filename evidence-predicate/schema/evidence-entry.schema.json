@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veritasacta.com/schemas/acta-evidence-entry.v1.schema.json",
+  "title": "Acta evidence entry (draft-farley-acta-signed-receipts-03, Section 4.1)",
+  "description": "One entry of the OPTIONAL payload.evidence array. Structural only: whether an entry is independent corroboration is decided by the relying party under Section 4.3, never by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dimension", "state", "source"],
+  "properties": {
+    "dimension": {
+      "oneOf": [
+        { "enum": ["data_rights", "provenance", "compliance", "freshness", "consent", "identity", "authorization", "integrity"] },
+        { "type": "string", "pattern": "^x-[a-z0-9]+:[a-z0-9_.-]+$" }
+      ]
+    },
+    "state": { "enum": ["satisfied", "unverified", "stale", "failed", "not_applicable"] },
+    "as_of": { "type": "string", "format": "date-time", "description": "Omitted when absent; never null." },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "ref"],
+      "properties": {
+        "authority": { "type": "string", "minLength": 1, "description": "The attesting party. Advisory: the producer controls it." },
+        "ref": { "type": "string", "minLength": 1, "description": "A resolvable reference, or sha256:<hex> of the attested subject." },
+        "kid": { "type": "string", "minLength": 1, "description": "The attesting authority's key id; the relying party obtains the key out of band." },
+        "alg": { "type": "string", "description": "Signature algorithm; defaults to EdDSA when absent." },
+        "sig": { "type": "string", "pattern": "^[0-9a-f]+$", "description": "The authority's signature over JCS({dimension, ref, state, as_of?}), lowercase hex. Length depends on alg." }
+      }
+    }
+  }
+}

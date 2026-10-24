@@ -1,0 +1,11 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "test:signing-input:ed25519",
+      "x": "kDXdE8TJ6z2Pca35z9Ypq7y2hJpNjsntdymWquq4-mU",
+      "use": "sig"
+    }
+  ]
+}
