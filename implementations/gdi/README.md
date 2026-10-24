@@ -1,59 +1,75 @@
-# GDI Driver
+# GDI driver
 
-**Governed Decision Intelligence** conformance driver for
-[`draft-farley-acta-signed-receipts`](https://datatracker.ietf.org/doc/draft-farley-acta-signed-receipts/).
+**Governed Decision Intelligence** conformance driver contributed by
+[@mj3b](https://github.com/mj3b) in [PR #7](https://github.com/ScopeBlind/agent-governance-testvectors/pull/7).
 
 - **License:** Apache-2.0
 - **Spec:** https://github.com/mj3b/governed-decision-intelligence
 - **Contact:** @mj3b
+- **Format:** the `decision_receipt` compatibility shape accepted by this suite;
+  not the Acta 2.1 envelope specified in the published Internet-Draft.
 
-## What this driver adds
+## What this driver checks
 
-Standard conformance drivers emit receipts that capture the policy outcome
-(allow/deny), the policy identifier, and chain integrity fields. This driver
-embeds a **Governed Decision Record (GDR)** in the receipt's `gdr` field,
-sealing the pre-decision reasoning state before the tool fires.
+The driver evaluates the exact bytes of `fixtures/policy/autoresearch-safe.cedar`
+using the Rust Cedar engine through `cedarpy`. It embeds a demonstration Governed
+Decision Record (GDR) in `payload.gdr`. The `payload.result_hash` field is
+`"sha256:"` + hex(SHA-256(JCS(GDR))), binding:
 
-The `result_hash` field is `sha256(JCS(GDR))`, binding:
+- `confidence_score`: numeric score against institutional thresholds (here a fixed fixture value)
+- `gate_classification`: `routine | elevated_review | mandatory_escalation | blocked | deferred`
+- `reasoning_reconstruction`: plain-language explanation of the decision
+- `evidence_sources`: completeness classification per input source
+- `accountability_chain`: named roles and responsibilities
 
-- `confidence_score` — numeric score against institutional thresholds
-- `gate_classification` — `routine | elevated_review | mandatory_escalation | blocked | deferred`
-- `reasoning_reconstruction` — plain-language explanation of the decision
-- `evidence_sources` — completeness classification per input source
-- `accountability_chain` — named roles and responsibilities
+In this driver, confidence scores and role names are fixture values, not measured
+confidence, corroborating evidence, or evidence of a real person's approval. No
+threshold is applied and no tool executes. A valid signature authenticates the
+recorded bytes under the supplied test key; it does not establish the truth or
+quality of the reasoning.
 
-Receipt integrity (attribution, ordering, tamper detection) is independent
-of payload semantics per the v1.1 spec. An auditor verifies the receipt
-offline with `@veritasacta/verify`, then reads GDR fields from the now-attested
-payload to assess decision quality.
+The chain and policy digest follow the published
+[draft-farley-acta-signed-receipts-03](https://datatracker.ietf.org/doc/html/draft-farley-acta-signed-receipts-03)
+Sections 2.2, 6.7 and 6.8:
 
-## Bilateral pattern
+- `payload.previousReceiptHash` is absent on the genesis receipt.
+- Each later value is `"sha256:"` plus the lowercase hex SHA-256 of the JCS form
+  of the **whole previous receipt as signed**, signature included.
+- `policy_digest` is the `acta-policy-digest-v1` manifest digest over the exact
+  policy bytes evaluated.
 
-For threat models requiring pre-execution intent binding, this driver supports
-the bilateral pattern described in the v1.1 spec discussion
-([VeritasActa/verify#1](https://github.com/VeritasActa/verify/issues/1)):
+The signature covers JCS of the receipt without its `signature` member, the
+Section 6.6 rule for a receipt whose signature is a hex string, as in the suite's
+`decision_receipt` shape. Canonicalization uses the `rfc8785` package.
 
-- Receipt 1: sealed over the pre-execution GDR (intent)
-- Receipt 2: sealed over the post-execution result, chained via `previous_receipt_hash`
+Cedar errors fail the driver. Every fixture is evaluated and signed before
+replacing the prior output, so a bad later fixture does not leave a partial new
+chain. `expected_decision` is never used to derive a decision.
 
-This binds both sides independently. The current driver emits single receipts
-for v1.0 conformance; bilateral emission is in progress.
+The bilateral pattern (one receipt sealed over the pre-execution GDR as intent,
+a second over the post-execution result, chained by `previousReceiptHash`) is
+not implemented yet; this driver emits one receipt per fixture.
 
-## Requirements
+## Run from the repository root
 
-- Python 3.10+
-- `pip install cryptography`
-
-## Running
+Use Python 3.10+ and Node/npm for the shared verifier:
 
 ```bash
-cd implementations/gdi
-chmod +x run.sh
-./run.sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r implementations/gdi/requirements.txt
+bash implementations/gdi/run.sh
+bash conformance/verify.sh receipts/gdi
+python -m unittest discover -s implementations/gdi -p 'test_*.py' -v
 ```
 
-Receipts are written to `receipts/gdi/`. Run the conformance verifier:
+Receipts go to `receipts/gdi/`. The suite verifies **every file separately**:
+the verifier takes one receipt per invocation, so do not pass it a glob. The
+shared suite verifies with the fixture public key from `fixtures/keys/README.md`,
+supplied separately from the receipt; `key.hex` records the same key for manual
+checks. All signing key material in this driver is public test material and
+must never be used for production.
 
-```bash
-./conformance/verify.sh receipts/gdi/
-```
+The regression tests include malformed chain conventions, mutation of signed
+GDR fields, policy replacement, Cedar evaluation errors, nested inputs, JCS
+number/key-order behavior, and preservation of previous output on failed runs.

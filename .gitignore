@@ -2,3 +2,4 @@
 # contain node compile caches, so it should never be committed.
 receipts/
 __pycache__/
+.venv/

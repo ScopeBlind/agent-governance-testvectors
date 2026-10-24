@@ -24,10 +24,14 @@ jobs:
           python-version: '3.12'
       - name: Install the Python drivers' dependencies
         # nobulex needs an Ed25519 library; the APS driver needs cedarpy and the
-        # published Passport SDK. Both publish wheels, so this is a pip step, not
-        # a toolchain. Without it both drivers exit 77 and the suite verifies
-        # only the reference implementation.
-        run: python -m pip install --quiet pynacl cedarpy==4.8.7 agent-passport-system
+        # published Passport SDK; the GDI driver needs the pinned packages in
+        # implementations/gdi/requirements.txt, whose cedarpy pin must match the
+        # one on this line. All publish wheels, so this is a pip step, not a
+        # toolchain. Without it these drivers exit 77 and are reported as skipped.
+        run: python -m pip install --quiet pynacl cedarpy==4.8.7 agent-passport-system -r implementations/gdi/requirements.txt
+
+      - name: GDI driver regression checks
+        run: python -m unittest discover -s implementations/gdi -p 'test_*.py' -v
 
       - name: Make scripts executable
         run: chmod +x conformance/*.sh implementations/*/run.sh evidence-predicate/run.sh verifier-vectors/run.mjs
