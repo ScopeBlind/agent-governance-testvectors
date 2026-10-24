@@ -3,24 +3,26 @@
 //
 //   node verifier-vectors/run.mjs
 //
-//   VERIFY_PKG  the verifier run through npx (default: 0.10.27, the latest release, published with npm provenance).
-//               0.10.26 was the first to check a receipt against a supplied predecessor (--previous), to read --jwks
-//               with --replay-chain, and to combine checks as -04 Section 5.3 does; 0.10.25 the first to refuse a
-//               payload-only link in a sequence whatever the receipt before it cites, and to report each chain a
-//               sequence holds; 0.10.22 the first to refuse a malformed or other-algorithm chain link on a receipt
-//               checked alone, Section 6.7; and 0.10.21 the first to implement -04 Section 5.5 and refuse a signature
-//               member in the signing input, Section 6.6.
+//   VERIFY_PKG  the verifier run through npx (default: 0.11.0, published with npm provenance, the first release with
+//               the fix for GHSA-whwv-ppvg-jwgx). 0.10.26 was the first to check a receipt against a supplied
+//               predecessor (--previous), to read --jwks with --replay-chain, and to combine checks as Section 5.3 of
+//               the -04 editor's copy (VeritasActa/drafts#6) does; 0.10.25 the first to refuse a payload-only link in a
+//               sequence whatever the receipt before it cites, and to report each chain a sequence holds; 0.10.22 the
+//               first to refuse a malformed or other-algorithm chain link on a receipt checked alone, -03 Section 6.7;
+//               and 0.10.21 the first to implement the editor's copy's Section 5.5 and refuse a signature member in the
+//               signing input, -03 Section 6.6.
 //   VERIFY_CMD  instead of npx, a command prefix, e.g. "node /path/to/verify-cli/cli.js" (local testing)
 //   REVOCATION_CHECKED=1  score revocation/ against expected_if_revocation_checked, for a verifier that reads revoked_at
 //
 // Seven parts:
-//   1. key-window/                    this repository's key validity window vectors (Section 5.5)
+//   1. key-window/                    this repository's key validity window vectors (-03 Section 9.2; editor's copy 5.5)
 //   2. farley-receipt-signature       giskard09/argentum-core's vectors (Apache-2.0), fetched at a pinned commit
 //   3. conformance/check_embedded_key.sh   a receipt's own key must never be trusted (Section 9.5)
 //   4. revocation/                    a key revoked before issued_at: the gap, since the draft defines no revocation
 //   5. timeliness/                    one issued_at, alone and against an external chain commitment (Section 9.7)
 //   6. signing-input/                 a signature member in the object canonicalized, null included (Section 6.6)
-//   7. chain-link/                    the link alone, against a supplied predecessor, in a sequence (6.7, 6.7.1, 5.3)
+//   7. chain-link/                    the link alone, against a supplied predecessor, in a sequence (-03 6.7; editor's
+//                                     copy 6.7.1, 5.3)
 //
 // Exit: 0 every case matched, 1 a case did not, 77 the pinned verifier cannot be installed here.
 
@@ -32,7 +34,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.dirname(HERE)
-const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.10.27'
+const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.11.0'
 const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
 const ARGENTUM = {
   repo: 'giskard09/argentum-core',
