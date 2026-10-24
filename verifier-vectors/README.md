@@ -214,10 +214,12 @@ The signing-input case is @astrogilda's, found with `vectors-receipt-signature` 
 
 ## In CI
 
-The workflow runs this with the verifier pinned to `@veritasacta/verify@0.10.27`, the latest release, published with
-npm provenance. 0.10.26 was the first that checks a receipt against a supplied predecessor (`--previous`), reads `--jwks` with
-`--replay-chain`, and combines checks as -04 §5.3 does. 0.10.25 was the first to refuse a payload-only link in a sequence
-whatever the receipt before it cites, and to report each chain a sequence holds, 0.10.22 the first release that refuses a
-malformed or other-algorithm chain link on a receipt checked alone (§6.7), and 0.10.21 the first implementing §5.5 and
-the §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a failure, and the pin is the
-only line to change when a later release should be held to the same cases.
+The workflow runs this with the verifier pinned to `@veritasacta/verify@0.11.0`, published with npm provenance, the
+first release with the fix for GHSA-whwv-ppvg-jwgx. 0.10.26 was the first that checks a receipt against a supplied
+predecessor (`--previous`), reads `--jwks` with `--replay-chain`, and combines checks as §5.3 of the -04 editor's copy
+(VeritasActa/drafts#6) does. 0.10.25 was the first to refuse a payload-only link in a sequence whatever the receipt
+before it cites, and to report each chain a sequence holds, 0.10.22 the first release that refuses a malformed or
+other-algorithm chain link on a receipt checked alone (-03 §6.7), and 0.10.21 the first implementing the editor's
+copy's §5.5 and the -03 §6.6 refusal. If the pinned release is not on npm the step reports a skip rather than a
+failure. The pins to change when a later release should be held to the same cases are in `run.mjs` and in the
+workflow's agent-evidence-vectors step.

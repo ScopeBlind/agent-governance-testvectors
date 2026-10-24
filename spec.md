@@ -12,9 +12,13 @@ plus a deterministic keypair `K`, an implementation must:
    the [Cedar language reference](https://docs.cedarpolicy.com/).
 2. For each evaluation, produce a receipt `R_i` with the fields listed in
    [`expected/receipt-schema.json`](./expected/receipt-schema.json).
-3. Each receipt's `parent_receipt_hash` (except the first) must be the
-   SHA-256 of the JCS-canonical form of `R_{i-1}`.
-4. Sign each receipt with Ed25519 over the JCS-canonical payload.
+3. Each receipt's `previousReceiptHash` (except the first, where it is
+   omitted) must be `"sha256:"` plus the lowercase hex SHA-256 of the
+   JCS-canonical form of the whole signed `R_{i-1}`, including its signature
+   (section 6.7). The link is a member of `payload` (section 2.2).
+4. Sign each receipt with Ed25519 over its shape's JCS-canonical signing
+   input (section 6.6): the payload for the Acta 2.1 envelope; the whole
+   receipt minus `signature` for `decision_receipt`.
 5. Write the receipt chain to disk as a directory of per-receipt JSON
    files, ordered by `sequence`.
 
@@ -38,13 +42,14 @@ Every conformant implementation must pass these three checks:
 
 | # | Check | Where |
 |---|-------|-------|
-| 1 | Each produced receipt matches one of the two schema shapes (v1 flat or v2 envelope) | `expected/receipt-schema.json` |
-| 2 | Each receipt's Ed25519 signature verifies against the public key | Signature validation with `fixtures/keys/public.hex` |
-| 3 | The chain of `parent_receipt_hash` (v1) or `prev_hash` (v2) values forms a valid ordered chain from genesis to the final receipt | Walk the chain |
+| 1 | Each receipt matches one of the two accepted schema shapes (Acta 2.1 envelope or `decision_receipt`) | `expected/receipt-schema.json` |
+| 2 | Each receipt's Ed25519 signature verifies under the fixture public key, supplied separately from the receipt | `conformance/verify.sh`; the key is in `fixtures/keys/README.md` |
+| 3 | Each `previousReceiptHash` is the link of the whole signed receipt before it, sequences are ordered, and decisions and policy identity match `expected/chain.jsonl` | `conformance/check_chain.py` |
 
-`@veritasacta/verify` performs checks 2 and 3 automatically and accepts
-both receipt shapes. Check 1 is a shape-level test run by
-`conformance/verify.sh`.
+`conformance/verify.sh` validates each file's schema and invokes the verifier
+once per file for signatures. It then invokes `check_chain.py` for predecessor
+matching and expected fixture outcomes. Verifying a receipt alone does not
+establish its link to a predecessor that was not supplied.
 
 ## Four receipt shapes in use
 
@@ -55,7 +60,9 @@ receipts, and it was reported from outside. The schema now describes what
 is actually here.
 
 A receipt conformant to `expected/receipt-schema.json` matches exactly one
-of the four. That is a statement about what exists in this corpus, not
+of its two accepted shapes: Acta 2.1 or `decision_receipt`. The v1 flat and v2
+envelope definitions remain as historical descriptions, outside `oneOf`;
+they are not accepted. That is a statement about this corpus, not
 about what the draft requires. Only the Acta 2.1 envelope is the shape
 draft-farley-acta-signed-receipts-03 specifies.
 
@@ -147,7 +154,7 @@ verifies because signer and verifier agree on which bytes to sign within
 one shape. A v1 verifier does not verify v2 receipts and vice versa without
 the polyglot logic `@veritasacta/verify` implements.
 
-Conformance here means producing one shape correctly and having the
+Conformance here means producing one accepted shape correctly and having the
 reference verifier accept the output. New producers should emit the Acta
 2.1 envelope, since that is the shape the draft specifies. The other three
 are recorded because they exist, not because they are recommended.
