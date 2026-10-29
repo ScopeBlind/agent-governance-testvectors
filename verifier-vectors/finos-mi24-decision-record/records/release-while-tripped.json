@@ -3,13 +3,13 @@
     "type": "x-agent-governance-testvectors:mi24-decision-record",
     "issuer_id": "test:mi24-gate:ed25519",
     "issued_at": "2026-10-27T22:20:02Z",
-    "previousReceiptHash": "sha256:15541ead9d7b7d3bdd91763c2375d8e73fe5a27e65787c838f949195f990c9c9",
+    "previousReceiptHash": "sha256:d77e5523bccee065d85d4e1af95188f8ebbe78b98e1133fe49580f117c880403",
     "decision_id": "dec-20261027-0002",
     "timestamp_utc": "2026-10-27T22:20:01Z",
     "agent_id": "agent:payables-assistant",
     "model_version": "example-model-2026-09",
     "policy_version": "agent-gate-policy@2026.10.2",
-    "autonomy_tier": "standing approval",
+    "autonomy_tier": "T2_BOUNDED_AUTO_EXECUTE",
     "action_type": "tickets.create",
     "resolved_action_digest": "sha256:c175aca62b79b8f7c2a245e3968d5583a407b93261f755a3cb1b7fc91ac06a0b",
     "blast_radius_usd": 0,
@@ -19,17 +19,33 @@
     ],
     "human_approver": {
       "principal_id": "user:payables-operator-07@example.com",
-      "oversight_pattern": "user confirmation",
+      "oversight_pattern": "STANDING_BOUNDED_GRANT",
       "grant_id": "grant-tickets-create-20261027-a"
     },
-    "suspension_trigger_state": "ST-01 tripped",
+    "suspension_trigger_state": {
+      "status": "TRIPPED",
+      "tripped_trigger": "ST-01",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ],
+      "trigger_evidence": {
+        "rolling_total_usd": 81000,
+        "ceiling_usd": 100000,
+        "policy_version": "agent-gate-policy@2026.10.2"
+      }
+    },
     "rollback_token": "rollback-tickets-20261027-0002",
-    "schema_version": "0.1.0-draft",
-    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+    "control_owner": "Payables Operations Lead: user:payables-lead-03@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
   },
   "signature": {
     "alg": "EdDSA",
     "kid": "test:mi24-gate:ed25519",
-    "sig": "def17acd99cbad0886394fa30d7180bbf5be080efc08c0c617cce1b34ef6e89baf4f68292c3cb23a6806a5addcfecf75dcf94754dd3f1949469c323d8c5b0c06"
+    "sig": "f33c269b44cfb431c82b539642453b56cac20734c331a6ec5a6d35f0939691543e926bab388731828f8c311febd8a35d13fa2a5c4e7499cf3817d9e1d15ec20c"
   }
 }

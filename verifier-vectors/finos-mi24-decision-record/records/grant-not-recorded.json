@@ -3,13 +3,13 @@
     "type": "x-agent-governance-testvectors:mi24-decision-record",
     "issuer_id": "test:mi24-gate:ed25519",
     "issued_at": "2026-10-27T22:20:02Z",
-    "previousReceiptHash": "sha256:15541ead9d7b7d3bdd91763c2375d8e73fe5a27e65787c838f949195f990c9c9",
+    "previousReceiptHash": "sha256:d77e5523bccee065d85d4e1af95188f8ebbe78b98e1133fe49580f117c880403",
     "decision_id": "dec-20261027-0002",
     "timestamp_utc": "2026-10-27T22:20:01Z",
     "agent_id": "agent:payables-assistant",
     "model_version": "example-model-2026-09",
     "policy_version": "agent-gate-policy@2026.10.2",
-    "autonomy_tier": "standing approval",
+    "autonomy_tier": "T2_BOUNDED_AUTO_EXECUTE",
     "action_type": "tickets.create",
     "resolved_action_digest": "sha256:c175aca62b79b8f7c2a245e3968d5583a407b93261f755a3cb1b7fc91ac06a0b",
     "blast_radius_usd": 0,
@@ -19,17 +19,28 @@
     ],
     "human_approver": {
       "principal_id": "user:payables-operator-07@example.com",
-      "oversight_pattern": "user confirmation",
+      "oversight_pattern": "STANDING_BOUNDED_GRANT",
       "grant_id": "grant-tickets-create-20261027-b"
     },
-    "suspension_trigger_state": "no trigger tripped",
+    "suspension_trigger_state": {
+      "status": "CLEAR",
+      "tripped_trigger": "NONE",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ]
+    },
     "rollback_token": "rollback-tickets-20261027-0002",
-    "schema_version": "0.1.0-draft",
-    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+    "control_owner": "Payables Operations Lead: user:payables-lead-03@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
   },
   "signature": {
     "alg": "EdDSA",
     "kid": "test:mi24-gate:ed25519",
-    "sig": "40f1bf0dd181491430c5f852069b62e8b828a4fc97464427208658fca6a3e21fee6851b6c3b0c3fa2874ca254d862bb226020f3852618576a9ffc2206a5ef00c"
+    "sig": "1df81b6a24ddad17dbef6c6be337f8dd06b5383c9ba7921520c95251fd646a60e06b646d3604abcb0f4de6ef420b9e20d271c50b482388c417705b48373b4c09"
   }
 }

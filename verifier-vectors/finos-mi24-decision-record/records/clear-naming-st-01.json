@@ -8,7 +8,7 @@
     "agent_id": "agent:payables-assistant",
     "model_version": "example-model-2026-09",
     "policy_version": "agent-gate-policy@2026.10.2",
-    "autonomy_tier": "per-action approval",
+    "autonomy_tier": "T1_HUMAN_APPROVAL_REQUIRED",
     "action_type": "payments.transfer",
     "resolved_action_digest": "sha256:480fb28cb281f79d21e292d1242c4f943a33be5c1a475c26384cef0c23bbcac1",
     "blast_radius_usd": 25000,
@@ -19,17 +19,28 @@
     ],
     "human_approver": {
       "principal_id": "user:treasury-checker-02@example.com",
-      "oversight_pattern": "maker-checker",
-      "grant_id": null
+      "oversight_pattern": "PER_ACTION_APPROVAL",
+      "grant_id": "per-action:dec-20261027-0001"
     },
-    "suspension_trigger_state": "no trigger tripped",
-    "idempotency_key": "idem-payables-20261027-0001",
-    "schema_version": "0.2.0-draft",
-    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+    "suspension_trigger_state": {
+      "status": "CLEAR",
+      "tripped_trigger": "ST-01",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ]
+    },
+    "rollback_token": "idem-payables-20261027-0001",
+    "control_owner": "AP Controller: user:ap-controller-01@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
   },
   "signature": {
     "alg": "EdDSA",
     "kid": "test:mi24-gate:ed25519",
-    "sig": "43d41ee66934ff9420af043e77e40eca7915fb9fd961106d4b9b7a233b802e5d6cf9e4d41333d97cf3bcb715ca1706b58887eb2d886bda66ecf5af42c475950d"
+    "sig": "6beca3fe05febd66f7d6dc83faf68b73cc31fbf52c5fd8d82b4e91cf749ae54ecf4da00e5f7fba35908699888a9e5ec499afd338a856a554089918b0da4e690a"
   }
 }

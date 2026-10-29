@@ -8,7 +8,7 @@
     "agent_id": "agent:payables-assistant",
     "model_version": "example-model-2026-09",
     "policy_version": "agent-gate-policy@2026.10.2",
-    "autonomy_tier": "per-action approval",
+    "autonomy_tier": "T1_HUMAN_APPROVAL_REQUIRED",
     "action_type": "payments.transfer",
     "resolved_action_digest": "sha256:480fb28cb281f79d21e292d1242c4f943a33be5c1a475c26384cef0c23bbcac1",
     "blast_radius_usd": 25000,
@@ -17,14 +17,25 @@
       "urn:example:invoice:INV-20431",
       "urn:example:sanctions-screen:ss-4471"
     ],
-    "suspension_trigger_state": "no trigger tripped",
-    "idempotency_key": "idem-payables-20261027-0001",
-    "schema_version": "0.1.0-draft",
-    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+    "suspension_trigger_state": {
+      "status": "CLEAR",
+      "tripped_trigger": "NONE",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ]
+    },
+    "rollback_token": "idem-payables-20261027-0001",
+    "control_owner": "AP Controller: user:ap-controller-01@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
   },
   "signature": {
     "alg": "EdDSA",
     "kid": "test:mi24-gate:ed25519",
-    "sig": "1f6ab3b8f88d2c1da19fbfda74ddd266001630775b8fac92789fd856dbe474a599ba0c4e194bc7e4d93b0ff0925c306b6e2dd0c9ed2e9634a40cfdbb0906f10b"
+    "sig": "539355c6a689368437d72133e65645901dcf3b0447c72a1f6d9d420e6c26d700eaf9bf0f1b0697c3c05dc7730fad318556efc3411854eac771eb92c3e29de607"
   }
 }

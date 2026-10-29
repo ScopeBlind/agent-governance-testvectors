@@ -8,28 +8,39 @@
     "agent_id": "agent:payables-assistant",
     "model_version": "example-model-2026-09",
     "policy_version": "agent-gate-policy@2026.10.2",
-    "autonomy_tier": "bounded unattended execution",
+    "autonomy_tier": "T2_BOUNDED_AUTO_EXECUTE",
     "action_type": "payments.transfer",
-    "resolved_action_digest": "sha256:dd49df69942680dcb637ec28f5e6a28bdde3e1ab8552f81d3083a2e0e56a8032",
-    "blast_radius_usd": 56000,
+    "resolved_action_digest": "sha256:6ea3ac7d4d3fb3c721cc073d7310f75b751cd95825315151dea79da85f95248e",
+    "blast_radius_usd": 14000,
     "cumulative_24h_usd": 81000,
     "evidence_refs": [
       "urn:example:invoice:INV-20502"
     ],
     "human_approver": null,
     "suspension_trigger_state": {
-      "trigger": "ST-01",
-      "rolling_total_usd": 81000,
-      "ceiling_usd": 100000,
-      "policy_version": "agent-gate-policy@2026.10.2"
+      "status": "TRIPPED",
+      "tripped_trigger": "ST-01",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ],
+      "trigger_evidence": {
+        "rolling_total_usd": 81000,
+        "ceiling_usd": 100000,
+        "policy_version": "agent-gate-policy@2026.10.2"
+      }
     },
-    "idempotency_key": "idem-payables-20261027-0003",
-    "schema_version": "0.1.0-draft",
-    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+    "rollback_token": "idem-payables-20261027-0003",
+    "control_owner": "AP Controller: user:ap-controller-01@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
   },
   "signature": {
     "alg": "EdDSA",
     "kid": "test:mi24-gate:ed25519",
-    "sig": "9fa03a04c0edc20e33c44267355d967d89fd4420b8f951cabb9b38bf09386e46292cd9ec94bb29ef3f740689340fc4d6783c0224a833a162eef0c623c5557205"
+    "sig": "87b26254257086d5e8ee54f6906b85dec03cbb2bf308968ebb38f3e84575f9156457ce3a6a294f027e69ee86042c7d83b32b699d3514dc7635231486fc312d03"
   }
 }
