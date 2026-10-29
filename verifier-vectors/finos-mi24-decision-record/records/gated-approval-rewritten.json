@@ -1,0 +1,35 @@
+{
+  "payload": {
+    "type": "x-agent-governance-testvectors:mi24-decision-record",
+    "issuer_id": "test:mi24-gate:ed25519",
+    "issued_at": "2026-10-27T22:14:06Z",
+    "decision_id": "dec-20261027-0001",
+    "timestamp_utc": "2026-10-27T22:14:05Z",
+    "agent_id": "agent:payables-assistant",
+    "model_version": "example-model-2026-09",
+    "policy_version": "agent-gate-policy@2026.10.2",
+    "autonomy_tier": "per-action approval",
+    "action_type": "payments.transfer",
+    "resolved_action_digest": "sha256:480fb28cb281f79d21e292d1242c4f943a33be5c1a475c26384cef0c23bbcac1",
+    "blast_radius_usd": 25000,
+    "cumulative_24h_usd": 25000,
+    "evidence_refs": [
+      "urn:example:invoice:INV-20431",
+      "urn:example:sanctions-screen:ss-4471"
+    ],
+    "human_approver": {
+      "principal_id": "user:treasury-checker-05@example.com",
+      "oversight_pattern": "maker-checker",
+      "grant_id": null
+    },
+    "suspension_trigger_state": "no trigger tripped",
+    "idempotency_key": "idem-payables-20261027-0001",
+    "schema_version": "0.1.0-draft",
+    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "test:mi24-gate:ed25519",
+    "sig": "fca4a5b14071fb096985f94968b4df49e49b9bf0b9fdb67235bdf224e318f20340f5b4c6ebc70d8e109fd46591a495a5973b4839c83af4036eeea0e72e5caf02"
+  }
+}

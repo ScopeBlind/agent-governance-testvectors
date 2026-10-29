@@ -1,0 +1,8 @@
+{
+  "about": "The recorded standing approvals the relying party resolves a grant_id against (MI-24 Record the Grant as Approval Evidence). MI-24 lists what a grant record persists (the grantor, scope and argument constraints, environment, grant and expiry times, any revocation) but defines no format for it, so each entry carries only the identifier the check reads.",
+  "recorded_standing_approvals": [
+    {
+      "grant_id": "grant-tickets-create-20261027-a"
+    }
+  ]
+}

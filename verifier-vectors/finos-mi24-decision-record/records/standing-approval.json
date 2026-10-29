@@ -1,0 +1,35 @@
+{
+  "payload": {
+    "type": "x-agent-governance-testvectors:mi24-decision-record",
+    "issuer_id": "test:mi24-gate:ed25519",
+    "issued_at": "2026-10-27T22:20:02Z",
+    "previousReceiptHash": "sha256:15541ead9d7b7d3bdd91763c2375d8e73fe5a27e65787c838f949195f990c9c9",
+    "decision_id": "dec-20261027-0002",
+    "timestamp_utc": "2026-10-27T22:20:01Z",
+    "agent_id": "agent:payables-assistant",
+    "model_version": "example-model-2026-09",
+    "policy_version": "agent-gate-policy@2026.10.2",
+    "autonomy_tier": "standing approval",
+    "action_type": "tickets.create",
+    "resolved_action_digest": "sha256:c175aca62b79b8f7c2a245e3968d5583a407b93261f755a3cb1b7fc91ac06a0b",
+    "blast_radius_usd": 0,
+    "cumulative_24h_usd": 25000,
+    "evidence_refs": [
+      "urn:example:decision:dec-20261027-0001"
+    ],
+    "human_approver": {
+      "principal_id": "user:payables-operator-07@example.com",
+      "oversight_pattern": "user confirmation",
+      "grant_id": "grant-tickets-create-20261027-a"
+    },
+    "suspension_trigger_state": "no trigger tripped",
+    "rollback_token": "rollback-tickets-20261027-0002",
+    "schema_version": "0.1.0-draft",
+    "schema_digest": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "test:mi24-gate:ed25519",
+    "sig": "0e4f9a9247bc69e94e5cfcf1c527a887f858e504fb59f92312819baf6bbec11c067353e75f73e84400ebf76acb948957bcc8c0b123d9a426f33228ec4bdba70a"
+  }
+}

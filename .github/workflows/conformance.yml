@@ -47,6 +47,7 @@ jobs:
           node verifier-vectors/timeliness/scripts/generate.mjs --check
           node verifier-vectors/signing-input/scripts/generate.mjs --check
           node verifier-vectors/chain-link/scripts/generate.mjs --check
+          node verifier-vectors/finos-mi24-decision-record/scripts/generate.mjs --check
           node verifier-vectors/timeliness/scripts/check.mjs
 
       - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys, revocation, timeliness, signing input, chain links)
@@ -64,6 +65,23 @@ jobs:
           rc=$?
           if [ "$rc" -eq 77 ]; then echo "::notice::verifier vectors skipped: the pinned verifier is not installable yet"; exit 0; fi
           exit $rc
+
+      - name: Draft FINOS MI-24 decision records as Acta receipts (verifier 0.11.1, the draft schema and digests)
+        # A DRAFT offered for the follow-up to MI-24 in finos/ai-governance-framework, not adopted by FINOS. The pinned
+        # verifier checks each receipt's signature, key and chain; the runner then checks the record against the draft
+        # schema, the schema it names, its resolved action digest and the contradictions MI-24 names, and sweeps each
+        # check off in turn. Pinned to 0.11.1, published with npm provenance, installed with ajv 8.20.0 (which 0.11.1
+        # itself depends on) into a temporary prefix; ajv cross-checks the dependency-free schema check. If the verifier
+        # cannot be installed the runner exits 77 and this step reports a skip, not a failure. See
+        # verifier-vectors/finos-mi24-decision-record/README.md.
+        run: |
+          set +e
+          npm install --prefix "$RUNNER_TEMP/verify-0.11.1" --no-save --no-audit --no-fund @veritasacta/verify@0.11.1 ajv@8.20.0
+          VERIFY_CMD="$RUNNER_TEMP/verify-0.11.1/node_modules/.bin/verify" node verifier-vectors/finos-mi24-decision-record/run.mjs
+          rc=$?
+          if [ "$rc" -eq 77 ]; then echo "::notice::MI-24 draft vectors skipped: the pinned verifier is not installable"; exit 0; fi
+          if [ "$rc" -ne 0 ]; then exit $rc; fi
+          node verifier-vectors/finos-mi24-decision-record/scripts/crosscheck-ajv.mjs "$RUNNER_TEMP/verify-0.11.1"
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 

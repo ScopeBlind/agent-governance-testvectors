@@ -65,6 +65,7 @@ verifier-vectors/
 ├── timeliness/                  One issued_at, alone and against an external chain commitment (Section 9.7)
 ├── signing-input/               A signature member in the object canonicalized, null included (Section 6.6)
 ├── chain-link/                  A previousReceiptHash alone, after a supplied predecessor, in a sequence (-03 Section 6.7; -04 editor's copy Section 6.7.1)
+├── finos-mi24-decision-record/  DRAFT, not adopted by FINOS: MI-24 decision records as Acta receipt payloads, a draft schema, its own runner
 └── run.mjs                      Runs these, argentum-core's farley vectors, and the embedded-key check
 .github/workflows/
 └── conformance.yml              CI running all implementations against fixtures

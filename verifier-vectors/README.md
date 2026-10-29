@@ -23,6 +23,7 @@ Exit status: 0 every case matched, 1 a case did not, 77 the pinned verifier cann
 | `signing-input/` | -03 §6.6 (unchanged in -04) | This repository. A signature member in the object canonicalized, `null` and `""` included, is refused even though the signature over it verifies. `signing-input/scripts/generate.mjs --check`. |
 | `chain-link/` | -04 §6.7, §6.7.1, §5.3 | This repository. `previousReceiptHash` on a receipt checked alone, against a predecessor the caller supplies, and in a sequence: its form, how it is read, and a failed link check beside one that could not run. Every signature verifies. `chain-link/scripts/generate.mjs --check`. |
 | `agent-evidence-vectors/` | -03 §5.1, §6.6, §9.2 | [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) 0.24.0 `vectors-receipt-signature`, installed from PyPI by hash and checked against the release's signed digest list, never copied. `agent-evidence-vectors/run.sh`. |
+| `finos-mi24-decision-record/` | §2.2, §6.7; FINOS MI-24 | This repository. A DRAFT for the follow-up to FINOS MI-24, not adopted by FINOS: MI-24 decision records as the signed payload of Acta receipts, a draft schema for them, and its own runner pinned to 0.11.1, which `run.mjs` does not run. `finos-mi24-decision-record/scripts/generate.mjs --check`. |
 
 ## Key validity windows
 

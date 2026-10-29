@@ -1,0 +1,637 @@
+{
+  "suite": "finos-mi24-decision-record",
+  "status": "DRAFT for the follow-up to MI-24 in finos/ai-governance-framework. Not adopted, reviewed or endorsed by FINOS, which owns the MI-24 decision record. Written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and @veritasacta/verify, with AI coding agents: the format author's own work, not an independent evaluation.",
+  "mi24": {
+    "pull_request": "https://github.com/finos/ai-governance-framework/pull/412",
+    "head": "490d0fd73e8f47f459698ee8c6e0843e0f9204cc",
+    "file": "docs/_mitigations/mi-24_human-in-the-loop-action-approval-gate.md",
+    "file_sha256": "86e9d959d8a64c033144c9c1d66fb36ab7e83da4350cffacf103d8dd3462d08a"
+  },
+  "profile": "Each record is the signed payload of a draft-farley-acta-signed-receipts receipt (envelope shape, signed over JCS(payload)). The payload carries the receipt's own members (type, issuer_id, issued_at, and previousReceiptHash when chained) beside the MI-24 record.",
+  "record_type": "x-agent-governance-testvectors:mi24-decision-record",
+  "schema": {
+    "file": "schema/mi24-decision-record-0.1.0-draft.schema.json",
+    "version": "0.1.0-draft",
+    "sha256": "sha256:118a896f502047948cdd22b0e5d0b14cfb1a0081d8850b1eafb0a6d92d483797"
+  },
+  "issuer": {
+    "kid": "test:mi24-gate:ed25519",
+    "public_key_hex": "b92aaa7c8db21139aa7d7ec0daa8d7e62519d6ee46a4534e07644c683a008391",
+    "seed": "00..10",
+    "jwks": "issuer-jwks.json",
+    "window": {
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    }
+  },
+  "other_keys": {
+    "test:mi24-agent:ed25519": {
+      "public_key_hex": "4f2a59edc8367deb40047ce83ee7f5ce711a57d93abbda9d1ce8588c56a3ce88",
+      "seed": "00..11",
+      "note": "The agent's own key. It signs only records/unexpected-signer.json and is in no key set here."
+    }
+  },
+  "grants": "grants.json",
+  "invocation": {
+    "alone": "verify <file> --jwks issuer-jwks.json --mode receipt --json",
+    "sequence": "verify --replay-chain <file> --jwks issuer-jwks.json --json"
+  },
+  "checks": {
+    "signature": "The receipt's signature, and its signing input (Section 6.6), under the pinned key set: @veritasacta/verify's checks.signature and checks.signing_input.",
+    "key": "The receipt names the pinned gate key (issuer_id is signature.kid), the verifier resolved that key from the pinned key set, and the signed issued_at falls inside its window.",
+    "chain": "In a sequence, each record's previousReceiptHash is the Section 6.7 link of the record before it (verify --replay-chain). A record checked alone has no predecessor to follow: not_run.",
+    "schema": "The payload validates against the draft schema.",
+    "schema_digest": "The record names the schema's version and \"sha256:\" plus the SHA-256 of the schema file's bytes.",
+    "action_digest": "resolved_action_digest is \"sha256:\" plus the SHA-256 of the RFC 8785 bytes of the action supplied with the case.",
+    "approver_not_agent": "human_approver.principal_id is not agent_id. not_run when the record names no human approver.",
+    "grant_recorded": "human_approver.grant_id names a standing approval in grants.json. not_run when grant_id is null or absent."
+  },
+  "scoring": "An accept or reject case conforms when the verdict and outcome equal expected. An unsettled case is one MI-24 does not decide: it carries no expected verdict, and a verifier conforms on it with any verdict its readings list, the convention of the agent-audit-record corpus in agent-evidence-vectors. expected.checks are the results of run.mjs's own checks, and verify the outcome, exit status and code @veritasacta/verify 0.11.1 reports for the receipt or, in a sequence, for the line named; another verifier is held to the verdict alone. The verdict combines the checks as Section 5.3 of the -04 editor's copy does: invalid if any check ran and failed, undecidable if none failed and one could not decide, otherwise valid.",
+  "counts": {
+    "accept": 2,
+    "reject": 13,
+    "unsettled": 2
+  },
+  "cases": [
+    {
+      "id": "gated-approval",
+      "kind": "accept",
+      "check": "alone",
+      "file": "records/gated-approval.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema; Checkable Decision Records",
+      "note": "A per-action maker-checker approval of a 25,000 USD payment. It carries every member MI-24 lists, grant_id is null because no standing approval applies, it names the schema by version and by the digest of its bytes, and its resolved_action_digest is the digest of the action supplied."
+    },
+    {
+      "id": "standing-approval-chain",
+      "kind": "accept",
+      "check": "sequence",
+      "file": "records/standing-approval-chain.jsonl",
+      "sequence": [
+        "records/gated-approval.json",
+        "records/standing-approval.json"
+      ],
+      "line": 2,
+      "actions": [
+        "actions/payment.json",
+        "actions/ticket.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "pass",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null,
+        "chains": 1,
+        "chain_breaks": 0
+      },
+      "mi24": "Record the Grant as Approval Evidence; Tamper-Evidence vs. Non-repudiation; Conformance (informative)",
+      "note": "The approval above, then a ticket released under a recorded standing approval, whose previousReceiptHash is the link to the approval: one chain. The release names its grant, so it is distinguishable from a per-action decision, and it carries rollback_token where the approval carries idempotency_key."
+    },
+    {
+      "id": "signature-altered",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/signature-altered.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The last hex digit of signature.sig changed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "fail",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "invalid_signature"
+      },
+      "mi24": "Tamper-Evidence vs. Non-repudiation",
+      "note": "The record is untouched and every MI-24 check passes; the signature does not verify under the pinned gate key."
+    },
+    {
+      "id": "field-changed-after-signing",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/field-changed-after-signing.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "blast_radius_usd changed from 25000 to 2500 after signing, the signature kept.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "fail",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "invalid_signature"
+      },
+      "mi24": "Tamper-Evidence vs. Non-repudiation",
+      "note": "The changed record is still well formed, so every MI-24 check passes on it. Only the signature shows that a member changed after signing."
+    },
+    {
+      "id": "unexpected-signer",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/unexpected-signer.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "Signed with the agent's own key, which signature.kid and issuer_id name.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "undecidable",
+          "key": "fail",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "undecidable",
+        "exit": 2,
+        "code": "jwks_fetch_failed"
+      },
+      "mi24": "Tamper-Evidence vs. Non-repudiation",
+      "note": "A signature that verifies under the key it names, the agent's. The relying party pinned the gate's key, and MI-24 has non-repudiation rest on an institutional signing key or the approver's identity. Holding only the pinned key set, the verifier cannot check the signature (undecidable, exit 2), and the key check fails because the record names a key the pinned set does not hold, so the record is invalid."
+    },
+    {
+      "id": "broken-chain",
+      "kind": "reject",
+      "check": "sequence",
+      "file": "records/broken-chain.jsonl",
+      "sequence": [
+        "records/gated-approval-rewritten.json",
+        "records/standing-approval.json"
+      ],
+      "line": 2,
+      "actions": [
+        "actions/payment.json",
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 1 rewritten after line 2 was appended: another approver named, and the record signed again with the gate key.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "fail",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass"
+        }
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "chain_break",
+        "chains": 1,
+        "chain_breaks": 1
+      },
+      "mi24": "Tamper-Evidence vs. Non-repudiation; Conformance (informative)",
+      "note": "Both records verify under the gate key and pass every MI-24 check. Line 2 still links to the approval as first written, so the rewrite shows even to a holder of the gate key: the append-only property the Conformance bullet gives the Acta link."
+    },
+    {
+      "id": "missing-decision-id",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/missing-decision-id.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "decision_id removed, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema",
+      "note": "The receipt verifies; the record lacks a member MI-24 lists."
+    },
+    {
+      "id": "missing-human-approver",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/missing-human-approver.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "human_approver removed, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "not_run",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema; Minimum Evidence Set",
+      "note": "A gated payment approval that names no approver. MI-24 lists human_approver among the members a record captures at minimum, and its Minimum Evidence Set needs the approver identity for every gated action."
+    },
+    {
+      "id": "approver-is-agent",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/approver-is-agent.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "human_approver.principal_id set to agent_id.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "fail",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Checkable Decision Records; Named Oversight Pattern",
+      "note": "MI-24's first example of a record whose fields contradict each other. Every member is well formed, so the schema cannot see it."
+    },
+    {
+      "id": "grant-not-recorded",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/grant-not-recorded.json",
+      "actions": [
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 2's grant_id changed to one that no recorded standing approval carries, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "fail"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Checkable Decision Records; Record the Grant as Approval Evidence",
+      "note": "MI-24's second example: a grant_id that resolves to no recorded standing approval. grants.json stands for the institution's record of its grants, which the record itself cannot carry."
+    },
+    {
+      "id": "action-digest-mismatch",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/gated-approval.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The record is unchanged; the action presented for release pays another account.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "fail",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Checkable Decision Records; Bind the Decision to the Resolved Action",
+      "note": "The same receipt as gated-approval, byte for byte. The approval was granted for one version of the action; the action presented has another to_account, so its digest differs and the approval does not move to it."
+    },
+    {
+      "id": "schema-digest-mismatch",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/schema-digest-mismatch.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_digest set to the SHA-256 of the schema in RFC 8785 form instead of its bytes, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema",
+      "note": "The record names the right version and a digest of the same JSON value, but not of the bytes published. MI-24 names RFC 8785 for the action digest and the schema's bytes for this one."
+    },
+    {
+      "id": "schema-version-mismatch",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/schema-version-mismatch.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_version set to 0.2.0-draft, then signed; schema_digest still names the bytes of 0.1.0-draft.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema",
+      "note": "The two halves of the name disagree. The schema refuses any version but its own (const), and the digest check refuses a version other than the one whose bytes it hashed."
+    },
+    {
+      "id": "timestamp-not-utc",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/timestamp-not-utc.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "timestamp_utc written with a +11:00 offset (Sydney): the same instant, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema",
+      "note": "A valid RFC 3339 date-time for the same instant, but not in UTC."
+    },
+    {
+      "id": "evidence-refs-not-array",
+      "kind": "reject",
+      "check": "alone",
+      "file": "records/evidence-refs-not-array.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "evidence_refs a single string rather than an array, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run"
+        }
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Machine-Readable Decision Record Schema",
+      "note": "MI-24 writes evidence_refs[]."
+    },
+    {
+      "id": "trip-record-no-approver",
+      "kind": "unsettled",
+      "check": "alone",
+      "file": "records/trip-record-no-approver.json",
+      "actions": [
+        "actions/payment-held.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "not_run",
+          "grant_recorded": "not_run"
+        }
+      },
+      "readings": [
+        {
+          "verdict": "REJECT",
+          "outcome": "invalid",
+          "rationale": "The Machine-Readable Decision Record Schema bullet lists human_approver among the members every record captures at minimum, and null names no principal_id, oversight_pattern or grant_id. The draft schema takes this reading."
+        },
+        {
+          "verdict": "ACCEPT",
+          "outcome": "valid",
+          "rationale": "Trip and Reset Records has each trip write its own decision record, and Deterministic Runtime De-Escalation trips a breaker automatically, with no human decision, so a trip record has no approver to name."
+        }
+      ],
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Trip and Reset Records; Machine-Readable Decision Record Schema",
+      "note": "An ST-01 trip: the proposed 56,000 USD payment would take the rolling total to 81,000 against a ceiling of 100,000. suspension_trigger_state names the trigger, the rolling total, the ceiling and the policy version, as Trip and Reset Records asks for ST-01, and human_approver is null."
+    },
+    {
+      "id": "release-while-tripped",
+      "kind": "unsettled",
+      "check": "alone",
+      "file": "records/release-while-tripped.json",
+      "actions": [
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 2's suspension_trigger_state set to \"ST-01 tripped\", then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_digest": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass"
+        }
+      },
+      "readings": [
+        {
+          "verdict": "REJECT",
+          "outcome": "invalid",
+          "rationale": "Checkable Decision Records names a release recorded while suspension_trigger_state names a tripped trigger as a record whose fields contradict each other. A verifier that reads \"ST-01 tripped\" as naming a tripped trigger, and a recorded grant_id as a release, refuses it."
+        },
+        {
+          "verdict": "ACCEPT",
+          "outcome": "valid",
+          "rationale": "MI-24 defines no value of suspension_trigger_state as naming a tripped trigger, and no member that says a record records a release, so the contradiction cannot be established from the members MI-24 lists. The draft schema and run.mjs take this reading: every check they can make passes."
+        }
+      ],
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "mi24": "Checkable Decision Records",
+      "note": "The release under standing approval, recorded with ST-01 named as tripped. A tripped breaker suspends unattended release, so MI-24 calls this record a contradiction, but the members it lists cannot show one."
+    }
+  ]
+}

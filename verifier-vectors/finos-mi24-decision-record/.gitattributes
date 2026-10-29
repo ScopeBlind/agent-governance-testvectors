@@ -1,0 +1,2 @@
+# Every record names the schema by the SHA-256 of its exact bytes, so git must never rewrite its line endings.
+schema/*.json -text
