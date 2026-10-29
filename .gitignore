@@ -2,3 +2,6 @@
 # contain node compile caches, so it should never be committed.
 receipts/
 __pycache__/
+# A local npm prefix for a pinned verifier, as CI installs into $RUNNER_TEMP
+# (see verifier-vectors/finos-mi24-decision-record/README.md).
+.verify/

@@ -1,0 +1,10 @@
+{
+  "tool": "tickets.create",
+  "arguments": {
+    "queue": "payables-reconciliation",
+    "title": "Reconcile the payment for INV-20431",
+    "links": [
+      "urn:example:decision:dec-20261027-0001"
+    ]
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swostipanda.github.io/schemas/adoa-decision-record.schema.json#v1.1.0",
+  "title": "Agent Delegation-of-Authority (A-DoA) Decision Record Schema v1.1.0",
+  "description": "Audit-grade decision record schema for autonomous AI agent actions across Autonomy Tiers T0-T3 and Runtime Suspension Triggers ST-01..ST-05 (Swosti Panda, 2026, CC BY 4.0, DOI: 10.5281/zenodo.23275115).",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "timestamp_utc",
+    "agent_id",
+    "model_version",
+    "policy_version",
+    "autonomy_tier",
+    "action_type",
+    "resolved_action_digest",
+    "blast_radius_usd",
+    "cumulative_24h_usd",
+    "evidence_refs",
+    "human_approver",
+    "suspension_trigger_state",
+    "rollback_token",
+    "schema_version",
+    "schema_sha256"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "description": "Unique identifier for this decision envelope."
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of the gate evaluation."
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Authenticated identifier of the proposing AI agent."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Identifier and version digest of the underlying model."
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Version or digest of the active A-DoA policy table."
+    },
+    "autonomy_tier": {
+      "type": "string",
+      "enum": ["T0_OBSERVE", "T1_HUMAN_APPROVAL_REQUIRED", "T2_BOUNDED_AUTO_EXECUTE", "T3_PROHIBITED"],
+      "description": "Evaluated A-DoA autonomy tier (or gating mode) at decision time."
+    },
+    "action_type": {
+      "type": "string",
+      "description": "Canonical action class or tool identifier."
+    },
+    "resolved_action_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 digest over the RFC 8785 (JCS) canonical bytes of the resolved action and arguments."
+    },
+    "blast_radius_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Single-action monetary exposure evaluated from master data."
+    },
+    "cumulative_24h_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Rolling 24-hour cumulative monetary commitment across the agent/session."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Immutable references or snapshot digests of inputs consulted."
+    },
+    "human_approver": {
+      "type": "object",
+      "required": ["principal_id", "oversight_pattern", "grant_id"],
+      "properties": {
+        "principal_id": { "type": "string" },
+        "oversight_pattern": {
+          "type": "string",
+          "enum": ["PER_ACTION_APPROVAL", "STANDING_BOUNDED_GRANT", "DUAL_KEY_APPROVAL", "UNATTENDED_T2"]
+        },
+        "grant_id": { "type": "string" }
+      }
+    },
+    "suspension_trigger_state": {
+      "type": "object",
+      "required": ["status", "triggers_evaluated"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["CLEAR", "TRIPPED", "RESET"]
+        },
+        "tripped_trigger": {
+          "type": "string",
+          "enum": ["NONE", "ST-01", "ST-02", "ST-03", "ST-04", "ST-05"],
+          "description": "ST-01: Aggregate Blast-Radius Exhaustion (>=80% ceiling); ST-02: Human Override/Rejection Spike; ST-03: Upstream Tool/Payload Schema Drift; ST-04: Grounding/Mandate State Deficit; ST-05: Downstream Execution/outcome-unknown Spike."
+        },
+        "triggers_evaluated": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05"]
+          }
+        },
+        "trigger_evidence": {
+          "type": "object",
+          "description": "Evidence payload when a circuit breaker (ST-01..ST-05) trips or is reset."
+        }
+      }
+    },
+    "rollback_token": {
+      "type": "string",
+      "description": "Idempotency key or pre-computed compensating rollback token."
+    },
+    "control_owner": {
+      "type": "string",
+      "description": "Named accountable human control owner (role + identifier)."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.1.0"
+    },
+    "schema_sha256": {
+      "type": "string",
+      "description": "SHA-256 digest of the schema bytes this record was validated against."
+    }
+  }
+}

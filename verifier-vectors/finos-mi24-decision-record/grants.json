@@ -1,0 +1,11 @@
+{
+  "about": "The recorded standing approvals the relying party resolves a grant_id against (MI-24 Record the Grant as Approval Evidence). MI-24 lists what a grant record persists (the grantor, scope and argument constraints, environment, grant and expiry times, any revocation), and neither MI-24 nor the A-DoA schema defines a format for it, so each entry carries only the identifier the check reads.",
+  "recorded_standing_approvals": [
+    {
+      "grant_id": "grant-tickets-create-20261027-a"
+    },
+    {
+      "grant_id": "grant-doa-payments-t2-20261001"
+    }
+  ]
+}

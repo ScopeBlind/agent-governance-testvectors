@@ -47,6 +47,7 @@ jobs:
           node verifier-vectors/timeliness/scripts/generate.mjs --check
           node verifier-vectors/signing-input/scripts/generate.mjs --check
           node verifier-vectors/chain-link/scripts/generate.mjs --check
+          node verifier-vectors/finos-mi24-decision-record/scripts/generate.mjs --check
           node verifier-vectors/timeliness/scripts/check.mjs
 
       - name: Verifier vectors (key windows, farley-receipt-signature, embedded keys, revocation, timeliness, signing input, chain links)
@@ -64,6 +65,24 @@ jobs:
           rc=$?
           if [ "$rc" -eq 77 ]; then echo "::notice::verifier vectors skipped: the pinned verifier is not installable yet"; exit 0; fi
           exit $rc
+
+      - name: FINOS MI-24 decision records as Acta receipts (verifier 0.11.1, the A-DoA schema v1.1.0, MI-24's rules)
+        # Vectors for the A-DoA Decision Record Schema v1.1.0 (vendored unchanged, CC BY 4.0), which FINOS MI-24 cites;
+        # not reviewed or endorsed by FINOS or the schema's author. The pinned verifier checks each receipt's signature,
+        # key and chain; the runner then checks the record against the schema, the schema it names and its resolved
+        # action digest, and the rules MI-24's text adds beyond the schema, and sweeps each check off in turn. Pinned to
+        # 0.11.1, published with npm provenance, installed with ajv 8.20.0 and ajv-formats 3.0.1 (which 0.11.1 itself
+        # depends on) into a temporary prefix; ajv cross-checks the dependency-free schema check, with format read as an
+        # annotation and asserted. If the verifier cannot be installed the runner exits 77 and this step reports a skip,
+        # not a failure. See verifier-vectors/finos-mi24-decision-record/README.md.
+        run: |
+          set +e
+          npm install --prefix "$RUNNER_TEMP/verify-0.11.1" --no-save --no-audit --no-fund @veritasacta/verify@0.11.1 ajv@8.20.0 ajv-formats@3.0.1
+          VERIFY_CMD="$RUNNER_TEMP/verify-0.11.1/node_modules/.bin/verify" node verifier-vectors/finos-mi24-decision-record/run.mjs
+          rc=$?
+          if [ "$rc" -eq 77 ]; then echo "::notice::MI-24 draft vectors skipped: the pinned verifier is not installable"; exit 0; fi
+          if [ "$rc" -ne 0 ]; then exit $rc; fi
+          node verifier-vectors/finos-mi24-decision-record/scripts/crosscheck-ajv.mjs "$RUNNER_TEMP/verify-0.11.1"
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
