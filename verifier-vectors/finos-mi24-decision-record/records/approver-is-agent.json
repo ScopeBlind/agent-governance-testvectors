@@ -1,0 +1,46 @@
+{
+  "payload": {
+    "type": "x-agent-governance-testvectors:mi24-decision-record",
+    "issuer_id": "test:mi24-gate:ed25519",
+    "issued_at": "2026-10-27T22:14:06Z",
+    "decision_id": "dec-20261027-0001",
+    "timestamp_utc": "2026-10-27T22:14:05Z",
+    "agent_id": "agent:payables-assistant",
+    "model_version": "example-model-2026-09",
+    "policy_version": "agent-gate-policy@2026.10.2",
+    "autonomy_tier": "T1_HUMAN_APPROVAL_REQUIRED",
+    "action_type": "payments.transfer",
+    "resolved_action_digest": "sha256:480fb28cb281f79d21e292d1242c4f943a33be5c1a475c26384cef0c23bbcac1",
+    "blast_radius_usd": 25000,
+    "cumulative_24h_usd": 25000,
+    "evidence_refs": [
+      "urn:example:invoice:INV-20431",
+      "urn:example:sanctions-screen:ss-4471"
+    ],
+    "human_approver": {
+      "principal_id": "agent:payables-assistant",
+      "oversight_pattern": "PER_ACTION_APPROVAL",
+      "grant_id": "per-action:dec-20261027-0001"
+    },
+    "suspension_trigger_state": {
+      "status": "CLEAR",
+      "tripped_trigger": "NONE",
+      "triggers_evaluated": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ]
+    },
+    "rollback_token": "idem-payables-20261027-0001",
+    "control_owner": "AP Controller: user:ap-controller-01@example.com",
+    "schema_version": "1.1.0",
+    "schema_sha256": "e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e"
+  },
+  "signature": {
+    "alg": "EdDSA",
+    "kid": "test:mi24-gate:ed25519",
+    "sig": "ff1f4c823699e06b73fd76d1e5e4f889eb1d1b3d6796cbdd392ef13e7ff7f5e0be2016a58691f86981b4ca8ab974aed592c7b582784662c68ff68958c209330b"
+  }
+}

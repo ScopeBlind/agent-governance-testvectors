@@ -1,0 +1,10 @@
+{
+  "tool": "payments.transfer",
+  "arguments": {
+    "from_account": "urn:example:account:operating-001",
+    "to_account": "urn:example:account:vendor-7731",
+    "amount": "25000.00",
+    "currency": "USD",
+    "reference": "INV-20431"
+  }
+}
