@@ -15,4 +15,4 @@
   `e5a4c6108e9df21863ec69ea80a3ee588ede3e8a27a74924305264bb7c5a549e`. `scripts/generate.mjs --check` fails if a byte
   changes, and `../.gitattributes` keeps git from rewriting its line endings.
 
-Inclusion here does not mean the author has reviewed or endorsed these vectors.
+On 3 November 2026 the author [reviewed the historical 31 cases and endorsed their expected verdicts](https://github.com/finos/ai-governance-framework/pull/412#issuecomment-6553545848). This review does not extend to the v1.2.0 follow-up and is not FINOS endorsement.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Optional: compare lib.mjs's dependency-free schema check with ajv's JSON Schema 2020-12 validator on the vendored
-// A-DoA v1.1.0 schema, on every record payload here and on variants of one payload that reach the rest of the schema.
+// A-DoA schema (v1.1.0 by default, --v1.2.0 for the follow-up), on every record payload here and on variants of one payload that reach the rest of the schema.
 //
 //   npm install --prefix <dir> --no-save --no-audit --no-fund ajv@8.20.0 ajv-formats@3.0.1
 //   node verifier-vectors/finos-mi24-decision-record/scripts/crosscheck-ajv.mjs <dir>
@@ -11,8 +11,8 @@
 //   2. format asserted: lib.mjs's RFC 3339 date-time against ajv-formats. They must agree on every payload but the two
 //      variants listed in KNOWN, where ajv-formats accepts what RFC 3339's grammar does not.
 //   3. the payloads whose verdict changes when format is asserted, as ajv reports them.
-// ajv refuses to compile the schema as published, because its $id carries a fragment, so the comparisons compile it
-// unchanged with meta-schema validation off. Exit: 0 as above, 1 otherwise, 2 usage or ajv not found.
+// v1.1.0 carries a forbidden $id fragment, so only that historical version disables meta-schema validation.
+// v1.2.0 compiles unchanged with meta-schema validation on, and also checks the expected schema verdicts. Exit: 0 as above, 1 otherwise, 2 usage or ajv not found.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -20,7 +20,9 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { checkSchema, validate } from '../lib.mjs'
 
-const DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const BASE = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const V120 = process.argv.includes('--v1.2.0')
+const DIR = V120 ? path.join(BASE, 'v1.2.0') : BASE
 if (!process.argv[2]) { console.error('usage: crosscheck-ajv.mjs <directory whose node_modules holds ajv and ajv-formats>'); process.exit(2) }
 let Ajv2020, addFormats, versions
 try {
@@ -39,9 +41,11 @@ checkSchema(schema)
 // Strict mode, less its strictRequired lint (an ajv style rule, not a 2020-12 one).
 const STRICT = { strict: true, strictRequired: false, allErrors: true }
 let refusal = 'none: ajv compiled it'
-try { new Ajv2020(STRICT).compile(schema) } catch (e) { refusal = e.message.split('\n')[0] }
-const annotated = new Ajv2020({ ...STRICT, validateSchema: false, validateFormats: false }).compile(schema)
-const assertingAjv = new Ajv2020({ ...STRICT, validateSchema: false })
+if (!V120) {
+  try { new Ajv2020(STRICT).compile(schema) } catch (e) { refusal = e.message.split('\n')[0] }
+}
+const annotated = new Ajv2020({ ...STRICT, validateSchema: V120, validateFormats: false }).compile(schema)
+const assertingAjv = new Ajv2020({ ...STRICT, validateSchema: V120 })
 addFormats(assertingAjv)
 const asserted = assertingAjv.compile(schema)
 
@@ -94,9 +98,24 @@ variant('an extra member', (p) => { p.x_extra = true })
 variant('the payload an array', () => [base])
 variant('the payload null', () => null)
 // Where ajv-formats accepts what RFC 3339 section 5.6 does not; lib.mjs follows the RFC.
-const KNOWN = new Set(['variant: timestamp_utc with a space for T', 'variant: timestamp_utc offset with no colon'])
+const KNOWN = new Set(V120 ? [] : ['variant: timestamp_utc with a space for T', 'variant: timestamp_utc offset with no colon'])
 
+if (V120) {
+  variant('missing decision_outcome', (p) => { delete p.decision_outcome })
+  variant('modification_ref null', (p) => { p.modification_ref = null })
+  variant('timestamp_utc at +00:00', (p) => at(p, '2026-10-27T22:14:05+00:00'))
+  variant('timestamp_utc at -00:00', (p) => at(p, '2026-10-27T22:14:05-00:00'))
+  variant('schema_sha256 uppercase', (p) => { p.schema_sha256 = p.schema_sha256.toUpperCase() })
+}
 let failures = 0
+// Cross-check the hand-written schema verdict, not only agreement between two implementations.
+for (const c of V120 ? index.cases : []) {
+  const text = fs.readFileSync(path.join(DIR, c.file), 'utf8')
+  const receipts = c.check === 'sequence' ? text.trim().split('\n').map(JSON.parse) : [JSON.parse(text)]
+  const got = receipts.every((r) => asserted(r.payload)) ? 'pass' : 'fail'
+  if (got !== c.expected.checks.schema) { failures++; console.log(`  WRONG SCHEMA VERDICT  ${c.id}: ajv ${got}, expected ${c.expected.checks.schema}`) }
+}
+
 const differ = []
 const known = []
 for (const [label, payload] of payloads) {
@@ -114,8 +133,8 @@ for (const [label, payload] of payloads) {
   console.log(`  ${ours === theirs ? 'agree' : 'DIFFER'}  ${label}: ${word(theirs)}${theirs !== theirsAsserted ? `, ${word(theirsAsserted)} with format asserted` : ''}`)
 }
 console.log(`\n${versions}, draft 2020-12, strict but for strictRequired`)
-console.log(`the schema as published, meta-schema checked: ${refusal}`)
-console.log(`compiled unchanged with meta-schema validation off: ${payloads.length} payloads`)
+console.log(V120 ? 'the published v1.2.0 schema compiled unchanged with meta-schema validation and ajv-formats enabled' : `the schema as published, meta-schema checked: ${refusal}`)
+console.log(`compiled unchanged with meta-schema validation ${V120 ? 'on' : 'off'}: ${payloads.length} payloads`)
 console.log(`format an annotation: lib.mjs and ajv agree on ${payloads.length - payloads.filter(([l, p]) => (validate(schema, p).errors.length === 0) !== annotated(p)).length} of ${payloads.length}`)
 console.log(`format asserted: lib.mjs and ajv-formats differ only where RFC 3339 and ajv-formats do (${known.length}):${known.map((k) => `\n  ${k}`).join('')}`)
 console.log(`verdicts that change when ajv asserts format (${differ.length}):${differ.map((d) => `\n  ${d}`).join('')}`)

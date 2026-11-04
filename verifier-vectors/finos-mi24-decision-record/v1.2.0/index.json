@@ -1,0 +1,2033 @@
+{
+  "suite": "finos-mi24-decision-record/v1.2.0",
+  "status": "ScopeBlind follow-up for A-DoA v1.2.0, authored with Codex. Not reviewed or endorsed by FINOS or the schema author. The author endorsed only the historical 31-case v1.1.0 suite; that review does not extend to these adapted or new cases.",
+  "mi24": {
+    "pull_request": "https://github.com/finos/ai-governance-framework/pull/412",
+    "head": "e668312fe060da311d27373a4ff5e3e04a43b4b7",
+    "file": "docs/_mitigations/mi-24_human-in-the-loop-action-approval-gate.md",
+    "file_sha256": "8196156ce361bcbc07d6e98b7d9a67fa5dd07caa3d6ac1bfb0d1cdbc267d47ac"
+  },
+  "schema": {
+    "file": "schema/adoa-decision-record.schema.json",
+    "title": "Agent Delegation-of-Authority (A-DoA) Decision Record Schema v1.2.0",
+    "id": "https://swostipanda.github.io/schemas/adoa-decision-record.schema.json",
+    "source": "https://swostipanda.github.io/schemas/adoa-decision-record.schema.json",
+    "author": "Swosti Panda",
+    "doi": "10.5281/zenodo.23275115",
+    "licence": "CC BY 4.0",
+    "included": "unchanged, byte for byte, fetched 3 November 2026 and verified against the author-announced SHA-256 (see schema/ATTRIBUTION.md)",
+    "bytes": 5152,
+    "version": "1.2.0",
+    "sha256": "5713e4286dc8b99d49c012db28c6534853a43d16c33bdf08521050a2f0e3821e"
+  },
+  "specification": {
+    "title": "Agent Delegation-of-Authority (A-DoA) Framework v1.0 (ADOA-2026-v1), Swosti Panda, CC BY 4.0",
+    "doi": "10.5281/zenodo.23275115",
+    "file": "A-DoA-Specification-v1.0.pdf, 298,542 bytes, md5 a7a232a3b7b84819c134442cbb629113",
+    "note": "Historical companion PDF provenance only; this versioned suite follows the pinned published schema v1.2.0 and MI-24 text above."
+  },
+  "profile": "Each record is the signed payload of a draft-farley-acta-signed-receipts receipt (envelope shape, signed over JCS(payload)). The payload carries the receipt's own members (type, issuer_id, issued_at, and previousReceiptHash when chained) beside the A-DoA record; the schema does not forbid other members.",
+  "record_type": "x-agent-governance-testvectors:mi24-decision-record",
+  "schema_sha256_encoding": "Bare lowercase hex, exactly 64 characters, as required by v1.2.0.",
+  "issuer": {
+    "kid": "test:mi24-gate:ed25519",
+    "public_key_hex": "b92aaa7c8db21139aa7d7ec0daa8d7e62519d6ee46a4534e07644c683a008391",
+    "seed": "00..10",
+    "jwks": "issuer-jwks.json",
+    "window": {
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    }
+  },
+  "other_keys": {
+    "test:mi24-agent:ed25519": {
+      "public_key_hex": "4f2a59edc8367deb40047ce83ee7f5ce711a57d93abbda9d1ce8588c56a3ce88",
+      "seed": "00..11",
+      "note": "The agent's own key. It signs only records/unexpected-signer.json and is in no key set here."
+    }
+  },
+  "grants": "grants.json",
+  "invocation": {
+    "alone": "verify <file> --jwks issuer-jwks.json --mode receipt --json",
+    "sequence": "verify --replay-chain <file> --jwks issuer-jwks.json --json"
+  },
+  "check_kinds": {
+    "receipt": "(a) The Acta receipt: signature, key and chain, decided by @veritasacta/verify 0.11.1 against the pinned gate key.",
+    "schema": "(b) A-DoA v1.2.0 assertions, including date-time format asserted by this profile. AJV 2020-12 and ajv-formats independently cross-check every payload with meta-schema validation enabled.",
+    "naming": "(c) The schema's name and the digests: schema_version and schema_sha256 against the pinned schema bytes, and resolved_action_digest as the schema describes it.",
+    "mi24": "(d) Checks taken from MI-24's text, beyond the schema. They are not schema checks."
+  },
+  "checks": {
+    "signature": {
+      "kind": "receipt",
+      "description": "The receipt's signature, and its signing input (Section 6.6), under the pinned key set: @veritasacta/verify's checks.signature and checks.signing_input."
+    },
+    "key": {
+      "kind": "receipt",
+      "description": "The receipt names the pinned gate key (issuer_id is signature.kid), the verifier resolved that key from the pinned key set, and the signed issued_at falls inside its window."
+    },
+    "chain": {
+      "kind": "receipt",
+      "description": "In a sequence, each record's previousReceiptHash is the Section 6.7 link of the record before it (verify --replay-chain). A record checked alone has no predecessor to follow: not_run."
+    },
+    "schema": {
+      "kind": "schema",
+      "description": "The payload validates against the unchanged v1.2.0 schema with date-time format asserted."
+    },
+    "schema_named": {
+      "kind": "naming",
+      "description": "schema_version is the pinned schema's version, and schema_sha256 is the lowercase hex SHA-256 of the pinned file's bytes."
+    },
+    "action_digest": {
+      "kind": "naming",
+      "description": "resolved_action_digest names the SHA-256 of the RFC 8785 bytes of the action and arguments supplied with the case. Its form is the schema's pattern, so this compares the value alone."
+    },
+    "approver_not_agent": {
+      "kind": "mi24",
+      "description": "human_approver.principal_id is not agent_id (MI-24 Checkable Decision Records). not_run when the record names no human approver."
+    },
+    "grant_recorded": {
+      "kind": "mi24",
+      "description": "Where oversight_pattern is STANDING_BOUNDED_GRANT or UNATTENDED_T2, human_approver.grant_id names a standing approval in grants.json (MI-24 Checkable Decision Records). not_run otherwise."
+    },
+    "release_not_tripped": {
+      "kind": "mi24",
+      "description": "APPROVED and APPROVED_WITH_MODIFICATION cannot carry suspension_trigger_state.status TRIPPED. Other outcomes: not_run. This does not evaluate a live gate.",
+      "source": "https://github.com/finos/ai-governance-framework/blob/e668312fe060da311d27373a4ff5e3e04a43b4b7/docs/_mitigations/mi-24_human-in-the-loop-action-approval-gate.md#6-recording-the-approval-evidence"
+    }
+  },
+  "scoring": "An accept or reject case conforms when the verdict and outcome equal expected. An unsettled case is one neither the schema nor MI-24 decides: it carries no expected verdict, and a verifier conforms on it with any verdict its readings list, the convention of the agent-audit-record corpus in agent-evidence-vectors. decided_by names the check kinds whose checks do not pass, or for an unsettled case the kind that would have to settle it. expected.checks are run.mjs's own results, expected.format whether each date-time the schema reaches holds, and verify the outcome, exit status and code @veritasacta/verify 0.11.1 reports for the receipt or, in a sequence, for the line named; another verifier is held to the verdict alone. The verdict combines the checks as Section 5.3 of the -04 editor's copy does: invalid if any check ran and failed, undecidable if none failed and one could not decide, otherwise valid.",
+  "counts": {
+    "accept": 10,
+    "reject": 37,
+    "unsettled": 3
+  },
+  "cases": [
+    {
+      "id": "gated-approval",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/gated-approval.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Machine-Readable Decision Record Schema",
+      "note": "Adapted from the historical v1.1.0 case gated-approval; schema version/digest and decision_outcome are updated and receipts re-signed. Same scenario.",
+      "adapted_from": "../index.json#gated-approval"
+    },
+    {
+      "id": "standing-approval-chain",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "sequence",
+      "file": "records/standing-approval-chain.jsonl",
+      "sequence": [
+        "records/gated-approval.json",
+        "records/standing-approval.json"
+      ],
+      "line": 2,
+      "actions": [
+        "actions/payment.json",
+        "actions/ticket.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "pass",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null,
+        "chains": 1,
+        "chain_breaks": 0
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Record the Grant as Approval Evidence; Conformance (informative)",
+      "note": "Adapted from the historical v1.1.0 case standing-approval-chain; schema version/digest and decision_outcome are updated and receipts re-signed. Same scenario.",
+      "adapted_from": "../index.json#standing-approval-chain"
+    },
+    {
+      "id": "trip-record",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/trip-record.json",
+      "actions": [
+        "actions/payment-held.json"
+      ],
+      "parent": null,
+      "change": null,
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 suspension_trigger_state; MI-24 Trip and Reset Records",
+      "note": "Adapted from the historical v1.1.0 case trip-record; schema version/digest and decision_outcome are updated and receipts re-signed. Same scenario.",
+      "adapted_from": "../index.json#trip-record"
+    },
+    {
+      "id": "signature-altered",
+      "kind": "reject",
+      "decided_by": [
+        "receipt"
+      ],
+      "check": "alone",
+      "file": "records/signature-altered.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The last hex digit of signature.sig changed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "fail",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "invalid_signature"
+      },
+      "basis": "MI-24 Tamper-Evidence vs. Non-repudiation",
+      "note": "Adapted from the historical v1.1.0 case signature-altered; schema version/digest and decision_outcome are updated and receipts re-signed. The last hex digit of signature.sig changed.",
+      "adapted_from": "../index.json#signature-altered"
+    },
+    {
+      "id": "field-changed-after-signing",
+      "kind": "reject",
+      "decided_by": [
+        "receipt"
+      ],
+      "check": "alone",
+      "file": "records/field-changed-after-signing.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "blast_radius_usd changed from 25000 to 2500 after signing, the signature kept.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "fail",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "invalid_signature"
+      },
+      "basis": "MI-24 Tamper-Evidence vs. Non-repudiation",
+      "note": "Adapted from the historical v1.1.0 case field-changed-after-signing; schema version/digest and decision_outcome are updated and receipts re-signed. blast_radius_usd changed from 25000 to 2500 after signing, the signature kept.",
+      "adapted_from": "../index.json#field-changed-after-signing"
+    },
+    {
+      "id": "unexpected-signer",
+      "kind": "reject",
+      "decided_by": [
+        "receipt"
+      ],
+      "check": "alone",
+      "file": "records/unexpected-signer.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "Signed with the agent's own key, which signature.kid and issuer_id name.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "undecidable",
+          "key": "fail",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "undecidable",
+        "exit": 2,
+        "code": "jwks_fetch_failed"
+      },
+      "basis": "MI-24 Tamper-Evidence vs. Non-repudiation",
+      "note": "Adapted from the historical v1.1.0 case unexpected-signer; schema version/digest and decision_outcome are updated and receipts re-signed. Signed with the agent's own key, which signature.kid and issuer_id name.",
+      "adapted_from": "../index.json#unexpected-signer"
+    },
+    {
+      "id": "broken-chain",
+      "kind": "reject",
+      "decided_by": [
+        "receipt"
+      ],
+      "check": "sequence",
+      "file": "records/broken-chain.jsonl",
+      "sequence": [
+        "records/gated-approval-rewritten.json",
+        "records/standing-approval.json"
+      ],
+      "line": 2,
+      "actions": [
+        "actions/payment.json",
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 1 rewritten after line 2 was appended: another approver named, and the record signed again with the gate key.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "fail",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "invalid",
+        "exit": 1,
+        "code": "chain_break",
+        "chains": 1,
+        "chain_breaks": 1
+      },
+      "basis": "MI-24 Tamper-Evidence vs. Non-repudiation; Conformance (informative)",
+      "note": "Adapted from the historical v1.1.0 case broken-chain; schema version/digest and decision_outcome are updated and receipts re-signed. Line 1 rewritten after line 2 was appended: another approver named, and the record signed again with the gate key.",
+      "adapted_from": "../index.json#broken-chain"
+    },
+    {
+      "id": "missing-decision-id",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/missing-decision-id.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "decision_id removed, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 required",
+      "note": "Adapted from the historical v1.1.0 case missing-decision-id; schema version/digest and decision_outcome are updated and receipts re-signed. decision_id removed, then signed.",
+      "adapted_from": "../index.json#missing-decision-id"
+    },
+    {
+      "id": "missing-human-approver",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/missing-human-approver.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "human_approver removed, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "not_run",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 required",
+      "note": "Adapted from the historical v1.1.0 case missing-human-approver; schema version/digest and decision_outcome are updated and receipts re-signed. human_approver removed, then signed.",
+      "adapted_from": "../index.json#missing-human-approver"
+    },
+    {
+      "id": "trip-record-no-approver",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/trip-record-no-approver.json",
+      "actions": [
+        "actions/payment-held.json"
+      ],
+      "parent": "trip-record",
+      "change": "human_approver set to null, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "not_run",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 required; MI-24 Trip and Reset Records",
+      "note": "Adapted from the historical v1.1.0 case trip-record-no-approver; schema version/digest and decision_outcome are updated and receipts re-signed. human_approver set to null, then signed.",
+      "adapted_from": "../index.json#trip-record-no-approver"
+    },
+    {
+      "id": "evidence-refs-not-array",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/evidence-refs-not-array.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "evidence_refs one string instead of an array, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 evidence_refs",
+      "note": "Adapted from the historical v1.1.0 case evidence-refs-not-array; schema version/digest and decision_outcome are updated and receipts re-signed. evidence_refs one string instead of an array, then signed.",
+      "adapted_from": "../index.json#evidence-refs-not-array"
+    },
+    {
+      "id": "autonomy-tier-outside-enum",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/autonomy-tier-outside-enum.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "autonomy_tier set to T1_ACT_AND_NOTIFY, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "relies_on_enum": "/properties/autonomy_tier",
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 autonomy_tier enum",
+      "note": "Adapted from the historical v1.1.0 case autonomy-tier-outside-enum; schema version/digest and decision_outcome are updated and receipts re-signed. autonomy_tier set to T1_ACT_AND_NOTIFY, then signed.",
+      "adapted_from": "../index.json#autonomy-tier-outside-enum"
+    },
+    {
+      "id": "oversight-pattern-outside-enum",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/oversight-pattern-outside-enum.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "human_approver.oversight_pattern set to MAKER_CHECKER, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "relies_on_enum": "/properties/human_approver/properties/oversight_pattern",
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 oversight_pattern enum",
+      "note": "Adapted from the historical v1.1.0 case oversight-pattern-outside-enum; schema version/digest and decision_outcome are updated and receipts re-signed. human_approver.oversight_pattern set to MAKER_CHECKER, then signed.",
+      "adapted_from": "../index.json#oversight-pattern-outside-enum"
+    },
+    {
+      "id": "trigger-status-outside-enum",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/trigger-status-outside-enum.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "suspension_trigger_state.status set to SUSPENDED, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "relies_on_enum": "/properties/suspension_trigger_state/properties/status",
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 status enum",
+      "note": "Adapted from the historical v1.1.0 case trigger-status-outside-enum; schema version/digest and decision_outcome are updated and receipts re-signed. suspension_trigger_state.status set to SUSPENDED, then signed.",
+      "adapted_from": "../index.json#trigger-status-outside-enum"
+    },
+    {
+      "id": "tripped-trigger-st-06",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/tripped-trigger-st-06.json",
+      "actions": [
+        "actions/payment-held.json"
+      ],
+      "parent": "trip-record",
+      "change": "tripped_trigger set to ST-06, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "relies_on_enum": "/properties/suspension_trigger_state/properties/tripped_trigger",
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 tripped_trigger enum",
+      "note": "Adapted from the historical v1.1.0 case tripped-trigger-st-06; schema version/digest and decision_outcome are updated and receipts re-signed. tripped_trigger set to ST-06, then signed.",
+      "adapted_from": "../index.json#tripped-trigger-st-06"
+    },
+    {
+      "id": "triggers-evaluated-st-06",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/triggers-evaluated-st-06.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "ST-06 added to triggers_evaluated, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "relies_on_enum": "/properties/suspension_trigger_state/properties/triggers_evaluated/items",
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 triggers_evaluated items enum",
+      "note": "Adapted from the historical v1.1.0 case triggers-evaluated-st-06; schema version/digest and decision_outcome are updated and receipts re-signed. ST-06 added to triggers_evaluated, then signed.",
+      "adapted_from": "../index.json#triggers-evaluated-st-06"
+    },
+    {
+      "id": "trigger-state-missing-triggers-evaluated",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/trigger-state-missing-triggers-evaluated.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "triggers_evaluated removed from suspension_trigger_state, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 suspension_trigger_state required",
+      "note": "Adapted from the historical v1.1.0 case trigger-state-missing-triggers-evaluated; schema version/digest and decision_outcome are updated and receipts re-signed. triggers_evaluated removed from suspension_trigger_state, then signed.",
+      "adapted_from": "../index.json#trigger-state-missing-triggers-evaluated"
+    },
+    {
+      "id": "blast-radius-negative",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/blast-radius-negative.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "blast_radius_usd set to -25000, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 blast_radius_usd minimum",
+      "note": "Adapted from the historical v1.1.0 case blast-radius-negative; schema version/digest and decision_outcome are updated and receipts re-signed. blast_radius_usd set to -25000, then signed.",
+      "adapted_from": "../index.json#blast-radius-negative"
+    },
+    {
+      "id": "action-digest-no-prefix",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/action-digest-no-prefix.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "resolved_action_digest without its sha256: prefix, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 resolved_action_digest pattern",
+      "note": "Adapted from the historical v1.1.0 case action-digest-no-prefix; schema version/digest and decision_outcome are updated and receipts re-signed. resolved_action_digest without its sha256: prefix, then signed.",
+      "adapted_from": "../index.json#action-digest-no-prefix"
+    },
+    {
+      "id": "action-digest-uppercase",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/action-digest-uppercase.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "resolved_action_digest in uppercase hex, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 resolved_action_digest pattern",
+      "note": "Adapted from the historical v1.1.0 case action-digest-uppercase; schema version/digest and decision_outcome are updated and receipts re-signed. resolved_action_digest in uppercase hex, then signed.",
+      "adapted_from": "../index.json#action-digest-uppercase"
+    },
+    {
+      "id": "schema-version-1-0-0",
+      "kind": "reject",
+      "decided_by": [
+        "schema",
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-version-1-0-0.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_version set to 1.0.0, then signed; schema_sha256 still names the 1.1.0 bytes.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 schema_version const",
+      "note": "Adapted from the historical v1.1.0 case schema-version-1-0-0; schema version/digest and decision_outcome are updated and receipts re-signed. schema_version set to 1.0.0, then signed; schema_sha256 still names the 1.1.0 bytes.",
+      "adapted_from": "../index.json#schema-version-1-0-0"
+    },
+    {
+      "id": "schema-sha256-mismatch",
+      "kind": "reject",
+      "decided_by": [
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-sha256-mismatch.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_sha256 set to the SHA-256 of the schema in RFC 8785 form instead of its bytes, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 schema_sha256: \"SHA-256 digest of the schema bytes\"",
+      "note": "Adapted from the historical v1.1.0 case schema-sha256-mismatch; schema version/digest and decision_outcome are updated and receipts re-signed. schema_sha256 set to the SHA-256 of the schema in RFC 8785 form instead of its bytes, then signed.",
+      "adapted_from": "../index.json#schema-sha256-mismatch"
+    },
+    {
+      "id": "action-digest-mismatch",
+      "kind": "reject",
+      "decided_by": [
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/gated-approval.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The record is unchanged; the action presented for release pays another account.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "fail",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 resolved_action_digest; MI-24 Bind the Decision to the Resolved Action",
+      "note": "Adapted from the historical v1.1.0 case action-digest-mismatch; schema version/digest and decision_outcome are updated and receipts re-signed. The record is unchanged; the action presented for release pays another account.",
+      "adapted_from": "../index.json#action-digest-mismatch"
+    },
+    {
+      "id": "approver-is-agent",
+      "kind": "reject",
+      "decided_by": [
+        "mi24"
+      ],
+      "check": "alone",
+      "file": "records/approver-is-agent.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "human_approver.principal_id set to agent_id, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "fail",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "MI-24 Checkable Decision Records; Named Oversight Pattern",
+      "note": "Adapted from the historical v1.1.0 case approver-is-agent; schema version/digest and decision_outcome are updated and receipts re-signed. human_approver.principal_id set to agent_id, then signed.",
+      "adapted_from": "../index.json#approver-is-agent"
+    },
+    {
+      "id": "grant-not-recorded",
+      "kind": "reject",
+      "decided_by": [
+        "mi24"
+      ],
+      "check": "alone",
+      "file": "records/grant-not-recorded.json",
+      "actions": [
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 2's grant_id changed to one that no recorded standing approval carries, then signed.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "fail",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "MI-24 Checkable Decision Records; Record the Grant as Approval Evidence",
+      "note": "Adapted from the historical v1.1.0 case grant-not-recorded; schema version/digest and decision_outcome are updated and receipts re-signed. Line 2's grant_id changed to one that no recorded standing approval carries, then signed.",
+      "adapted_from": "../index.json#grant-not-recorded"
+    },
+    {
+      "id": "timestamp-not-utc",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/timestamp-not-utc.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "timestamp_utc written with a +11:00 offset (Sydney): the same instant, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds",
+        "verdict": "REJECT",
+        "outcome": "invalid"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 timestamp_utc; MI-24 Machine-Readable Decision Record Schema",
+      "note": "v1.2.0 rejects the non-UTC offset by pattern, even with format treated as an annotation.",
+      "adapted_from": "../index.json#timestamp-not-utc"
+    },
+    {
+      "id": "timestamp-no-offset",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/timestamp-no-offset.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "timestamp_utc written with no offset at all, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "fails",
+        "verdict": "REJECT",
+        "outcome": "invalid"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 timestamp_utc format",
+      "note": "v1.2.0 rejects a missing UTC suffix by pattern and by asserted date-time format.",
+      "adapted_from": "../index.json#timestamp-no-offset"
+    },
+    {
+      "id": "schema-sha256-prefixed",
+      "kind": "reject",
+      "decided_by": [
+        "schema",
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-sha256-prefixed.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_sha256 written as sha256: and the hex, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds",
+        "verdict": "REJECT",
+        "outcome": "invalid"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 schema_sha256",
+      "note": "v1.2.0 requires bare lowercase hex; schema_named also rejects the prefix.",
+      "adapted_from": "../index.json#schema-sha256-prefixed"
+    },
+    {
+      "id": "release-while-tripped",
+      "kind": "reject",
+      "decided_by": [
+        "mi24"
+      ],
+      "check": "alone",
+      "file": "records/release-while-tripped.json",
+      "actions": [
+        "actions/ticket.json"
+      ],
+      "parent": "standing-approval-chain",
+      "change": "Line 2's suspension_trigger_state replaced with the TRIPPED state of trip-record, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "fail"
+        },
+        "format": "holds",
+        "verdict": "REJECT",
+        "outcome": "invalid"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "MI-24 Checkable Decision Records; v1.2.0 decision_outcome",
+      "note": "APPROVED makes release explicit. MI-24 Checkable Decision Records rejects it when status is TRIPPED; the JSON Schema alone accepts it.",
+      "adapted_from": "../index.json#release-while-tripped"
+    },
+    {
+      "id": "tripped-with-trigger-none",
+      "kind": "unsettled",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/tripped-with-trigger-none.json",
+      "actions": [
+        "actions/payment-held.json"
+      ],
+      "parent": "trip-record",
+      "change": "tripped_trigger set to NONE, status left TRIPPED, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "pass",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "readings": [
+        {
+          "verdict": "ACCEPT",
+          "outcome": "valid",
+          "rationale": "The schema relates status and tripped_trigger to nothing, so both values are valid on their own."
+        },
+        {
+          "verdict": "REJECT",
+          "outcome": "invalid",
+          "rationale": "A TRIPPED state that names no tripped trigger contradicts itself, and MI-24 Trip and Reset Records has a trip record name the trigger."
+        }
+      ],
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 suspension_trigger_state",
+      "note": "Adapted from the historical v1.1.0 case tripped-with-trigger-none; schema version/digest and decision_outcome are updated and receipts re-signed. tripped_trigger set to NONE, status left TRIPPED, then signed.",
+      "adapted_from": "../index.json#tripped-with-trigger-none"
+    },
+    {
+      "id": "clear-naming-st-01",
+      "kind": "unsettled",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/clear-naming-st-01.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "tripped_trigger set to ST-01, status left CLEAR, then signed.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "readings": [
+        {
+          "verdict": "ACCEPT",
+          "outcome": "valid",
+          "rationale": "The schema relates status and tripped_trigger to nothing, so both values are valid on their own."
+        },
+        {
+          "verdict": "REJECT",
+          "outcome": "invalid",
+          "rationale": "A CLEAR state that names a tripped trigger contradicts itself."
+        }
+      ],
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0 suspension_trigger_state",
+      "note": "Adapted from the historical v1.1.0 case clear-naming-st-01; schema version/digest and decision_outcome are updated and receipts re-signed. tripped_trigger set to ST-01, status left CLEAR, then signed.",
+      "adapted_from": "../index.json#clear-naming-st-01"
+    },
+    {
+      "id": "missing-decision-outcome",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/missing-decision-outcome.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "decision_outcome is required.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "decision_outcome is required."
+    },
+    {
+      "id": "decision-outcome-outside-enum",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/decision-outcome-outside-enum.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "An unlisted outcome is rejected.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "An unlisted outcome is rejected.",
+      "relies_on_enum": "/properties/decision_outcome"
+    },
+    {
+      "id": "decision-outcome-wrong-type",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/decision-outcome-wrong-type.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "decision_outcome must be a string.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "decision_outcome must be a string."
+    },
+    {
+      "id": "approved-with-modification",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/approved-with-modification.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "A modified approval links its prior decision and binds the changed action.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "A modified approval links its prior decision and binds the changed action."
+    },
+    {
+      "id": "modification-ref-wrong-type",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/modification-ref-wrong-type.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "Optional modification_ref must be a string when present.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "Optional modification_ref must be a string when present."
+    },
+    {
+      "id": "modified-release-while-tripped",
+      "kind": "reject",
+      "decided_by": [
+        "mi24"
+      ],
+      "check": "alone",
+      "file": "records/modified-release-while-tripped.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "An approval with modification is also a release and cannot carry status TRIPPED.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "fail"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "An approval with modification is also a release and cannot carry status TRIPPED."
+    },
+    {
+      "id": "modification-ref-absent",
+      "kind": "unsettled",
+      "decided_by": [
+        "mi24"
+      ],
+      "check": "alone",
+      "file": "records/modification-ref-absent.json",
+      "actions": [
+        "actions/payment-modified.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The schema does not require modification_ref conditionally; MI-24 asks for modification linkage. No linkage resolver is claimed here.",
+      "expected": {
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "The schema does not require modification_ref conditionally; MI-24 asks for modification linkage. No linkage resolver is claimed here.",
+      "readings": [
+        {
+          "verdict": "ACCEPT",
+          "outcome": "valid",
+          "rationale": "The schema makes modification_ref optional and no supplied linkage resolver establishes a contradiction."
+        },
+        {
+          "verdict": "REJECT",
+          "outcome": "invalid",
+          "rationale": "MI-24 Minimum Evidence Set asks for modification linkage, which this record does not supply."
+        }
+      ]
+    },
+    {
+      "id": "denied",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/denied.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "DENIED is not a release. The outcome may be recorded while the breaker is tripped.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "DENIED is not a release. The outcome may be recorded while the breaker is tripped."
+    },
+    {
+      "id": "escalated-t1",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/escalated-t1.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "ESCALATED_T1 is not a release. The outcome may be recorded while the breaker is tripped.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "ESCALATED_T1 is not a release. The outcome may be recorded while the breaker is tripped."
+    },
+    {
+      "id": "hold-pending-reconciliation",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/hold-pending-reconciliation.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "HOLD_PENDING_RECONCILIATION is not a release. The outcome may be recorded while the breaker is tripped.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "HOLD_PENDING_RECONCILIATION is not a release. The outcome may be recorded while the breaker is tripped."
+    },
+    {
+      "id": "circuit-breaker-reset",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/circuit-breaker-reset.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "CIRCUIT_BREAKER_RESET is not a release. This checks the reset record shape, not live reconciliation or grant renewal.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "not_run"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "CIRCUIT_BREAKER_RESET is not a release. This checks the reset record shape, not live reconciliation or grant renewal."
+    },
+    {
+      "id": "timestamp-plus-zero",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/timestamp-plus-zero.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "Explicit +00:00 UTC is accepted.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "Explicit +00:00 UTC is accepted."
+    },
+    {
+      "id": "timestamp-fractional-utc",
+      "kind": "accept",
+      "decided_by": [],
+      "check": "alone",
+      "file": "records/timestamp-fractional-utc.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "Fractional seconds with Z are accepted.",
+      "expected": {
+        "verdict": "ACCEPT",
+        "outcome": "valid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "pass",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "Fractional seconds with Z are accepted."
+    },
+    {
+      "id": "timestamp-minus-zero",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/timestamp-minus-zero.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The strict UTC pattern accepts uppercase T and Z or +00:00 only.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "The strict UTC pattern accepts uppercase T and Z or +00:00 only."
+    },
+    {
+      "id": "timestamp-lowercase",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/timestamp-lowercase.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The strict UTC pattern accepts uppercase T and Z or +00:00 only.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "The strict UTC pattern accepts uppercase T and Z or +00:00 only."
+    },
+    {
+      "id": "timestamp-invalid-date",
+      "kind": "reject",
+      "decided_by": [
+        "schema"
+      ],
+      "check": "alone",
+      "file": "records/timestamp-invalid-date.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The UTC pattern alone accepts this impossible calendar date; asserted date-time format must reject it.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "pass",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "fails"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "The UTC pattern alone accepts this impossible calendar date; asserted date-time format must reject it.",
+      "relies_on_format": true
+    },
+    {
+      "id": "schema-sha256-uppercase",
+      "kind": "reject",
+      "decided_by": [
+        "schema",
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-sha256-uppercase.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_sha256 must use lowercase hex.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "schema_sha256 must use lowercase hex."
+    },
+    {
+      "id": "schema-sha256-short",
+      "kind": "reject",
+      "decided_by": [
+        "schema",
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-sha256-short.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "schema_sha256 must contain exactly 64 hex characters.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "schema_sha256 must contain exactly 64 hex characters."
+    },
+    {
+      "id": "schema-version-1-1-0",
+      "kind": "reject",
+      "decided_by": [
+        "schema",
+        "naming"
+      ],
+      "check": "alone",
+      "file": "records/schema-version-1-1-0.json",
+      "actions": [
+        "actions/payment.json"
+      ],
+      "parent": "gated-approval",
+      "change": "The v1.2.0 schema rejects the historical version constant.",
+      "expected": {
+        "verdict": "REJECT",
+        "outcome": "invalid",
+        "checks": {
+          "signature": "pass",
+          "key": "pass",
+          "chain": "not_run",
+          "schema": "fail",
+          "schema_named": "fail",
+          "action_digest": "pass",
+          "approver_not_agent": "pass",
+          "grant_recorded": "not_run",
+          "release_not_tripped": "pass"
+        },
+        "format": "holds"
+      },
+      "verify": {
+        "outcome": "valid",
+        "exit": 0,
+        "code": null
+      },
+      "basis": "A-DoA v1.2.0; MI-24 Checkable Decision Records",
+      "note": "The v1.2.0 schema rejects the historical version constant."
+    }
+  ],
+  "historical_review": {
+    "cases": 31,
+    "schema_version": "1.1.0",
+    "commit": "9e334fbb6a60c18403b0f411d0fd92e275ede58a",
+    "url": "https://github.com/finos/ai-governance-framework/pull/412#issuecomment-6553545848"
+  },
+  "schema_format": "assert"
+}
