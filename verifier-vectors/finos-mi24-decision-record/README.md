@@ -1,11 +1,18 @@
 # FINOS MI-24 decision records as Acta receipts: vectors for the A-DoA schema v1.1.0
 
 **Status:** test vectors for the
-[A-DoA Decision Record Schema v1.1.0](https://swostipanda.github.io/schemas/adoa-decision-record.schema.json) by
+[A-DoA Decision Record Schema v1.1.0](schema/adoa-decision-record.schema.json) by
 Swosti Panda: the schema that MI-24 in [finos/ai-governance-framework](https://github.com/finos/ai-governance-framework)
 cites ([#412](https://github.com/finos/ai-governance-framework/pull/412)), whose required fields are the members MI-24
-lists. The records here are carried as Veritas Acta receipts. **Neither FINOS nor the schema's author has reviewed or
-endorsed these vectors.**
+lists. The records here are carried as Veritas Acta receipts. On 3 November 2026, **Swosti Panda reviewed all 31
+historical cases and endorsed their expected verdicts**, including the approver and recorded-grant semantic checks
+([review](https://github.com/finos/ai-governance-framework/pull/412#issuecomment-6553545848)). This is the schema author's
+review, not FINOS endorsement, and does not extend to the adapted or new v1.2.0 cases.
+
+**Current schema coverage:** [v1.2.0](v1.2.0/README.md) is a separate 50-case follow-up. The v1.1.0 schema, receipts,
+actions, grants, and case expectations below remain unchanged and reproducible. This page describes that historical
+version; the public schema URL now serves v1.2.0. The newer MI-24 text at `e668312` also clarifies that the mi-21 run
+checks the record's signature while the payload is checked against the decision-record schema.
 
 **Provenance:** written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and `@veritasacta/verify`,
 with AI coding agents (Claude). It is the receipt format author's own work, not an independent evaluation.

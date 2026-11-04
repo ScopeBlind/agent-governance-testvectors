@@ -8,7 +8,7 @@
 // The schema in schema/ is the published file, vendored unchanged; this script refuses to run if a byte of it differs.
 // Every record names it by version and by the SHA-256 of those bytes. Each case is one record from a parent with one
 // change, or the parent itself. The expected result of every check is written out below by hand, not computed by the
-// checks, so run.mjs cannot agree with itself by construction. Not reviewed or endorsed by FINOS or the schema's author.
+// checks, so run.mjs cannot agree with itself by construction. See README.md for the schema author's review of the historical 31 cases; no FINOS endorsement is claimed.
 
 import crypto from 'node:crypto'
 import fs from 'node:fs'
@@ -345,7 +345,7 @@ for (const [name, r] of RECEIPTS) files.set(name, json(r))
 for (const [name, members] of SEQUENCES) files.set(name, members.map((m) => JSON.stringify(RECEIPTS.get(m)) + '\n').join(''))
 files.set('index.json', json({
   suite: 'finos-mi24-decision-record',
-  status: 'Test vectors for the A-DoA Decision Record Schema v1.1.0, the decision record of FINOS MI-24, carried as Veritas Acta receipts. Not reviewed or endorsed by FINOS or by the schema\'s author. Written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and @veritasacta/verify, with AI coding agents: the receipt format author\'s own work, not an independent evaluation.',
+  status: 'Test vectors for the A-DoA Decision Record Schema v1.1.0, the decision record of FINOS MI-24, carried as Veritas Acta receipts. The schema author reviewed and endorsed the expected verdicts of these 31 historical v1.1.0 cases on 3 November 2026 (https://github.com/finos/ai-governance-framework/pull/412#issuecomment-6553545848). No FINOS endorsement is claimed; this review does not extend to the v1.2.0 follow-up. Written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and @veritasacta/verify, with AI coding agents: the receipt format author\'s own work, not an independent evaluation.',
   mi24: {
     pull_request: 'https://github.com/finos/ai-governance-framework/pull/412',
     head: '490d0fd73e8f47f459698ee8c6e0843e0f9204cc',

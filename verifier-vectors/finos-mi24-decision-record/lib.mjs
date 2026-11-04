@@ -1,5 +1,5 @@
 // Dependency-free checks for the FINOS MI-24 decision record vectors, which test the A-DoA Decision Record Schema
-// v1.1.0 (Swosti Panda, CC BY 4.0) on records carried as Veritas Acta receipts.
+// v1.1.0 and v1.2.0 (Swosti Panda, CC BY 4.0) on records carried as Veritas Acta receipts.
 //
 //   validate()        the JSON Schema 2020-12 keywords the vendored schema uses, and no others. checkSchema() walks the
 //                     whole schema first and refuses any other keyword, so a schema that needs one fails loudly.
@@ -97,8 +97,8 @@ const notRun = (detail) => ({ result: 'not_run', detail })
 const sha256Hex = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex')
 
 // (c) The record names its schema: schema_version is the pinned schema's version, and schema_sha256 is the SHA-256 of
-// the pinned file's bytes. The schema states no encoding for schema_sha256; these vectors use lowercase hex, 64
-// characters, no prefix, and hold every record to it. preimage 'jcs' exists only for run.mjs's mutation sweep.
+// the pinned file's bytes. These vectors use lowercase hex, 64 characters, no prefix: a suite convention for
+// v1.1.0 and an explicit schema requirement in v1.2.0. preimage 'jcs' exists only for run.mjs's mutation sweep.
 export function schemaNamed(payload, schema, { preimage = 'bytes' } = {}) {
   if (typeof payload.schema_version !== 'string' || typeof payload.schema_sha256 !== 'string') {
     return fail('the record does not name its schema by version and digest')
@@ -124,7 +124,7 @@ export function actionDigest(payload, action, { preimage = 'jcs' } = {}) {
 }
 
 // (d) MI-24 Checkable Decision Records: "an approval whose human_approver.principal_id equals agent_id" is invalid. The
-// schema has no member that says a record is an approval, so this applies to every record that names a human approver,
+// v1.1.0 schema has no outcome member; both versions check every record that names a human approver,
 // on MI-24's Key Principles: "In every pattern the agent itself is never a valid approver." Equality is exact.
 export function approverNotAgent(payload) {
   const approver = payload.human_approver
@@ -146,4 +146,12 @@ export function grantRecorded(payload, grants) {
   if (!STANDING_PATTERNS.has(approver.oversight_pattern)) return notRun(`${approver.oversight_pattern} rests on no standing grant`)
   if (!grants.has(approver.grant_id)) return fail(`grant_id ${approver.grant_id} resolves to no recorded standing approval`)
   return pass(`grant_id ${approver.grant_id} is recorded`)
+}
+
+// v1.2.0 names releases explicitly. MI-24 Checkable Decision Records rejects a release while a breaker is tripped.
+// This checks the represented state only; it does not observe a live gate or infer release from a trip/reset event.
+export function releaseNotTripped(payload) {
+  if (!['APPROVED', 'APPROVED_WITH_MODIFICATION'].includes(payload.decision_outcome)) return notRun('the outcome is not an action release')
+  if (payload.suspension_trigger_state?.status === 'TRIPPED') return fail('an approved release is recorded while the breaker status is TRIPPED')
+  return pass('the approved release is not recorded with status TRIPPED')
 }

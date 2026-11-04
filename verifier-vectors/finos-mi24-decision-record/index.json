@@ -1,6 +1,6 @@
 {
   "suite": "finos-mi24-decision-record",
-  "status": "Test vectors for the A-DoA Decision Record Schema v1.1.0, the decision record of FINOS MI-24, carried as Veritas Acta receipts. Not reviewed or endorsed by FINOS or by the schema's author. Written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and @veritasacta/verify, with AI coding agents: the receipt format author's own work, not an independent evaluation.",
+  "status": "Test vectors for the A-DoA Decision Record Schema v1.1.0, the decision record of FINOS MI-24, carried as Veritas Acta receipts. The schema author reviewed and endorsed the expected verdicts of these 31 historical v1.1.0 cases on 3 November 2026 (https://github.com/finos/ai-governance-framework/pull/412#issuecomment-6553545848). No FINOS endorsement is claimed; this review does not extend to the v1.2.0 follow-up. Written by ScopeBlind, which maintains draft-farley-acta-signed-receipts and @veritasacta/verify, with AI coding agents: the receipt format author's own work, not an independent evaluation.",
   "mi24": {
     "pull_request": "https://github.com/finos/ai-governance-framework/pull/412",
     "head": "490d0fd73e8f47f459698ee8c6e0843e0f9204cc",

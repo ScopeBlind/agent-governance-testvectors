@@ -1,0 +1,13 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "kid": "test:mi24-gate:ed25519",
+      "x": "uSqqfI2yETmqfX7A2qjX5iUZ1u5GpFNOB2RMaDoAg5E",
+      "use": "sig",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z"
+    }
+  ]
+}

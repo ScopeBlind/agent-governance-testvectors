@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Test vectors for the A-DoA Decision Record Schema v1.1.0 (Swosti Panda, CC BY 4.0), the decision record of FINOS
-// MI-24, on records carried as the signed payload of Veritas Acta receipts (draft-farley-acta-signed-receipts). Not
-// reviewed or endorsed by FINOS or by the schema's author. See README.md.
+// Test vectors for the A-DoA Decision Record Schema v1.1.0 and v1.2.0 (Swosti Panda, CC BY 4.0), the decision record of FINOS
+// MI-24, carried as signed Veritas Acta payloads. See README.md for the historical author review and the
+// unreviewed v1.2.0 follow-up (selected with --v1.2.0).
 //
 //   node verifier-vectors/finos-mi24-decision-record/run.mjs
 //
@@ -23,11 +23,13 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { actionDigest, approverNotAgent, checkSchema, grantRecorded, schemaNamed, validate } from './lib.mjs'
+import { actionDigest, approverNotAgent, checkSchema, grantRecorded, releaseNotTripped, schemaNamed, validate } from './lib.mjs'
 
-const HERE = path.dirname(fileURLToPath(import.meta.url))
+const BASE = path.dirname(fileURLToPath(import.meta.url))
+if (process.argv.slice(2).some((arg) => arg !== '--v1.2.0')) throw new Error('usage: run.mjs [--v1.2.0]')
+const HERE = process.argv.includes('--v1.2.0') ? path.join(BASE, 'v1.2.0') : BASE
 const PKG = process.env.VERIFY_PKG || '@veritasacta/verify@0.11.1'
-const CMD = process.env.VERIFY_CMD ? process.env.VERIFY_CMD.split(' ').filter(Boolean) : ['npx', '--yes', PKG]
+const CMD = process.env.VERIFY_CMD ? (fs.existsSync(process.env.VERIFY_CMD) ? [process.env.VERIFY_CMD] : process.env.VERIFY_CMD.split(' ').filter(Boolean)) : ['npx', '--yes', PKG]
 
 const read = (name) => fs.readFileSync(path.join(HERE, name))
 const readJson = (name) => JSON.parse(read(name).toString('utf8'))
@@ -37,6 +39,7 @@ const SCHEMA_VALUE = JSON.parse(schemaBytes.toString('utf8'))
 checkSchema(SCHEMA_VALUE)
 const PINNED = { version: index.schema.version, bytes: schemaBytes }
 const grants = new Set(readJson(index.grants).recorded_standing_approvals.map((g) => g.grant_id))
+const ASSERT_FORMAT = index.schema_format === 'assert'
 const CHECKS = Object.keys(index.checks)
 const KIND_OF = Object.fromEntries(Object.entries(index.checks).map(([name, c]) => [name, c.kind]))
 
@@ -96,7 +99,7 @@ function evaluate(c, v, mutation = null) {
     const payload = receipt.payload ?? {}
     const action = c.actions[i] ? { value: readJson(c.actions[i]), bytes: read(c.actions[i]) } : null
     const where = c.check === 'sequence' ? `line ${i + 1}: ` : ''
-    const checked = validate(schema, payload, { assertFormat: mutation?.assertFormat === true })
+    const checked = validate(schema, payload, { assertFormat: mutation?.assertFormat ?? ASSERT_FORMAT })
     if (checked.errors.length) details.push(`${where}${checked.errors.join('; ')}`)
     formats.push(...checked.formats)
     const own = {
@@ -106,6 +109,7 @@ function evaluate(c, v, mutation = null) {
       action_digest: actionDigest(payload, action, { preimage: mutation?.actionDigest ?? 'jcs' }),
       approver_not_agent: approverNotAgent(payload),
       grant_recorded: grantRecorded(payload, grants),
+      ...(CHECKS.includes('release_not_tripped') ? { release_not_tripped: releaseNotTripped(payload) } : {}),
     }
     for (const [name, r] of Object.entries(own)) {
       const result = typeof r === 'string' ? r : r.result
@@ -176,14 +180,14 @@ for (const c of index.cases) {
   const notPassing = CHECKS.filter((name) => got.checks[name] === 'fail' || got.checks[name] === 'undecidable')
   const verdict = c.kind === 'unsettled' ? `unsettled (${c.decided_by.map((k) => LABEL[k]).join(', ')}), read as ${got.verdict}` : `${got.verdict} (${got.outcome})`
   const why = notPassing.length ? `: ${notPassing.map((name) => `(${LABEL[KIND_OF[name]]}) ${name} ${got.checks[name]}`).join(', ')}` : ''
-  const format = got.format === 'fails' ? '; format date-time would fail if asserted' : ''
+  const format = got.format === 'fails' ? (ASSERT_FORMAT ? '; format date-time fails' : '; format date-time would fail if asserted') : ''
   const detail = got.details.length ? ` [${got.details.join('; ')}]` : ''
   if (m.length) bad(`${c.id}: ${verdict}${why}. ${m.join('; ')}`)
   else ok(`${c.id}: ${verdict}${why}${format}${detail}`)
 }
 
 // The verifier's reports are fixed now; each mutation re-scores the runner's own checks on them.
-console.log('\n=== mutation sweep: checks off, digests over the wrong bytes, format asserted, each enum dropped ===')
+console.log('\n=== mutation sweep: checks off, wrong digest preimages, format toggled, each enum dropped ===')
 const restsOn = (name) => (c) => c.expected.checks[name] === 'fail' || c.expected.checks[name] === 'undecidable'
 // Over the wrong bytes, a schema_sha256 that matched stops matching and one naming the RFC 8785 digest starts to: every
 // record that names the pinned version with a bare 64-hex digest. A record naming another version fails before its
@@ -205,7 +209,7 @@ const MUTATIONS = [
   ...CHECKS.map((name) => ({ label: `(${LABEL[KIND_OF[name]]}) ${name} turned off`, mutation: { disable: name }, predicted: restsOn(name) })),
   { label: '(c) schema_named over the RFC 8785 form, not the bytes', mutation: { schemaDigest: 'jcs' }, predicted: comparesSchemaDigest },
   { label: '(c) action_digest over the file bytes, not the RFC 8785 form', mutation: { actionDigest: 'file-bytes' }, predicted: (c) => c.expected.checks.action_digest === 'pass' },
-  { label: '(b) format asserted', mutation: { assertFormat: true }, predicted: (c) => c.expected.format === 'fails' },
+  { label: ASSERT_FORMAT ? '(b) format assertion disabled' : '(b) format asserted', mutation: { assertFormat: !ASSERT_FORMAT }, predicted: (c) => ASSERT_FORMAT ? c.relies_on_format === true : c.expected.format === 'fails' },
   ...enumPointers(SCHEMA_VALUE).map((pointer) => ({
     label: `(b) the enum at ${pointer} dropped`, mutation: { schema: withoutEnum(SCHEMA_VALUE, pointer) }, predicted: (c) => c.relies_on_enum === pointer,
   })),
