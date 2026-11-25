@@ -1,2 +1,3 @@
-agent-evidence-vectors==0.24.0 \
-    --hash=sha256:bc8c5785dc9768676361151a4ca2fb4dc1d9bd5a22a67381f6db7adda014539d
+agent-evidence-vectors==0.37.1 \
+    --hash=sha256:2325c4a90650fd59282422c274edeb46b9755636b74f7d0007d61a6ae0c9b09d \
+    --hash=sha256:d3ffb30aee82cec5334ea1db2dac723e3042ad20e005dcaaa17074f5824a24b6
